@@ -1,4 +1,4 @@
-# Configuração do n8n para Coolify - Versão Sem Porta
+# Configuração do n8n para Coolify - Versão Limpa
 version: '3.8'
 
 services:
@@ -6,7 +6,6 @@ services:
     image: n8nio/n8n:latest
     container_name: n8n-production
     restart: unless-stopped
-    # REMOVIDO: ports section - Coolify gerencia automaticamente
     environment:
       # Configurações de autenticação
       - N8N_BASIC_AUTH_ACTIVE=true
@@ -15,10 +14,10 @@ services:
       
       # Configurações de rede e domínio
       - N8N_HOST=n8n.1crypten.space
-      - N8N_PORT=5678  # Porta interna permanece 5678
-      - N8N_PROTOCOL=http  # Mudado para HTTP
-      - WEBHOOK_URL=http://n8n.1crypten.space/
-      - N8N_SECURE_COOKIE=false  # Mudado para false com HTTP
+      - N8N_PORT=8080
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.1crypten.space/
+      - N8N_SECURE_COOKIE=true
       
       # Configurações gerais
       - NODE_ENV=production
