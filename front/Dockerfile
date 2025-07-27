@@ -1,18 +1,21 @@
 # Build stage
-FROM node:18 as build
+FROM node:16-alpine as build
 
 WORKDIR /app
+
+# Instalar dependências do sistema
+RUN apk add --no-cache git
 
 # Copiar package files
 COPY package*.json ./
 
 # Instalar dependências
-RUN npm install
+RUN npm ci --only=production=false
 
 # Copiar código fonte
 COPY . .
 
-# Fazer build simples
+# Fazer build
 RUN npm run build
 
 # Production stage
