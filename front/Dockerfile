@@ -1,38 +1,24 @@
 # Build stage
 FROM node:18-alpine as build
 
-# Instalar dependências do sistema necessárias
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    git \
-    curl
-
-# Verificar se node e npm estão disponíveis
-RUN node --version && npm --version
+# Instalar dependências do sistema
+RUN apk add --no-cache python3 make g++ git
 
 WORKDIR /app
 
-# Copiar package files
+# Copiar arquivos de configuração
 COPY package*.json ./
+COPY tsconfig*.json ./
+COPY vite.config.ts ./
 
-# Limpar cache npm e instalar dependências
-RUN npm cache clean --force
-RUN npm install --verbose
+# Instalar dependências
+RUN npm ci --only=production=false
 
 # Copiar código fonte
 COPY . .
 
-# Verificar estrutura antes do build
-RUN ls -la
-RUN ls -la src/
-
-# Build da aplicação
-RUN npm run build
-
-# Verificar se dist foi criado
-RUN ls -la dist/
+# Build com configurações específicas para produção
+RUN npm run build -- --mode production
 
 # Production stage
 FROM nginx:alpine
