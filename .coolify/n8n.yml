@@ -7,7 +7,7 @@ services:
     container_name: n8n-production
     restart: unless-stopped
     ports:
-      - "8080:5678"  # ADICIONADO: Expor porta externa
+      - "8081:5678"  # MUDANÇA: 8080 → 8081
     environment:
       # Configurações de autenticação
       - N8N_BASIC_AUTH_ACTIVE=true
@@ -16,7 +16,7 @@ services:
       
       # Configurações de rede e domínio
       - N8N_HOST=n8n.1crypten.space
-      - N8N_PORT=5678  # CORRIGIDO: Porta interna do n8n
+      - N8N_PORT=5678  # Porta interna permanece 5678
       - N8N_PROTOCOL=https
       - WEBHOOK_URL=https://n8n.1crypten.space/
       - N8N_SECURE_COOKIE=true
