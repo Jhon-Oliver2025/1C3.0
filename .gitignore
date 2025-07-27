@@ -90,3 +90,24 @@ Cryptem1.1/
 back/signals.db
 back/binance_client.log
 back/python.exe
+
+
+# Arquivos de ambiente
+.env
+*.env
+
+# Dados sensíveis
+*.csv
+*.db
+*.json
+auth_tokens.csv
+users.csv
+password_reset_tokens.csv
+
+# Logs
+*.log
+
+# Dependências
+node_modules/
+.venv/
+__pycache__/
