@@ -1,4 +1,4 @@
-# Configuração do n8n para Coolify
+# Configuração do n8n para Coolify - Versão Limpa
 version: '3.8'
 
 services:
@@ -6,25 +6,31 @@ services:
     image: n8nio/n8n:latest
     container_name: n8n-production
     restart: unless-stopped
-    ports:
-      - "8080:8080"
     environment:
+      # Configurações de autenticação
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=CryptoSignals2024!
+      
+      # Configurações de rede e domínio
       - N8N_HOST=n8n.1crypten.space
       - N8N_PORT=8080
       - N8N_PROTOCOL=https
-      - NODE_ENV=production
       - WEBHOOK_URL=https://n8n.1crypten.space/
-      - GENERIC_TIMEZONE=America/Sao_Paulo
       - N8N_SECURE_COOKIE=true
+      
+      # Configurações gerais
+      - NODE_ENV=production
+      - GENERIC_TIMEZONE=America/Sao_Paulo
+      
+      # Configurações do banco de dados
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgres
       - DB_POSTGRESDB_PORT=5432
       - DB_POSTGRESDB_DATABASE=n8n
       - DB_POSTGRESDB_USER=n8n
       - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      
     volumes:
       - n8n_data:/home/node/.n8n
     depends_on:
