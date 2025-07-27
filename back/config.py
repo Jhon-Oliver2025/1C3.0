@@ -9,7 +9,7 @@ server = Flask(__name__, static_folder='static', static_url_path='')
 CORS(server, resources={r"/*": {"origins": ["http://localhost:5173", "*"]}})
 # Ou, se quiser ser mais restritivo e permitir APENAS o seu frontend:
 # CORS(server, resources={r"/*": {"origins": "http://localhost:5173"}})
-server.config['SECRET_KEY'] = 'chave-secreta-krypton-2024'
+server.config['SECRET_KEY'] = 'crypto_signals_secret_key_2025_muito_segura'
 
 # --- Início da Edição ---
 # Adicionar chaves da API da Binance diretamente ao config do Flask
