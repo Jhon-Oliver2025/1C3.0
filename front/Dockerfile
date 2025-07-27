@@ -1,26 +1,38 @@
 # Build stage
 FROM node:18-alpine as build
 
-# Instalar dependências do sistema
-RUN apk add --no-cache python3 make g++ git
+# Instalar dependências do sistema necessárias
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    git \
+    curl
+
+# Verificar se node e npm estão disponíveis
+RUN node --version && npm --version
 
 WORKDIR /app
 
-# Definir variáveis de ambiente para o build
-ENV NODE_ENV=production
-ENV GENERATE_SOURCEMAP=false
-
-# Copiar package files primeiro (para cache do Docker)
+# Copiar package files
 COPY package*.json ./
 
-# Instalar dependências
-RUN npm ci --only=production
+# Limpar cache npm e instalar dependências
+RUN npm cache clean --force
+RUN npm install --verbose
 
 # Copiar código fonte
 COPY . .
 
+# Verificar estrutura antes do build
+RUN ls -la
+RUN ls -la src/
+
 # Build da aplicação
 RUN npm run build
+
+# Verificar se dist foi criado
+RUN ls -la dist/
 
 # Production stage
 FROM nginx:alpine
@@ -28,7 +40,7 @@ FROM nginx:alpine
 # Copiar build para nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copiar configuração customizada do nginx
+# Copiar configuração do nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
