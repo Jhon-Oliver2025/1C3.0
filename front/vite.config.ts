@@ -5,21 +5,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     target: 'es2015',
-    minify: 'esbuild',
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: undefined
-      }
-    }
-  },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
+    minify: true,
+    sourcemap: false
   }
 });

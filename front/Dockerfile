@@ -1,24 +1,22 @@
 # Build stage
 FROM node:18-alpine as build
 
-# Instalar dependências do sistema
-RUN apk add --no-cache python3 make g++ git
+# Instalar dependências básicas do sistema
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-# Copiar arquivos de configuração
+# Copiar package files primeiro (para cache do Docker)
 COPY package*.json ./
-COPY tsconfig*.json ./
-COPY vite.config.ts ./
 
 # Instalar dependências
-RUN npm ci --only=production=false
+RUN npm ci --legacy-peer-deps
 
 # Copiar código fonte
 COPY . .
 
-# Build com configurações específicas para produção
-RUN npm run build -- --mode production
+# Build simples sem flags extras
+RUN npm run build
 
 # Production stage
 FROM nginx:alpine
