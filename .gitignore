@@ -92,9 +92,14 @@ back/binance_client.log
 back/python.exe
 
 
-# Arquivos de ambiente
+# Environment files
 .env
-*.env
+.env.local
+.env.production
+.env.n8n
+
+# Coolify - comentado para permitir commit
+# .coolify/
 
 # Dados sensíveis
 *.csv
