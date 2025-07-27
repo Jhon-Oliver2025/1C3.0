@@ -1,0 +1,57 @@
+/* Oculta a sidebar em telas menores que md (768px) */
+@media (max-width: 767.98px) {
+    .sidebar {
+        display: none !important;
+    }
+    /* Ajusta o padding do conteúdo principal para não ficar sob o botão fixo */
+    .content-wrapper {
+        padding-top: 60px; /* Ajuste conforme a altura do botão */
+    }
+}
+
+/* Exibe a sidebar em telas md e maiores */
+@media (min-width: 768px) {
+    .sidebar {
+        display: block !important;
+    }
+    /* Oculta o botão de toggle em telas md e maiores */
+    #open-offcanvas-button {
+        display: none !important;
+    }
+     /* Remove o padding extra em telas maiores */
+    .content-wrapper {
+        padding-top: 0;
+    }
+}
+
+/* Estilo básico para os links do menu no Offcanvas */
+.menu-container .menu-item {
+    display: block; /* Links em bloco para ocupar a largura */
+    padding: 10px 15px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.7);
+    transition: background-color 0.3s ease;
+}
+
+.menu-container .menu-item:hover {
+    background-color: rgba(139, 232, 229, 0.1);
+    color: #8BE8E5;
+}
+
+.menu-container .menu-item.active {
+    background-color: rgba(139, 232, 229, 0.2);
+    color: #8BE8E5;
+    font-weight: bold;
+}
+
+/* Estilo para o título do Offcanvas */
+.offcanvas-title {
+    color: #8BE8E5 !important;
+    font-weight: bold;
+}
+
+/* Estilo para o botão de fechar do Offcanvas */
+.offcanvas .btn-close {
+    filter: invert(1); /* Torna o X branco */
+}
+/* Remova a linha abaixo se ela estiver causando o erro */

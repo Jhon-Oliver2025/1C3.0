@@ -1,0 +1,99 @@
+.landingPageContainer {
+  min-height: calc(100vh - 102px); /* Garante que o contêiner ocupe a altura restante da viewport, abaixo da Navbar */
+  /* Removido: padding-top: 150px; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centraliza o conteúdo verticalmente dentro do espaço disponível */
+  align-items: center;
+  text-align: center;
+  color: white; /* Ensure text is visible on dark background */
+  background-image: url('../assets/terra.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  padding: 20px; /* Mantém um padding geral para as laterais e um pouco no topo/base do conteúdo */
+}
+
+.landingPageContainer h1 {
+  font-size: 4.5em; /* Aumentado o tamanho da fonte para o título principal */
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Add shadow for readability */
+}
+
+.landingPageContainer p {
+  font-size: 1.8em; /* Aumentado o tamanho da fonte para o subtítulo */
+  margin-bottom: 20px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.landingPageLogo {
+  height: 150px; /* Increased the size of the logo */
+  margin-bottom: 10px; /* Espaçamento abaixo do logo - Reduzido */
+}
+
+.landingPageContainer a {
+  color: #64FFDA; /* A contrasting color for the link */
+  font-weight: bold;
+  text-decoration: none;
+  padding: 10px 20px;
+  border: 2px solid #64FFDA; /* Mantém a borda original */
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  
+  /* Efeito Neon Inicial mais discreto */
+  box-shadow: 0 0 3px #64FFDA, /* Sombra mais próxima e discreta */
+              0 0 6px #64FFDA,
+              0 0 9px #64FFDA;
+  text-shadow: 0 0 1px #64FFDA; /* Sombra para o texto muito sutil */
+
+  /* Animação de brilho neon */
+  animation: neonGlow 1.5s ease-in-out infinite alternate;
+}
+
+.landingPageContainer a:hover {
+  background-color: #64FFDA;
+  color: #0A192F; /* Dark blue from your palette */
+  /* Remove as sombras no hover para que o fundo mude claramente */
+  box-shadow: none;
+  text-shadow: none;
+}
+
+/* Keyframes para a animação do brilho neon */
+@keyframes neonGlow {
+  from {
+    box-shadow: 0 0 3px #64FFDA,
+                0 0 6px #64FFDA,
+                0 0 9px #64FFDA;
+    text-shadow: 0 0 1px #64FFDA;
+  }
+  to {
+    box-shadow: 0 0 5px #64FFDA,
+                0 0 10px #64FFDA,
+                0 0 15px #64FFDA,
+                0 0 20px #64FFDA; /* Aumenta o espalhamento para o efeito de pulso, mas ainda discreto */
+    text-shadow: 0 0 2px #64FFDA; /* Aumenta a sombra do texto, mas ainda sutil */
+  }
+}
+
+
+/* Adicionar este bloco para o botão "Entrar" no conteúdo */
+.enterButton {
+  padding: 15px 30px;
+  background-color: #64FFDA; /* Cor de destaque */
+  color: #0A192F; /* Cor do texto */
+  border: none;
+  border-radius: 8px;
+  font-size: 1.5em;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 30px;
+  box-shadow: 0 5px 20px rgba(100, 255, 218, 0.5);
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.enterButton:hover {
+  background-color: #98FFEC;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(100, 255, 218, 0.7);
+}

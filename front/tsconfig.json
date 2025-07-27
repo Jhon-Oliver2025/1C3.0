@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "lib": ["es2017", "dom"],
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/@types"
+    ],
+    "module": "esnext", // This should already be set from a previous fix
+    "moduleResolution": "bundler", // Ensure this line is present and correct
+  }
+}

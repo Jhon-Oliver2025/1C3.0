@@ -1,0 +1,107 @@
+/* Global styles */
+* {
+    font-family: "Segoe UI", "Arial", sans-serif;
+    box-sizing: border-box;
+}
+
+/* Scrollbar styles */
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: rgba(0,0,51,0.4);
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #007FFF;
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #0066CC;
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #007FFF rgba(0,0,51,0.4);
+}
+
+/* Navbar styles - simplificado e limpo */
+.navbar {
+    background: transparent !important;
+    position: absolute;
+    width: 100%;
+    z-index: 1050;
+    top: 0;
+    left: 0;
+}
+
+/* Hero section adjustment */
+#hero {
+    position: relative;
+    margin-top: 0;
+    padding-top: 0;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Navigation links */
+.nav-link-custom {
+    font-weight: 500;
+    padding: 8px 16px !important;
+    transition: all 0.3s ease;
+    color: white !important;
+}
+
+.nav-link-custom:hover {
+    color: #8BE8E5 !important;
+    transform: translateY(-1px);
+}
+
+/* Login button enhancement */
+.login-btn-glow {
+    background: linear-gradient(45deg, #8BE8E5, #007FFF) !important;
+    border: none !important;
+    color: white !important;
+    padding: 12px 35px !important;
+    border-radius: 25px !important;
+    font-weight: 600 !important;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-size: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 0 25px rgba(139, 232, 229, 0.4);
+}
+
+.login-btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 35px rgba(139, 232, 229, 0.7);
+    background: linear-gradient(45deg, #007FFF, #8BE8E5) !important;
+}
+
+.login-btn-glow:active {
+    transform: translateY(1px);
+}
+
+.login-btn-special:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(139, 232, 229, 0.8);
+    background: linear-gradient(45deg, #007FFF, #8BE8E5) !important;
+}
+
+/* Section spacing */
+#hero, #beneficios, #planos, #resultados, #garantias, #faq, #contato {
+    padding: 100px 0;
+    margin: 20px 0;
+}
+
+/* Smooth scroll */
+html {
+    scroll-behavior: smooth;
+}

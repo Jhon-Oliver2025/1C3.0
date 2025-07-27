@@ -1,0 +1,180 @@
+.signalCard {
+  /* Glassmorphism */
+  background-color: rgba(10, 25, 47, 0.6); /* Azul escuro semi-transparente, mantendo boa transparência */
+  backdrop-filter: blur(25px); /* Efeito de desfoque MUITO aumentado */
+  -webkit-backdrop-filter: blur(25px); /* Para compatibilidade com Safari */
+  border: 1px solid rgba(100, 255, 218, 0.5); /* Borda discreta com cor complementar, opacidade um pouco maior */
+  box-shadow: 0 15px 50px 0 rgba(31, 38, 135, 0.5); /* Sombra mais pronunciada */
+  
+  border-radius: 10px;
+  padding: 20px;
+  color: #E2E8F0; /* Cor padrão do texto do card (para labels, etc.) */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 350px; /* Largura máxima para cada card */
+  width: 100%;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.symbol {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: white; /* Cor do símbolo (nome da moeda) */
+}
+
+.typeButton {
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.buy {
+  background-color: #4CAF50; /* Verde para compra */
+  color: white;
+}
+
+.sell {
+  background-color: #E53E3E; /* Vermelho para venda */
+  color: white;
+}
+
+.premiumText {
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #C0C0C0; /* Cor prata para Sinais Premium */
+  margin-bottom: 5px;
+  text-align: left; /* Alterado de center para left */
+  text-shadow: 0 0 3px rgba(192, 192, 192, 0.5); /* Efeito de brilho sutil */
+}
+
+.premiumTextTwoStars {
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #E0E0E0; /* Prata mais brilhante para Premium com duas estrelas */
+  margin-bottom: 5px;
+  text-align: left; /* Alterado de center para left */
+  text-shadow: 0 0 4px rgba(224, 224, 224, 0.6); /* Efeito de brilho mais intenso */
+}
+
+.eliteText {
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #FFD700; /* Cor dourada para Sinais Elite */
+  margin-bottom: 5px;
+  text-align: left; /* Alterado de center para left */
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.7); /* Efeito de brilho mais intenso */
+}
+
+.priceDetail {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 1.1em;
+}
+
+.label {
+  color: #A0AEC0; /* Cor para os labels (Entrada, Alvo) */
+}
+
+.entryPriceValue { /* Nova classe para o preço de entrada */
+  font-weight: bold;
+  color: white; /* Cor branca para o preço de entrada */
+}
+
+.value {
+  font-weight: bold;
+  color: #FFD700; /* Cor dourada para o valor (usado no Alvo) */
+}
+
+.changePercentage {
+  font-weight: bold;
+  margin-left: 10px;
+  color: #4CAF50; /* Alterado para o mesmo verde do botão de compra */
+}
+
+.date {
+  font-size: 0.8em;
+  color: #A0AEC0;
+  text-align: right;
+  margin-top: 10px;
+}
+
+
+.standardText {
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #A0AEC0; /* Cor cinza para sinais padrão */
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.scoreDetail,
+.timeframeDetail,
+.leverageDetail {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+}
+
+.score {
+  font-weight: bold;
+  color: #64FFDA;
+}
+
+.timeframes {
+  font-weight: bold;
+  color: #A0AEC0;
+}
+
+.leverage {
+  font-weight: bold;
+  color: #FFD700;
+}
+
+.eliteText {
+  color: #FFD700;
+  font-weight: bold;
+  font-size: 0.9em;
+  text-align: center;
+  margin: 8px 0;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.premiumText {
+  color: #00D4FF;
+  font-weight: bold;
+  font-size: 0.9em;
+  text-align: center;
+  margin: 8px 0;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+.standardText {
+  color: #888;
+  font-weight: normal;
+  font-size: 0.9em;
+  text-align: center;
+  margin: 8px 0;
+}
+
+.projectionDetail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0;
+  padding: 8px;
+  background-color: rgba(100, 255, 218, 0.1);
+  border-radius: 5px;
+}
