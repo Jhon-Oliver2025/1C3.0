@@ -6,18 +6,18 @@ services:
     image: n8nio/n8n:latest
     container_name: n8n-production
     restart: unless-stopped
-    ports:
-      - "5678:5678"
+    # ports: removido para evitar conflito
     environment:
       - N8N_BASIC_AUTH_ACTIVE=true
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=CryptoSignals2024!
-      - N8N_HOST=${N8N_HOST:-91.99.219.101}
+      - N8N_HOST=n8n.1crypten.space
       - N8N_PORT=5678
-      - N8N_PROTOCOL=http
+      - N8N_PROTOCOL=https
       - NODE_ENV=production
-      - WEBHOOK_URL=${WEBHOOK_URL:-http://91.99.219.101:5678/}
+      - WEBHOOK_URL=https://n8n.1crypten.space/
       - GENERIC_TIMEZONE=America/Sao_Paulo
+      - N8N_SECURE_COOKIE=true
       - DB_TYPE=postgresdb
       - DB_POSTGRESDB_HOST=postgres
       - DB_POSTGRESDB_PORT=5432
