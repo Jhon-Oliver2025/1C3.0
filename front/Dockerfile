@@ -3,15 +3,21 @@ FROM node:18-alpine as build
 
 WORKDIR /app
 
+# Instalar dependências do sistema necessárias
+RUN apk add --no-cache python3 make g++
+
 # Copiar package files
 COPY package*.json ./
 
-# Instalar TODAS as dependências (incluindo devDependencies) para o build
+# Limpar cache do npm e instalar dependências
+RUN npm cache clean --force
 RUN npm install
 
-# Copiar código e fazer build
+# Copiar código fonte
 COPY . .
-RUN npm run build
+
+# Fazer build com mais memória disponível
+RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build
 
 # Production stage
 FROM nginx:alpine
