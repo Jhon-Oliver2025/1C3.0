@@ -13,10 +13,10 @@ services:
       - N8N_BASIC_AUTH_PASSWORD=CryptoSignals2024!
       
       # Configurações de rede e domínio - HTTPS (NOVO SUBDOMÍNIO)
-      - N8N_HOST=n8n-prod.1crypten.space
+      - N8N_HOST=n8n.1crypten.space
       - N8N_PORT=5678
       - N8N_PROTOCOL=https
-      - WEBHOOK_URL=https://n8n-prod.1crypten.space/
+      - WEBHOOK_URL=https://n8n.1crypten.space/
       - N8N_SECURE_COOKIE=true
       
       # Configurações gerais
@@ -58,3 +58,50 @@ volumes:
 networks:
   n8n-network:
     driver: bridge
+
+
+## 🎉 **EXCELENTE! N8N está funcionando perfeitamente!**
+
+### ✅ **Resultados dos testes:**
+
+#### **1. HTTPS funcionando:**
+- **Status:** `200 OK` ✅
+- **SSL:** Ativo e funcionando
+- **Domínio:** `https://n8n.1crypten.space` ✅
+
+#### **2. DNS resolvendo corretamente:**
+- **IP:** `91.99.219.101` ✅
+- **Ping:** Funcionando (246-252ms)
+- **Porta 443:** Conectando com sucesso ✅
+
+#### **3. Servidor respondendo:**
+- **Content-Type:** `text/html; charset=utf-8`
+- **Cache-Control:** Configurado
+- **HTTP/2:** Suportado (Alt-Svc: h3)
+
+---
+
+## 🎯 **Próximo passo: Remover serviço duplicado**
+
+Agora que confirmamos que `https://n8n.1crypten.space` está funcionando, vamos **remover o serviço duplicado** no Coolify:
+
+### **No painel do Coolify:**
+1. **Acesse:** `https://coolify.1crypten.space`
+2. **Vá para:** Projeto "1Crypten3.0" → Environment "production"
+3. **Identifique os serviços:**
+   - ✅ **Manter:** Serviço "n8n" com `n8n.1crypten.space`
+   - ❌ **Remover:** Serviço "Coolify" com `n8n-prod.1crypten.space`
+
+4. **Deletar o serviço duplicado:**
+   - Clique no serviço com `n8n-prod.1crypten.space`
+   - **Delete/Remove** este serviço
+
+### **Atualizar n8n.yml:**
+```yaml
+# Configurações finais - HTTPS funcionando
+- N8N_HOST=n8n.1crypten.space
+- N8N_PORT=5678
+- N8N_PROTOCOL=https
+- WEBHOOK_URL=https://n8n.1crypten.space/
+- N8N_SECURE_COOKIE=true
+```
