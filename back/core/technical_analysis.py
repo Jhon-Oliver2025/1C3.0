@@ -4,20 +4,19 @@ from binance.exceptions import BinanceAPIException
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-from typing import Dict, Optional, List, Any, TypedDict, cast
+from typing import Dict, Optional, List, Any, TypedDict
 from ta.trend import EMAIndicator, MACD
 from ta.momentum import RSIIndicator
 from ta.volatility import AverageTrueRange
 from config import server
-import requests
 import time
 import traceback
-import os
-import csv
+import threading
 from .database import Database
 from colorama import Fore, Style, init
 from .binance_client import BinanceClient
 from .gerenciar_sinais import GerenciadorSinais
+from .telegram_notifier import TelegramNotifier
 
 # Initialize colorama
 init()
@@ -26,575 +25,656 @@ class TechnicalAnalysisConfig(TypedDict):
     trend_timeframe: str
     entry_timeframe: str
     quality_score_minimum: float
-    update_interval: int
+    scan_interval: int
+    pairs_update_interval: int
 
 class TechnicalAnalysis:
+    """Sistema principal de análise técnica e monitoramento de mercado"""
+    
     def __init__(self, db_instance: Database):
+        """Inicializa o sistema de análise técnica"""
         print("📊 Inicializando TechnicalAnalysis...")
+        
+        # Dependências principais
         self.db = db_instance
         self.binance = BinanceClient()
         self.gerenciador = GerenciadorSinais(db_instance)
         
-        # Configurações de análise
-        self.trend_timeframe: str = '4h'
-        self.entry_timeframe: str = '1h'
-        self.quality_score_minimum: float = 80.0
-        self.update_interval: int = 1200  # 20 minutos
+        # Configurações do sistema
+        self.config = {
+            'trend_timeframe': '4h',
+            'entry_timeframe': '1h',
+            'quality_score_minimum': 70.0,  # Alterado de 80.0 para 70.0
+            'scan_interval': 60,  # 60 segundos
+            'pairs_update_interval': 1200,  # 20 minutos
+            'target_percentage_min': 6.0,
+            'max_pairs': 100
+        }
         
-        # Controle de pares e varreduras
-        self.pairs_last_update: float = 0
+        # Estado do sistema
         self.top_pairs: List[str] = []
-        self.complete_scan_interval: int = 1200  # 20 minutos
-        self.quick_scan_interval: int = 60
-        self.last_complete_scan: float = 0
-        self.target_percentage: float = 6.0
+        self.all_usdt_pairs: List[str] = []
+        self.pairs_last_update: float = 0
+        self.is_monitoring: bool = False
+        self.monitoring_thread: Optional[threading.Thread] = None
         
-        # Inicialização forçada dos pares
-        print("🔄 Carregando pares iniciais...")
-        if not self.update_futures_pairs():
-            print("⚠️ Falha ao carregar pares iniciais, tentando método alternativo...")
-            self.select_top_pairs()
-        print(f"✅ {len(self.top_pairs)} pares carregados para análise")
-
-    def calculate_target_price(self, entry_price: float, signal_type: str, trend_data: Optional[Dict] = None, market_conditions: Optional[Dict] = None, quality_score: float = 0) -> float:
-        """Calcula o preço alvo com garantia mínima de 6% de ganho"""
-        # ALVO MÍNIMO GARANTIDO: 6%
-        min_percentage = 6.0
+        # Configurar notificações (opcional)
+        self.notifier = self._setup_telegram_notifier()
         
-        # Calcular percentual dinâmico baseado na qualidade
-        if quality_score >= 80:  # Sinais PREMIUM e ELITE
-            # Adicionar até 14% extra baseado em análise técnica
-            extra_percentage = 0.0
-            
-            if trend_data and market_conditions:
-                # Volatilidade: até +8%
-                volatility = market_conditions.get('volatility', 2.0)
-                volatility_bonus = min(volatility * 2.0, 8.0)
-                
-                # Força da tendência: até +3%
-                trend_strength = abs(trend_data.get('trend_strength', 0.01))
-                trend_bonus = min(trend_strength * 300, 3.0)
-                
-                # Qualidade do sinal: até +3%
-                if quality_score >= 90:  # ELITE
-                    quality_bonus = 3.0
-                elif quality_score >= 85:  # PREMIUM Alto
-                    quality_bonus = 2.0
-                else:  # PREMIUM Baixo
-                    quality_bonus = 1.0
-                
-                extra_percentage = volatility_bonus + trend_bonus + quality_bonus
-            
-            # Limitar o extra entre 0% e 14%
-            extra_percentage = min(max(extra_percentage, 0.0), 14.0)
-            final_percentage = min_percentage + extra_percentage
-        else:
-            # Para sinais com qualidade < 80, usar apenas o mínimo
-            final_percentage = min_percentage
-        
-        # Calcular preço alvo
-        if signal_type == 'COMPRA':
-            target_price = entry_price * (1 + final_percentage / 100)
-        else:  # VENDA
-            target_price = entry_price * (1 - final_percentage / 100)
-        
-        return target_price
-
-    def calculate_support_resistance_levels(self, df: pd.DataFrame, current_price: float) -> Dict[str, float]:
-        """Calcula níveis de suporte e resistência baseados em máximas e mínimas"""
+        print("✅ TechnicalAnalysis inicializado com sucesso!")
+    
+    def _setup_telegram_notifier(self) -> Optional[TelegramNotifier]:
+        """Configura notificações do Telegram (opcional)"""
         try:
-            # Últimas 50 velas para análise
-            recent_df = df.tail(50)
+            telegram_token = server.config.get('TELEGRAM_TOKEN')
+            telegram_chat_id = server.config.get('TELEGRAM_CHAT_ID')
             
-            # Encontrar máximas e mínimas locais
-            highs = recent_df['high'].values
-            lows = recent_df['low'].values
+            if telegram_token and telegram_chat_id:
+                notifier = TelegramNotifier(telegram_token, telegram_chat_id)
+                if notifier.test_connection():
+                    print("✅ Telegram configurado com sucesso!")
+                    return notifier
             
-            # Resistência: média das 3 maiores máximas recentes
-            top_highs = sorted(highs, reverse=True)[:3]
-            resistance = sum(top_highs) / len(top_highs)
-            
-            # Suporte: média das 3 menores mínimas recentes
-            bottom_lows = sorted(lows)[:3]
-            support = sum(bottom_lows) / len(bottom_lows)
-            
-            return {
-                'resistance': resistance,
-                'support': support,
-                'resistance_distance': ((resistance - current_price) / current_price) * 100,
-                'support_distance': ((current_price - support) / current_price) * 100
-            }
-            
-        except Exception as e:
-            print(f"❌ Erro ao calcular suporte/resistência: {e}")
-            return {
-                'resistance': current_price * 1.1, 
-                'support': current_price * 0.9, 
-                'resistance_distance': 10.0, 
-                'support_distance': 10.0
-            }
-
-    def select_top_pairs(self) -> bool:
-        """Seleciona os melhores pares para análise"""
-        try:
-            print("\n🔄 Selecionando melhores pares...")
-            pairs_data = []
-            
-            # Get all USDT perpetual futures using our custom client
-            exchange_info = self.binance.get_exchange_info()
-            if not exchange_info:
-                return False
-                
-            valid_pairs = [s['symbol'] for s in exchange_info['symbols'] 
-                         if s['symbol'].endswith('USDT') and 
-                         s['status'] == 'TRADING' and 
-                         s['contractType'] == 'PERPETUAL']
-            
-            total_pairs = len(valid_pairs)
-            remaining_pairs = total_pairs
-            
-            for i, symbol in enumerate(valid_pairs):
-                try:
-                    print(f"\r🔄 Analisando {symbol}... ({remaining_pairs}/{total_pairs})", end="")
-                    remaining_pairs -= 1
-                    # Na função select_top_pairs, linha ~160:
-                    # ANTES:
-                    df = self.get_klines(symbol, self.entry_timeframe, limit=100)
-                    
-                    # DEPOIS:
-                    df = self.get_klines(symbol, '4h', limit=100)  # ← MUDANÇA: usar 4h em vez de entry_timeframe
-                    if df is None or len(df) < 20:
-                        continue
-                        
-                    # Calculate metrics
-                    avg_volume = df['volume'].mean() * df['close'].mean()
-                    atr = AverageTrueRange(
-                        high=pd.Series(df['high'].values, dtype=float),
-                        low=pd.Series(df['low'].values, dtype=float),
-                        close=pd.Series(df['close'].values, dtype=float),
-                        window=14
-                    ).average_true_range()
-                    
-                    volatility = (atr.iloc[-1] / df['close'].iloc[-1]) * 100
-                    volume_score = min(avg_volume / 1000000, 10)
-                    volatility_score = min(volatility, 10)
-                    final_score = (volume_score * 0.5 + volatility_score * 0.5) * 10
-                    
-                    pairs_data.append({
-                        'symbol': symbol,
-                        'volume': avg_volume,
-                        'volatility': volatility,
-                        'score': final_score
-                    })
-                    
-                except Exception as e:
-                    continue
-            
-            # Sort and select top pairs
-            pairs_df = pd.DataFrame(pairs_data)
-            if len(pairs_df) > 0:
-                pairs_df = pairs_df.sort_values('score', ascending=False).head(100)
-                self.top_pairs = list(pairs_df['symbol'].values)
-                
-                # Converte o DataFrame para lista de tuplas (symbol, data)
-                pairs_list = [(row['symbol'], {
-                    'volume': row['volume'],
-                    'priceChangePercent': 0.0
-                }) for _, row in pairs_df.iterrows()]
-                
-                # Exibe os top 100 pares
-                print(f"\n✅ Top {len(self.top_pairs)} pares USDT perpétuos selecionados:")
-                for i, (symbol, data) in enumerate(pairs_list, 1):
-                    remaining = 100 - i + 1
-                    print(f"({remaining:03d}) {symbol:<12} - Volume: ${data['volume']:,.0f}")
-                
-                return True
-            
-            return False
-            
-        except Exception as e:
-            print(f"\n❌ Erro ao selecionar pares: {e}")
-            return False
-
-    def get_klines(self, symbol: str, interval: str, limit: int = 100) -> Optional[pd.DataFrame]:
-        """Obtém dados de klines da Binance"""
-        try:
-            klines = self.binance.make_request(
-                '/fapi/v1/klines',
-                params={
-                    'symbol': symbol,
-                    'interval': interval,
-                    'limit': limit
-                }
-            )
-            
-            if not klines:
-                return None
-                
-            # Create DataFrame
-            df = pd.DataFrame(data=klines)
-            
-            # Assign columns
-            df.columns = ['timestamp', 'open', 'high', 'low', 'close', 'volume',
-                         'close_time', 'quote_volume', 'trades', 'taker_buy_volume',
-                         'taker_buy_quote_volume', 'ignore']
-            
-            # Convert numeric columns
-            df[['open', 'high', 'low', 'close', 'volume']] = df[['open', 'high', 'low', 'close', 'volume']].astype(float)
-            
-            return df
-            
-        except Exception as e:
-            print(f"❌ Erro ao obter klines para {symbol}: {e}")
+            print("⚠️ Telegram não configurado")
             return None
-
-    def analyze_market(self) -> List[Dict[str, Any]]:
-        """Analisa todos os pares selecionados"""
-        signals = []
-        for symbol in self.top_pairs:
-            signal = self.analyze_symbol(symbol)
-            if signal:
-                signals.append(signal)
-        return signals
-
-    def scan_market(self, verbose: bool = False) -> List[Dict[str, Any]]:
-        """Executa varredura do mercado"""
-        try:
-            current_time = time.time()
-            current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            print(f"⚠️ Erro ao configurar Telegram: {e}")
+            return None
+    
+    def start_monitoring(self) -> bool:
+        """Inicia o monitoramento contínuo do mercado"""
+        if self.is_monitoring:
+            print("⚠️ Monitoramento já está ativo")
+            return False
+        
+        print("🚀 Iniciando monitoramento de mercado...")
+        self.is_monitoring = True
+        
+        # Inicializar pares na primeira execução
+        if not self.top_pairs:
+            print("🔄 Carregando pares iniciais...")
+            if not self._initialize_pairs():
+                print("❌ Falha ao carregar pares iniciais")
+                self.is_monitoring = False
+                return False
+        
+        # Iniciar thread de monitoramento
+        self.monitoring_thread = threading.Thread(
+            target=self._monitoring_loop, 
+            daemon=True
+        )
+        self.monitoring_thread.start()
+        
+        print("✅ Monitoramento iniciado com sucesso!")
+        return True
+    
+    def stop_monitoring(self) -> None:
+        """Para o monitoramento"""
+        print("🛑 Parando monitoramento...")
+        self.is_monitoring = False
+        
+        if self.monitoring_thread and self.monitoring_thread.is_alive():
+            self.monitoring_thread.join(timeout=5)
+        
+        print("✅ Monitoramento parado")
+    
+    def _monitoring_loop(self) -> None:
+        """Loop principal de monitoramento"""
+        print("\n" + "="*70)
+        print("🤖 INICIANDO MONITORAMENTO DE MERCADO")
+        print("="*70)
+        
+        while self.is_monitoring:
+            try:
+                cycle_start = time.time()
+                current_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+                
+                print(f"\n⏰ {current_time}")
+                print("🔍 Iniciando nova varredura...")
+                
+                # Executar varredura do mercado
+                signals = self.scan_market(verbose=True)
+                
+                # Processar sinais encontrados
+                if signals:
+                    self._process_new_signals(signals)
+                else:
+                    print("📊 Nenhum sinal encontrado neste ciclo")
+                
+                # Calcular tempo de espera
+                cycle_duration = time.time() - cycle_start
+                wait_time = max(0, self.config['scan_interval'] - cycle_duration)
+                
+                print(f"⏳ Próxima varredura em {wait_time:.0f}s")
+                print("="*70)
+                
+                # Aguardar próximo ciclo (interrompível)
+                self._interruptible_sleep(wait_time)
+                
+            except Exception as e:
+                print(f"❌ Erro no ciclo de monitoramento: {e}")
+                traceback.print_exc()
+                self._interruptible_sleep(5)  # Aguardar 5s antes de tentar novamente
+    
+    def _interruptible_sleep(self, duration: float) -> None:
+        """Sleep que pode ser interrompido"""
+        end_time = time.time() + duration
+        while time.time() < end_time and self.is_monitoring:
+            time.sleep(0.1)
+    
+    def _process_new_signals(self, signals: List[Dict[str, Any]]) -> None:
+        """Processa novos sinais encontrados"""
+        print(f"\n✨ {len(signals)} NOVOS SINAIS ENCONTRADOS!")
+        print("-" * 50)
+        
+        for signal in signals:
+            # Exibir informações do sinal
+            print(f"📊 {signal['symbol']} - {signal['type']}")
+            print(f"   💰 Entrada: {signal['entry_price']:.8f}")
+            print(f"   🎯 Alvo: {signal['target_price']:.8f}")
+            print(f"   📈 Projeção: {signal.get('projection_percentage', 6.0):.1f}%")
+            print(f"   ⭐ Qualidade: {signal['quality_score']:.1f} ({signal['signal_class']})")
             
-            if verbose:
-                print("\n" + "="*50)
-                print(f"🔍 Iniciando varredura do mercado em {current_datetime}")
-                print(f"📊 Pares monitorados: {len(self.top_pairs)}")
-                print("="*50)
-            
-            # Verifica se é hora de fazer varredura completa
-            time_since_last_update = current_time - self.pairs_last_update
-            if time_since_last_update >= self.complete_scan_interval:
-                print("\n🔄 Iniciando varredura completa...")
-                self.update_futures_pairs()
-                self.pairs_last_update = current_time
-                print("✅ Varredura completa finalizada")
-            else:
-                print("\n🔍 Analisando top 100 pares...")
-                time_to_next_complete = self.complete_scan_interval - time_since_last_update
-                hours = int(time_to_next_complete // 3600)
-                minutes = int((time_to_next_complete % 3600) // 60)
-                print(f"⏳ Próxima varredura completa em: {hours}h {minutes}m")
-            
-            # Analisa o mercado
-            signals = []
-            sinais_encontrados = 0
-            
-            for symbol in self.top_pairs:
+            # Enviar notificação se configurado
+            if self.notifier:
                 try:
-                    print(f"\r📊 Analisando {symbol}...", end="")
-                    signal = self.analyze_symbol(symbol)
-                    if signal:
-                        print(f"\n✅ Sinal encontrado para {symbol}:")
-                        print(f"   Tipo: {signal['type']}")
-                        print(f"   Preço Entrada: {signal['entry_price']:.8f}")
-                        print(f"   Preço Alvo: {signal['target_price']:.8f}")
-                        print(f"   RSI: {signal.get('rsi', 0):.2f}")
-                        print(f"   Pontuação: {signal['quality_score']:.2f} ({signal['signal_class']})")
-                        print(f"   - Tendência 4H: {signal['trend_score']:.2f}/35")
-                        print(f"   - Confirmação 1H: {signal['entry_score']:.2f}/25")
-                        print(f"   - RSI: {signal['rsi_score']:.2f}/20")
-                        print(f"   - Padrões Técnicos: {signal['pattern_score']:.2f}/20")
-                        
-                        # Usar apenas o gerenciador para salvar o sinal
-                        if self.gerenciador.save_signal(signal):
-                            signals.append(signal)
-                            sinais_encontrados += 1
-                            print(f"✅ Sinal salvo com sucesso: {symbol}")
-                        else:
-                            print(f"❌ Falha ao salvar sinal: {signal['symbol']}")
-                            
+                    self.notifier.send_signal(
+                        signal['symbol'],
+                        signal['type'],
+                        float(signal['entry_price']),
+                        signal.get('quality_score', 0),
+                        signal.get('entry_timeframe', '1h'),
+                        signal.get('target_price')
+                    )
                 except Exception as e:
-                    print(f"\n❌ Erro ao analisar {symbol}: {e}")
-                    continue
+                    print(f"⚠️ Erro ao enviar notificação: {e}")
+        
+        print("-" * 50)
+    
+    def _initialize_pairs(self) -> bool:
+        """Inicializa a lista de pares (lazy loading)"""
+        try:
+            print("🔍 Identificando pares USDT disponíveis...")
+            if not self._load_all_usdt_pairs():
+                return False
             
-            # Exibir resumo final
-            print("\n" + "="*50)
-            print(f"✅ Varredura concluída em {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            print(f"📈 Total de sinais encontrados: {sinais_encontrados}")
-            print("="*50)
-            print("\n⏳ Aguardando próxima varredura...")
-            
-            # Temporizador regressivo de 60 segundos
-            for i in range(60, 0, -1):
-                print(f"\r⏱️  Próxima varredura em {i} segundos...", end="")
-                time.sleep(1)
-            print("\n")
-            
-            return signals
+            print("📊 Criando lista dos top 100 pares...")
+            return self._create_top_pairs()
             
         except Exception as e:
-            print(f"❌ Erro na varredura do mercado: {e}")
+            print(f"❌ Erro na inicialização de pares: {e}")
             traceback.print_exc()
-            return []
-
-    def update_futures_pairs(self):
-        """Atualiza a lista de pares futuros"""
+            return False
+    
+    def _load_all_usdt_pairs(self) -> bool:
+        """Carrega todos os pares USDT perpétuos"""
         try:
-            print("\n🔄 Atualizando lista de pares futuros...")
-            
-            # Get exchange information using our custom client
             exchange_info = self.binance.get_exchange_info()
             if not exchange_info:
                 return False
             
-            # Filter USDT perpetual futures and check leverage
-            valid_pairs = []
-            total_symbols = len([s for s in exchange_info['symbols'] 
-                           if s['symbol'].endswith('USDT') and 
-                           s['status'] == 'TRADING' and 
-                           s['contractType'] == 'PERPETUAL'])
-            remaining = total_symbols
-            
-            for symbol in exchange_info['symbols']:
+            # Filtrar pares USDT perpétuos
+            self.all_usdt_pairs = [
+                symbol['symbol'] for symbol in exchange_info['symbols']
                 if (symbol['symbol'].endswith('USDT') and 
                     symbol['status'] == 'TRADING' and 
-                    symbol['contractType'] == 'PERPETUAL'):
-                    
+                    symbol['contractType'] == 'PERPETUAL')
+            ]
+            
+            print(f"✅ {len(self.all_usdt_pairs)} pares USDT identificados")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Erro ao carregar pares USDT: {e}")
+            return False
+    
+    def _create_top_pairs(self) -> bool:
+        """Cria lista dos top 100 pares baseado em critérios"""
+        try:
+            # Filtrar por alavancagem >= 50x
+            print("🔄 Filtrando por alavancagem >= 50x...")
+            leverage_info = self.binance.get_leverage_brackets()
+            if not leverage_info:
+                return False
+            
+            valid_pairs = []
+            for symbol in self.all_usdt_pairs:
+                if symbol in leverage_info:
                     try:
-                        print(f"\r🔄 Verificando {symbol['symbol']} ({remaining}/{total_symbols})", end="")
-                        leverage_info = self.binance.get_leverage_brackets()
-                        if not leverage_info or symbol['symbol'] not in leverage_info:
-                            remaining -= 1
-                            continue
-                            
-                        max_leverage = float(leverage_info[symbol['symbol']][0]['initialLeverage'])
+                        max_leverage = float(leverage_info[symbol][0]['initialLeverage'])
                         if max_leverage >= 50:
-                            valid_pairs.append(symbol['symbol'])
-                            print(f"\n✅ {symbol['symbol']} verificado (alavancagem: {max_leverage}x)")
-                        remaining -= 1
-                    except Exception as e:
-                        print(f"\n❌ Erro ao verificar {symbol['symbol']}: {e}")
-                        remaining -= 1
+                            valid_pairs.append(symbol)
+                    except (KeyError, IndexError, ValueError):
                         continue
             
-            # Get 24h ticker for valid pairs
+            print(f"✅ {len(valid_pairs)} pares com alavancagem >= 50x")
+            
+            # Obter dados de ticker 24h
+            print("📊 Analisando volume e volatilidade...")
             ticker_data = self.binance.get_24h_ticker_data(valid_pairs)
             if not ticker_data:
                 return False
-                
-            # Sort by volume and get top 100
-            sorted_pairs = sorted(
-                [(symbol, data) for symbol, data in ticker_data.items()],
-                key=lambda x: x[1]['volume'],
-                reverse=True
-            )[:100]
             
-            self.top_pairs = [pair[0] for pair in sorted_pairs]
+            # Calcular score e selecionar top 100
+            pair_scores = []
+            for symbol, data in ticker_data.items():
+                try:
+                    volume = float(data['volume'])
+                    volatility = abs(float(data['priceChangePercent']))
+                    
+                    # Score: Volume (70%) + Volatilidade (30%)
+                    volume_score = np.log10(volume + 1) if volume > 0 else 0
+                    final_score = (volume_score * 0.7) + (volatility * 0.3)
+                    
+                    pair_scores.append({
+                        'symbol': symbol,
+                        'score': final_score,
+                        'volume': volume,
+                        'volatility': volatility
+                    })
+                except (ValueError, KeyError):
+                    continue
             
-            print(f"\n✅ Top {len(self.top_pairs)} pares USDT perpétuos com alavancagem 50x selecionados:")
-            for i, (symbol, data) in enumerate(sorted_pairs, 1):
-                print(f"{i}. {symbol:<12} - Volume: ${data['volume']:,.0f} - Variação 24h: {data['priceChangePercent']:+.2f}%")
+            # Selecionar top 100
+            sorted_pairs = sorted(pair_scores, key=lambda x: x['score'], reverse=True)
+            self.top_pairs = [pair['symbol'] for pair in sorted_pairs[:self.config['max_pairs']]]
+            
+            print(f"✅ Top {len(self.top_pairs)} pares selecionados")
+            self.pairs_last_update = time.time()
             
             return True
             
         except Exception as e:
-            print(f"❌ Erro ao atualizar pares futuros: {e}")
+            print(f"❌ Erro ao criar top pares: {e}")
             traceback.print_exc()
             return False
-
-    def analyze_symbol(self, symbol: str) -> Optional[Dict[str, Any]]:
+    
+    def scan_market(self, verbose: bool = False) -> List[Dict[str, Any]]:
+        """Executa varredura completa do mercado"""
         try:
-            # Get trend timeframe data (4H)
-            trend_df = self.get_klines(symbol, self.trend_timeframe)
+            current_time = time.time()
+            
+            if verbose:
+                print(f"🔍 Analisando {len(self.top_pairs)} pares...")
+            
+            # Verificar se precisa atualizar lista de pares
+            if current_time - self.pairs_last_update >= self.config['pairs_update_interval']:
+                print("🔄 Atualizando lista de pares...")
+                self._create_top_pairs()
+            
+            # Analisar cada par
+            signals = []
+            for i, symbol in enumerate(self.top_pairs, 1):
+                try:
+                    if verbose:
+                        print(f"\r📊 Analisando {symbol} ({i}/{len(self.top_pairs)})...", end="")
+                    
+                    signal = self.analyze_symbol(symbol)
+                    if signal:
+                        # Salvar sinal no banco
+                        if self.gerenciador.save_signal(signal):
+                            signals.append(signal)
+                            if verbose:
+                                print(f"\n✅ Sinal salvo: {symbol} - {signal['type']}")
+                        
+                except Exception as e:
+                    if verbose:
+                        print(f"\n❌ Erro ao analisar {symbol}: {e}")
+                    continue
+            
+            if verbose:
+                print(f"\n✅ Varredura concluída: {len(signals)} sinais encontrados")
+            
+            return signals
+            
+        except Exception as e:
+            print(f"❌ Erro na varredura: {e}")
+            traceback.print_exc()
+            return []
+    
+    def analyze_symbol(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """Analisa um símbolo específico e retorna sinal se qualificado"""
+        try:
+            # 1. Análise de Tendência (4H)
+            trend_df = self.get_klines(symbol, self.config['trend_timeframe'])
             if trend_df is None or len(trend_df) < 50:
                 return None
-                
-            # Analisar tendência do timeframe maior primeiro
-            trend = self.analyze_trend_df(trend_df)
-            if trend is None:
+            
+            trend_analysis = self.analyze_trend_df(trend_df)
+            if trend_analysis is None:
                 return None
-                
-            # Get entry timeframe data (1H)
-            entry_df = self.get_klines(symbol, self.entry_timeframe)
+            
+            # 2. Análise de Entrada (1H)
+            entry_df = self.get_klines(symbol, self.config['entry_timeframe'])
             if entry_df is None or len(entry_df) < 50:
                 return None
-
-            # Determinar o tipo de sinal baseado na tendência
-            signal_type = 'COMPRA' if trend['is_uptrend'] else 'VENDA'
             
-            # Definir preço de entrada como o último preço de fechamento
+            entry_analysis = self.analyze_entry_df(entry_df)
+            
+            # 3. Determinar tipo de sinal
+            signal_type = 'COMPRA' if trend_analysis['is_uptrend'] else 'VENDA'
             entry_price = float(entry_df['close'].iloc[-1])
             
-            # Calcular condições de mercado
-            market_conditions = self.calculate_market_conditions(entry_df)
-            
-            # Calcular níveis de suporte e resistência
-            support_resistance = self.calculate_support_resistance_levels(entry_df, entry_price)
-            
-            # 1. Análise de Tendência em 4H (35 pontos)
-            trend_score = 0
-            trend_strength = abs(trend.get('trend_strength', 0))
-            trend_score += min(trend_strength * 50, 15)
-            
-            # Alinhamento de EMAs (10 pontos)
-            if trend['is_uptrend'] and trend['close'] >= trend['ema20'] * 0.98:
-                trend_score += 10
-            elif trend['is_downtrend'] and trend['close'] <= trend['ema20'] * 1.02:
-                trend_score += 10
-            
-            # Volume e momentum (10 pontos)
-            if trend.get('volume_trend', 0) > 0:
-                trend_score += 5
-            if abs(trend.get('macd_signal', 0)) > 0.001:
-                trend_score += 5
-            
-            # 2. Análise de Entrada em 1H (25 pontos) - NOVA LÓGICA
-            entry_analysis = self.analyze_entry_df(entry_df)
-            entry_score = 0
-            
-            # NOVA LÓGICA: Detectar retomada da tendência
-            if signal_type == 'COMPRA':
-                # Tendência principal é ALTA no 4H
-                if entry_analysis.get('is_uptrend', False):
-                    # 1H já está alinhado com 4H
-                    entry_score += 25  # Pontuação máxima
-                elif (
-                    entry_analysis.get('rsi', 50) < 55 and  # RSI não está sobrecomprado
-                    entry_analysis.get('momentum_positive', False) and  # Momentum voltando positivo
-                    entry_analysis.get('price_change', 0) > 0.005  # Movimento de pelo menos 0.5% para cima
-                ):
-                    # 1H está retomando a direção do 4H
-                    entry_score += 20  # Boa pontuação para retomada
-                elif (
-                    entry_analysis.get('rsi', 50) < 45 and  # RSI em zona de sobrevenda
-                    not entry_analysis.get('is_downtrend', True)  # Não está em downtrend forte
-                ):
-                    # 1H em correção, mas pode estar formando fundo
-                    entry_score += 10  # Pontuação moderada
-            elif signal_type == 'VENDA':  # CORRIGIDO: Agora está no mesmo nível do primeiro if
-                # Tendência principal é BAIXA no 4H
-                if entry_analysis.get('is_downtrend', False):
-                    # 1H já está alinhado com 4H
-                    entry_score += 25  # Pontuação máxima
-                elif (
-                    entry_analysis.get('rsi', 50) > 45 and  # RSI não está sobrevenda
-                    not entry_analysis.get('momentum_positive', True) and  # Momentum voltando negativo
-                    entry_analysis.get('price_change', 0) < -0.005  # Movimento de pelo menos 0.5% para baixo
-                ):
-                    # 1H está retomando a direção do 4H
-                    entry_score += 20  # Boa pontuação para retomada
-                elif (
-                    entry_analysis.get('rsi', 50) > 55 and  # RSI em zona de sobrecompra
-                    not entry_analysis.get('is_uptrend', True)  # Não está em uptrend forte
-                ):
-                    # 1H em correção, mas pode estar formando topo
-                    entry_score += 10  # Pontuação moderada
-            
-            # 3. Análise de RSI (20 pontos)
-            rsi_score = 0
-            rsi_value = entry_analysis.get('rsi', 50)
-            
-            if signal_type == 'COMPRA':
-                if 30 <= rsi_value <= 50:  # RSI em zona boa para compra
-                    rsi_score += 20
-                elif 20 <= rsi_value < 30:  # RSI sobrevenda
-                    rsi_score += 15
-                elif 50 < rsi_value <= 60:  # RSI neutro alto
-                    rsi_score += 10
-            else:  # VENDA
-                if 50 <= rsi_value <= 70:  # RSI em zona boa para venda
-                    rsi_score += 20
-                elif 70 < rsi_value <= 80:  # RSI sobrecompra
-                    rsi_score += 15
-                elif 40 <= rsi_value < 50:  # RSI neutro baixo
-                    rsi_score += 10
-            
-            # 4. Padrões Técnicos (20 pontos)
-            pattern_score = 0
-            
-            # Verificar padrões de candlestick
-            if len(entry_df) >= 3:
-                last_candles = entry_df.tail(3)
-                
-                # Padrão de reversão
-                if signal_type == 'COMPRA':
-                    # Martelo ou doji em baixa
-                    last_close = last_candles['close'].iloc[-1]
-                    last_open = last_candles['open'].iloc[-1]
-                    last_low = last_candles['low'].iloc[-1]
-                    last_high = last_candles['high'].iloc[-1]
-                    
-                    body_size = abs(last_close - last_open)
-                    lower_shadow = min(last_close, last_open) - last_low
-                    
-                    if lower_shadow > body_size * 2:  # Martelo
-                        pattern_score += 15
-                    elif body_size < (last_high - last_low) * 0.3:  # Doji
-                        pattern_score += 10
-                else:  # VENDA
-                    # Estrela cadente ou doji em alta
-                    last_close = last_candles['close'].iloc[-1]
-                    last_open = last_candles['open'].iloc[-1]
-                    last_low = last_candles['low'].iloc[-1]
-                    last_high = last_candles['high'].iloc[-1]
-                    
-                    body_size = abs(last_close - last_open)
-                    upper_shadow = last_high - max(last_close, last_open)
-                    
-                    if upper_shadow > body_size * 2:  # Estrela cadente
-                        pattern_score += 15
-                    elif body_size < (last_high - last_low) * 0.3:  # Doji
-                        pattern_score += 10
-            
-            # Calcular pontuação total de qualidade
-            quality_score = trend_score + entry_score + rsi_score + pattern_score
-            
-            # Classificar sinal baseado na pontuação
-            if quality_score >= 90:
-                signal_class = 'ELITE'
-            elif quality_score >= 80:
-                signal_class = 'PREMIUM'
-            elif quality_score >= 60:  # Reduzido para capturar mais sinais
-                signal_class = 'PADRÃO'
-            else:
-                signal_class = 'Descartado'
-                return None  # Não salvar sinais com qualidade baixa
-            
-            # Calcular preço alvo APÓS ter todos os dados
-            target_price = self.calculate_target_price(
-                entry_price, 
-                signal_type, 
-                trend, 
-                market_conditions, 
-                quality_score
+            # 4. Sistema de Pontuação (100 pontos)
+            scores = self._calculate_signal_scores(
+                trend_analysis, entry_analysis, signal_type, entry_df
             )
             
-            # Criar sinal
-            # Simplificar o retorno para apenas as informações necessárias
+            quality_score = sum(scores.values())
+            
+            # 5. Filtro de qualidade
+            if quality_score < self.config['quality_score_minimum']:
+                return None
+            
+            # 6. Classificação
+            signal_class = 'ELITE' if quality_score >= 90 else 'PREMIUM'  # PREMIUM agora para 70-89
+            
+            # 7. Calcular alvo
+            target_price = self.calculate_target_price(
+                entry_price, signal_type, trend_analysis, entry_analysis, quality_score
+            )
+            
+            # 8. Calcular projeção
+            if signal_type == 'COMPRA':
+                projection = ((target_price - entry_price) / entry_price) * 100
+            else:
+                projection = ((entry_price - target_price) / entry_price) * 100
+            
+            # 9. Montar sinal final
             signal = {
                 'symbol': symbol,
-                'type': signal_type,  # 'COMPRA' ou 'VENDA'
+                'type': signal_type,
                 'entry_price': entry_price,
                 'target_price': target_price,
+                'projection_percentage': projection,
                 'quality_score': quality_score,
                 'signal_class': signal_class,
-                'entry_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                # Adicionar os campos necessários para o display
-                'trend_score': trend_score,
-                'entry_score': entry_score,
-                'rsi_score': rsi_score,
-                'pattern_score': pattern_score,
-                'rsi': entry_analysis.get('rsi', 50)
+                'rsi': entry_analysis.get('rsi', 50),
+                'trend_score': scores['trend'],
+                'entry_score': scores['entry'],
+                'rsi_score': scores['rsi'],
+                'pattern_score': scores['pattern'],
+                'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+                'trend_timeframe': self.config['trend_timeframe'],
+                'entry_timeframe': self.config['entry_timeframe']
             }
             
             return signal
             
         except Exception as e:
-            print(f"❌ Erro na análise de {symbol}: {e}")
+            print(f"❌ Erro ao analisar {symbol}: {e}")
             return None
+    
+    def _calculate_signal_scores(self, trend_analysis: Dict, entry_analysis: Dict, 
+                           signal_type: str, entry_df: pd.DataFrame) -> Dict[str, float]:
+        """Calcula pontuação detalhada do sinal (100 pontos total)"""
+        scores = {'trend': 0.0, 'entry': 0.0, 'rsi': 0.0, 'pattern': 0.0}  # Usar float
+        
+        # 1. TENDÊNCIA 4H (35 pontos)
+        trend_strength = abs(trend_analysis.get('trend_strength', 0))
+        scores['trend'] += min(trend_strength * 50.0, 15.0)  # Força da tendência (15 pts)
+        
+        # Alinhamento EMAs (10 pts)
+        if signal_type == 'COMPRA' and trend_analysis['close'] >= trend_analysis['ema20'] * 0.98:
+            scores['trend'] += 10.0
+        elif signal_type == 'VENDA' and trend_analysis['close'] <= trend_analysis['ema20'] * 1.02:
+            scores['trend'] += 10.0
+        
+        # MACD alinhado (10 pts)
+        macd_signal = trend_analysis.get('macd_signal', 0)
+        if (signal_type == 'COMPRA' and macd_signal > 0) or (signal_type == 'VENDA' and macd_signal < 0):
+            scores['trend'] += 10.0
+        
+        # 2. CONFIRMAÇÃO 1H (25 pontos)
+        # Momentum (15 pts)
+        if signal_type == 'COMPRA':
+            if entry_analysis.get('momentum_positive', False):
+                scores['entry'] += 15.0
+            elif entry_analysis.get('price_change', 0) > 0.002:
+                scores['entry'] += 10.0
+        else:
+            if not entry_analysis.get('momentum_positive', True):
+                scores['entry'] += 15.0
+            elif entry_analysis.get('price_change', 0) < -0.002:
+                scores['entry'] += 10.0
+        
+        # Volume (10 pts)
+        volume_ratio = entry_analysis.get('volume_ratio', 1.0)
+        if volume_ratio > 1.2:
+            scores['entry'] += 10.0
+        elif volume_ratio > 1.0:
+            scores['entry'] += 5.0
+        
+        # 3. RSI (20 pontos)
+        rsi_value = entry_analysis.get('rsi', 50)
+        if 30 <= rsi_value <= 70:
+            if (signal_type == 'COMPRA' and 30 <= rsi_value <= 50) or \
+               (signal_type == 'VENDA' and 50 <= rsi_value <= 70):
+                scores['rsi'] += 20.0
+            else:
+                scores['rsi'] += 15.0
+        else:
+            scores['rsi'] += 5.0  # Penalizar extremos
+        
+        # 4. PADRÕES TÉCNICOS (20 pontos)
+        # Suporte/Resistência (10 pts)
+        support_resistance = self.calculate_support_resistance_levels(
+            entry_df, float(entry_df['close'].iloc[-1])
+        )
+        
+        if signal_type == 'COMPRA':
+            distance = support_resistance.get('support_distance', 0)
+        else:
+            distance = support_resistance.get('resistance_distance', 0)
+        
+        if 2 <= distance <= 5:
+            scores['pattern'] += 10.0
+        elif distance <= 8:
+            scores['pattern'] += 5.0
+        
+        # Padrões de candlestick (10 pts)
+        if len(entry_df) >= 3:
+            candle_score = self._analyze_candlestick_patterns(entry_df, signal_type)
+            scores['pattern'] += float(candle_score)  # Garantir que é float
+        
+        return scores
+    
+    def _analyze_candlestick_patterns(self, df: pd.DataFrame, signal_type: str) -> float:
+        """Analisa padrões de candlestick"""
+        try:
+            if len(df) < 3:
+                return 0.0
+                
+            last_candle = df.iloc[-1]
+            prev_candle = df.iloc[-2]
+            
+            last_open = float(last_candle['open'])
+            last_close = float(last_candle['close'])
+            last_high = float(last_candle['high'])
+            last_low = float(last_candle['low'])
+            
+            body_size = abs(last_close - last_open)
+            candle_range = last_high - last_low
+            
+            if candle_range == 0:
+                return 0.0
+                
+            score = 0.0
+            
+            if signal_type == 'COMPRA':
+                # Martelo ou padrão de alta
+                lower_shadow = min(last_close, last_open) - last_low
+                if lower_shadow > body_size * 2:  # Martelo
+                    score += 10.0
+                elif body_size < candle_range * 0.3:  # Doji
+                    score += 5.0
+            else:  # VENDA
+                # Estrela cadente ou padrão de baixa
+                upper_shadow = last_high - max(last_close, last_open)
+                if upper_shadow > body_size * 2:  # Estrela cadente
+                    score += 10.0
+                elif body_size < candle_range * 0.3:  # Doji
+                    score += 5.0
+            
+            return score
+            
+        except Exception as e:
+            print(f"❌ Erro na análise de candlestick: {e}")
+            return 0.0
 
+    def calculate_target_price(self, entry_price: float, signal_type: str, 
+                             trend_data: Dict, entry_data: Dict, quality_score: float) -> float:
+        """Calcula preço alvo com garantia mínima de 6%"""
+        try:
+            base_percentage = self.config['target_percentage_min']  # 6% mínimo
+            
+            # Bônus por volatilidade (0-8%)
+            atr_ratio = entry_data.get('atr_ratio', 0.02)
+            volatility_bonus = min(atr_ratio * 400, 8.0)  # Máximo 8%
+            
+            # Bônus por força da tendência (0-3%)
+            trend_strength = abs(trend_data.get('trend_strength', 0))
+            trend_bonus = min(trend_strength * 100, 3.0)  # Máximo 3%
+            
+            # Bônus por qualidade (0-1%)
+            quality_bonus = min((quality_score - 80) / 20, 1.0)  # Máximo 1%
+            
+            # Calcular porcentagem total
+            total_percentage = base_percentage + volatility_bonus + trend_bonus + quality_bonus
+            total_percentage = min(total_percentage, 20.0)  # Máximo 20%
+            
+            # Calcular preço alvo
+            if signal_type == 'COMPRA':
+                target_price = entry_price * (1 + total_percentage / 100)
+            else:
+                target_price = entry_price * (1 - total_percentage / 100)
+            
+            # Validação final
+            if signal_type == 'COMPRA' and target_price <= entry_price:
+                target_price = entry_price * 1.06  # Forçar 6% mínimo
+            elif signal_type == 'VENDA' and target_price >= entry_price:
+                target_price = entry_price * 0.94  # Forçar 6% mínimo
+            
+            return target_price
+            
+        except Exception as e:
+            print(f"❌ Erro no cálculo do alvo: {e}")
+            # Fallback para 6% mínimo
+            if signal_type == 'COMPRA':
+                return entry_price * 1.06
+            else:
+                return entry_price * 0.94
+
+    def calculate_support_resistance_levels(self, df: pd.DataFrame, current_price: float) -> Dict[str, float]:
+        """Calcula níveis de suporte e resistência"""
+        try:
+            if df.empty or len(df) < 20:
+                return {
+                    'support': current_price * 0.98,
+                    'resistance': current_price * 1.02,
+                    'support_strength': 1.0,
+                    'resistance_strength': 1.0,
+                    'support_distance': 2.0,
+                    'resistance_distance': 2.0
+                }
+                
+            # Calcular níveis baseados em máximas e mínimas locais
+            highs = df['high'].rolling(window=5, center=True).max()
+            lows = df['low'].rolling(window=5, center=True).min()
+            
+            # Encontrar níveis de resistência (máximas locais)
+            resistance_levels = []
+            for i in range(2, len(df) - 2):
+                if (df['high'].iloc[i] == highs.iloc[i] and 
+                    df['high'].iloc[i] > df['high'].iloc[i-1] and 
+                    df['high'].iloc[i] > df['high'].iloc[i+1]):
+                    resistance_levels.append(df['high'].iloc[i])
+            
+            # Encontrar níveis de suporte (mínimas locais)
+            support_levels = []
+            for i in range(2, len(df) - 2):
+                if (df['low'].iloc[i] == lows.iloc[i] and 
+                    df['low'].iloc[i] < df['low'].iloc[i-1] and 
+                    df['low'].iloc[i] < df['low'].iloc[i+1]):
+                    support_levels.append(df['low'].iloc[i])
+            
+            # Encontrar o suporte e resistência mais próximos do preço atual
+            if resistance_levels:
+                resistance = min([r for r in resistance_levels if r > current_price], 
+                               default=current_price * 1.02)
+            else:
+                resistance = current_price * 1.02
+            
+            if support_levels:
+                support = max([s for s in support_levels if s < current_price], 
+                            default=current_price * 0.98)
+            else:
+                support = current_price * 0.98
+            
+            # Calcular força dos níveis (quantas vezes foram testados)
+            support_strength = len([s for s in support_levels if abs(s - support) / support < 0.01])
+            resistance_strength = len([r for r in resistance_levels if abs(r - resistance) / resistance < 0.01])
+            
+            # Calcular distâncias em porcentagem
+            support_distance = abs(current_price - support) / current_price * 100
+            resistance_distance = abs(resistance - current_price) / current_price * 100
+            
+            return {
+                'support': support,
+                'resistance': resistance,
+                'support_strength': max(float(support_strength), 1.0),
+                'resistance_strength': max(float(resistance_strength), 1.0),
+                'support_distance': support_distance,
+                'resistance_distance': resistance_distance
+            }
+                
+        except Exception as e:
+            print(f"❌ Erro ao calcular suporte/resistência: {e}")
+            return {
+                'support': current_price * 0.98,
+                'resistance': current_price * 1.02,
+                'support_strength': 1.0,
+                'resistance_strength': 1.0,
+                'support_distance': 2.0,
+                'resistance_distance': 2.0
+            }
+
+    def get_klines(self, symbol: str, interval: str, limit: int = 100) -> Optional[pd.DataFrame]:
+        """Obtém dados de klines (candlesticks) para um símbolo"""
+        try:
+            # Usar o método do BinanceClient
+            klines_data = self.binance.get_klines(symbol, interval, limit)
+            if not klines_data:
+                return None
+                
+            # Converter para DataFrame
+            df = pd.DataFrame(klines_data)
+            
+            # Converter tipos de dados
+            numeric_columns = ['open', 'high', 'low', 'close', 'volume']
+            for col in numeric_columns:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors='coerce')
+            
+            # Garantir que retornamos apenas DataFrame ou None
+            if all(col in df.columns for col in numeric_columns):
+                # Usar to_frame() se for Series, senão usar copy() diretamente
+                result = df[numeric_columns].copy()
+                # Garantir que é sempre DataFrame
+                if isinstance(result, pd.Series):
+                    result = result.to_frame().T
+                return result
+            else:
+                return None
+            
+        except Exception as e:
+            print(f"❌ Erro ao obter klines para {symbol}: {e}")
+            return None
+    
     def analyze_trend_df(self, df: pd.DataFrame) -> Optional[Dict]:
         """Analisa tendência do DataFrame"""
         try:
-            # Calcular indicadores - conversão explícita para Series
+            # Calcular indicadores
             close_series = pd.Series(df['close'].values, dtype=float)
             ema20 = EMAIndicator(close=close_series, window=20).ema_indicator()
             ema50 = EMAIndicator(close=close_series, window=50).ema_indicator()
@@ -605,54 +685,19 @@ class TechnicalAnalysis:
             current_ema20 = ema20.iloc[-1]
             current_ema50 = ema50.iloc[-1]
             
-            # CONDIÇÕES MAIS CLARAS para detectar tendências
-            # Uptrend: Preço acima da EMA20 E EMA20 > EMA50
+            # Detectar tendências
             is_uptrend = (
-                current_price > current_ema20 * 0.995 and  # Preço pelo menos 0.5% próximo ou acima da EMA20
-                current_ema20 > current_ema50 * 1.005      # EMA20 claramente acima da EMA50 (0.5%)
+                current_price > current_ema20 * 0.995 and
+                current_ema20 > current_ema50 * 1.005
             )
             
-            # Downtrend: Preço abaixo da EMA20 E EMA20 < EMA50
             is_downtrend = (
-                current_price < current_ema20 * 1.005 and  # Preço pelo menos 0.5% próximo ou abaixo da EMA20
-                current_ema20 < current_ema50 * 0.995      # EMA20 claramente abaixo da EMA50 (0.5%)
+                current_price < current_ema20 * 1.005 and
+                current_ema20 < current_ema50 * 0.995
             )
-            
-            # Verificação secundária para casos onde nenhuma tendência é detectada
-            if not is_uptrend and not is_downtrend:
-                # Se o preço está acima da EMA50, considerar tendência de alta
-                if current_price > current_ema50 * 1.01:  # Preço 1% acima da EMA50
-                    is_uptrend = True
-                # Se o preço está abaixo da EMA50, considerar tendência de baixa
-                elif current_price < current_ema50 * 0.99:  # Preço 1% abaixo da EMA50
-                    is_downtrend = True
-                # Caso contrário, usar a inclinação da EMA20 para determinar a tendência
-                else:
-                    ema20_slope = (current_ema20 - ema20.iloc[-6]) / ema20.iloc[-6]  # Inclinação das últimas 5 velas
-                    if ema20_slope > 0.002:  # Inclinação positiva de 0.2%
-                        is_uptrend = True
-                    elif ema20_slope < -0.002:  # Inclinação negativa de 0.2%
-                        is_downtrend = True
-                    # Se ainda não tiver tendência clara, usar o MACD como último recurso
-                    elif macd_line.iloc[-1] > macd_signal.iloc[-1]:
-                        is_uptrend = True
-                    else:
-                        is_downtrend = True
-            
-            # Garantir que não tenhamos tendências conflitantes
-            if is_uptrend and is_downtrend:
-                # Decidir com base na força relativa da EMA20 vs EMA50
-                ema_ratio = current_ema20 / current_ema50
-                if ema_ratio > 1:
-                    is_downtrend = False  # Priorizar tendência de alta
-                else:
-                    is_uptrend = False    # Priorizar tendência de baixa
             
             # Calcular força da tendência
             trend_strength = abs(current_price - current_ema20) / current_price
-            
-            # Volume trend
-            volume_trend = 1 if df['volume'].tail(5).mean() > df['volume'].tail(10).mean() else 0
             
             return {
                 'is_uptrend': is_uptrend,
@@ -661,55 +706,17 @@ class TechnicalAnalysis:
                 'close': current_price,
                 'ema20': current_ema20,
                 'ema50': current_ema50,
-                'macd_signal': macd_line.iloc[-1] - macd_signal.iloc[-1],
-                'volume_trend': volume_trend
+                'macd_signal': macd_line.iloc[-1] - macd_signal.iloc[-1]
             }
             
         except Exception as e:
             print(f"❌ Erro na análise de tendência: {e}")
             return None
-
-    def calculate_market_conditions(self, df: pd.DataFrame) -> Dict[str, float]:
-        """Calcula condições de mercado como volatilidade e momentum"""
-        try:
-            # Calcular ATR para volatilidade
-            atr = AverageTrueRange(
-                high=pd.Series(df['high'].values, dtype=float),
-                low=pd.Series(df['low'].values, dtype=float),
-                close=pd.Series(df['close'].values, dtype=float),
-                window=14
-            ).average_true_range()
-            
-            current_price = df['close'].iloc[-1]
-            volatility = (atr.iloc[-1] / current_price) * 100
-            
-            # Calcular momentum
-            price_change_24h = (current_price - df['close'].iloc[-24]) / df['close'].iloc[-24] * 100 if len(df) >= 24 else 0
-            price_change_12h = (current_price - df['close'].iloc[-12]) / df['close'].iloc[-12] * 100 if len(df) >= 12 else 0
-            
-            # Volume relativo
-            volume_ratio = df['volume'].tail(5).mean() / df['volume'].tail(20).mean() if len(df) >= 20 else 1.0
-            
-            return {
-                'volatility': volatility,
-                'price_change_24h': price_change_24h,
-                'price_change_12h': price_change_12h,
-                'volume_ratio': volume_ratio
-            }
-            
-        except Exception as e:
-            print(f"❌ Erro ao calcular condições de mercado: {e}")
-            return {
-                'volatility': 2.0,
-                'price_change_24h': 0.0,
-                'price_change_12h': 0.0,
-                'volume_ratio': 1.0
-            }
-
+    
     def analyze_entry_df(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Analisa condições de entrada no timeframe menor"""
         try:
-            # Calcular indicadores - conversão explícita para Series
+            # Calcular indicadores
             close_series = pd.Series(df['close'].values, dtype=float)
             ema20 = EMAIndicator(close=close_series, window=20).ema_indicator()
             ema50 = EMAIndicator(close=close_series, window=50).ema_indicator()
@@ -720,7 +727,7 @@ class TechnicalAnalysis:
             current_ema50 = ema50.iloc[-1]
             current_rsi = rsi.iloc[-1]
             
-            # Condições de tendência (mais tolerantes que na análise de tendência)
+            # Condições de tendência
             is_uptrend = current_price > current_ema20 * 0.99 and current_ema20 > current_ema50 * 1.002
             is_downtrend = current_price < current_ema20 * 1.01 and current_ema20 < current_ema50 * 0.998
             
@@ -728,9 +735,8 @@ class TechnicalAnalysis:
             price_change = (current_price - df['close'].iloc[-3]) / df['close'].iloc[-3] if len(df) >= 3 else 0
             momentum_positive = price_change > 0
             
-            # Verificar se o preço está se aproximando da EMA20 (possível entrada)
-            price_to_ema20_ratio = current_price / current_ema20
-            approaching_ema20 = 0.995 < price_to_ema20_ratio < 1.005
+            # Volume ratio
+            volume_ratio = df['volume'].tail(5).mean() / df['volume'].tail(20).mean() if len(df) >= 20 else 1.0
             
             return {
                 'is_uptrend': is_uptrend,
@@ -738,7 +744,7 @@ class TechnicalAnalysis:
                 'rsi': current_rsi,
                 'price_change': price_change,
                 'momentum_positive': momentum_positive,
-                'approaching_ema20': approaching_ema20
+                'volume_ratio': volume_ratio
             }
             
         except Exception as e:
@@ -749,5 +755,5 @@ class TechnicalAnalysis:
                 'rsi': 50.0,
                 'price_change': 0.0,
                 'momentum_positive': False,
-                'approaching_ema20': False
+                'volume_ratio': 1.0
             }

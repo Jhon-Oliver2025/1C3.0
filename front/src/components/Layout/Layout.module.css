@@ -17,7 +17,7 @@
   background-color: #0A192F; /* Cor de fundo escura */
   padding: 10px 20px;
   display: flex;
-  justify-content: center; /* Centraliza o conteúdo */
+  justify-content: flex-start; /* CORRIGIDO: Alinha à esquerda em vez de centralizar */
   align-items: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
   z-index: 1000; /* Garante que fique acima de outros elementos */
@@ -28,7 +28,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* CORRIGIDO: Alinha à esquerda */
   width: 80px; /* Ajuste para o tamanho do seu logo */
   height: 40px; /* Ajuste para o tamanho do seu logo */
 }

@@ -6,7 +6,8 @@ import TopHeader from '../Layout/TopHeader';
 // import BottomNavBar from '../Layout/BottomNavBar';
 import Navbar from '../Navbar/Navbar';
 import styles from '../Layout/Layout.module.css';
-import { FaHome, FaChartBar, FaUser, FaCog, FaQuestionCircle, FaSignOutAlt } from 'react-icons/fa';
+// CORRIGIDO: Removidos FaChartBar, FaUser, FaCog que não são mais utilizados
+import { FaHome, FaQuestionCircle, FaSignOutAlt } from 'react-icons/fa';
 
 const MainLayout: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -63,26 +64,26 @@ const MainLayout: React.FC = () => {
                 onClick={toggleMenu}>
                 <FaHome /> Dashboard
               </NavLink>
-              <NavLink to="/btc-sentiment" className={({isActive}) => 
+              {/* REMOVIDO: <NavLink to="/btc-sentiment" className={({isActive}) => 
                 `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
                 onClick={toggleMenu}>
                 <FaChartBar /> Sentimento BTC
-              </NavLink>
-              <NavLink to="/minha-conta" className={({isActive}) => 
+              </NavLink> */}
+              {/* REMOVIDO: <NavLink to="/minha-conta" className={({isActive}) => 
                 `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
                 onClick={toggleMenu}>
                 <FaUser /> Minha Conta
-              </NavLink>
+              </NavLink> */}
               <NavLink to="/suporte" className={({isActive}) => 
                 `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
                 onClick={toggleMenu}>
                 <FaQuestionCircle /> Suporte
               </NavLink>
-              <NavLink to="/configuracoes" className={({isActive}) => 
+              {/* REMOVIDO: <NavLink to="/configuracoes" className={({isActive}) => 
                 `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
                 onClick={toggleMenu}>
                 <FaCog /> Configurações
-              </NavLink>
+              </NavLink> */}
               <button className={styles.sidebarLink} onClick={handleLogout}>
                 <FaSignOutAlt /> Sair
               </button>

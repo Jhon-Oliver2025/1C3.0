@@ -3,7 +3,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import LandingPage from './pages/LandingPage';
-import ChatInterface from './pages/ChatInterface/ChatInterface'; // NEW import for ChatInterface
+// REMOVIDO: import ChatInterface from './pages/ChatInterface/ChatInterface';
 
 // Importe o novo componente MainLayout
 import MainLayout from './components/MainLayout/MainLayout';
@@ -15,12 +15,9 @@ import UnderConstructionPage from './pages/UnderConstructionPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import ResetPasswordPage from './pages/ResetPasswordPage'; // Importe a nova página
-// Remove this line:
-// import BtcSentimentPage from './pages/BtcSentimentPage.tsx';
-// Keep only this one:
-import BtcSentimentPage from './pages/BtcSentimentPage';
-import MinhaContaPage from './pages/MinhaContaPage'; // Adicione esta linha
+import ResetPasswordPage from './pages/ResetPasswordPage';
+// REMOVIDO: import BtcSentimentPage from './pages/BtcSentimentPage';
+// REMOVIDO: import MinhaContaPage from './pages/MinhaContaPage';
 
 function App() {
   return (
@@ -30,26 +27,19 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} /> {/* Nova rota para Redefinir Senha */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/terms-of-service" element={<TermsOfServicePage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
         {/* Rotas que usam a Navbar e o contexto de autenticação */}
-        {/* O MainLayout renderizará a Navbar e seu conteúdo (as rotas aninhadas) */}
         <Route element={<MainLayout />}>
-          <Route path="/" element={<LandingPage />} /> {/* Landing page com Navbar */}
+          <Route path="/" element={<LandingPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/btc-sentiment" element={<BtcSentimentPage />} /> {/* Adicione esta nova rota */}
-          {/* Use UnderConstructionPage para as páginas em desenvolvimento */}
-          {/* Substitua esta linha: */}
-          {/* <Route path="/minha-conta" element={<UnderConstructionPage />} /> */}
-          {/* Por esta: */}
-          <Route path="/minha-conta" element={<MinhaContaPage />} />
+          {/* REMOVIDO: <Route path="/btc-sentiment" element={<BtcSentimentPage />} /> */}
+          {/* REMOVIDO: <Route path="/minha-conta" element={<MinhaContaPage />} /> */}
           <Route path="/suporte" element={<UnderConstructionPage />} />
-          <Route path="/configuracoes" element={<UnderConstructionPage />} />
-          {/* NEW: Route for the chat interface, now inside MainLayout */}
-          <Route path="/chat" element={<ChatInterface />} />
-          {/* Adicione mais rotas protegidas/autenticadas aqui, se houver */}
+          {/* REMOVIDO: <Route path="/configuracoes" element={<UnderConstructionPage />} /> */}
+          {/* REMOVIDO: <Route path="/chat" element={<ChatInterface />} /> */}
         </Route>
       </Routes>
     </Router>

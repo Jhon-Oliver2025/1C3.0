@@ -144,7 +144,7 @@
 }
 
 .eliteText {
-  color: #FFD700;
+  color: #FFD700; /* Dourado - mantido */
   font-weight: bold;
   font-size: 0.9em;
   text-align: center;
@@ -153,14 +153,24 @@
 }
 
 .premiumText {
-  color: #00D4FF;
+  color: #C0C0C0; /* Prateado */
   font-weight: bold;
   font-size: 0.9em;
   text-align: center;
   margin: 8px 0;
-  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  text-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
 }
 
+.eliteText {
+  color: #FFD700; /* Dourado - mantido */
+  font-weight: bold;
+  font-size: 0.9em;
+  text-align: center;
+  margin: 8px 0;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* Remover .standardText - não será mais usado */
 .standardText {
   color: #888;
   font-weight: normal;

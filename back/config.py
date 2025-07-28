@@ -1,15 +1,32 @@
 from flask import Flask
 from flask_login import LoginManager
 from flask_cors import CORS
-import time  # Add this import
+import time
+import os
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente
+load_dotenv()
 
 # Configurar Flask com pasta static correta
 server = Flask(__name__, static_folder='static', static_url_path='')
 # Permite requisições de http://localhost:5173 e de qualquer outra origem
 CORS(server, resources={r"/*": {"origins": ["http://localhost:5173", "*"]}})
-# Ou, se quiser ser mais restritivo e permitir APENAS o seu frontend:
-# CORS(server, resources={r"/*": {"origins": "http://localhost:5173"}})
 server.config['SECRET_KEY'] = 'crypto_signals_secret_key_2025_muito_segura'
+
+# Adicionar configurações JWT e outras variáveis de ambiente
+server.config['JWT_SECRET'] = os.getenv('JWT_SECRET')
+server.config['EVO_AI_AGENT_BASE_URL'] = os.getenv('EVO_AI_AGENT_BASE_URL')
+server.config['EVO_AI_API_KEY'] = os.getenv('EVO_AI_API_KEY')
+
+# Validar configurações obrigatórias
+if not server.config['JWT_SECRET']:
+    raise ValueError("❌ JWT_SECRET não está definido!")
+
+if not server.config['EVO_AI_AGENT_BASE_URL']:
+    raise ValueError("❌ EVO_AI_AGENT_BASE_URL não está definido!")
+
+print(f"✅ JWT_SECRET configurado: {server.config['JWT_SECRET'][:5]}...")
 
 # --- Início da Edição ---
 # Adicionar chaves da API da Binance diretamente ao config do Flask

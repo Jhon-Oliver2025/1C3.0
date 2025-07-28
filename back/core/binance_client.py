@@ -96,9 +96,12 @@ class BinanceClient:
         ).hexdigest()
 
     def make_request(self, endpoint: str, method: str = 'GET', params: Optional[Dict] = None, auth: bool = False) -> Optional[Dict]:
-        """Faz requisição para API Binance"""
+        """Faz requisição para API Binance com rate limiting"""
         max_retries = 3
         retry_delay = 1
+        
+        # Rate limiting: máximo 1200 requests por minuto
+        time.sleep(0.05)  # 50ms entre requests
         
         for attempt in range(max_retries):
             try:
@@ -291,4 +294,38 @@ class BinanceClient:
             
         except Exception as e:
             self.logger.error(f"Erro ao selecionar top pares: {e}")
+            return []
+
+    def get_klines(self, symbol, interval='1h', limit=100):
+        """Obtém dados históricos (klines) para um símbolo"""
+        try:
+            endpoint = '/fapi/v1/klines'
+            params = {
+                'symbol': symbol,
+                'interval': interval,
+                'limit': limit
+            }
+            
+            # CORREÇÃO: Usar make_request ao invés de _make_request
+            response = self.make_request(endpoint, 'GET', params)
+            
+            if not response:
+                return []
+            
+            # Converter para formato mais legível
+            klines_data = []
+            for kline in response:
+                klines_data.append({
+                    'open_time': kline[0],
+                    'open': float(kline[1]),
+                    'high': float(kline[2]),
+                    'low': float(kline[3]),
+                    'close': float(kline[4]),
+                    'volume': float(kline[5]),
+                    'close_time': kline[6]
+                })
+            
+            return klines_data
+        except Exception as e:
+            self.logger.error(f"Erro ao obter klines para {symbol}: {e}")
             return []

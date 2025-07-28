@@ -22,15 +22,17 @@ const motivationalPhrases: string[] = [
 ];
 
 // Definir a interface para o tipo de sinal
+// Corrigir a interface Signal para usar os tipos corretos do backend
 interface Signal {
   symbol: string;
-  type: 'COMPRA' | 'VENDA'; // Mudança aqui
+  type: 'LONG' | 'SHORT'; // Alterado de 'COMPRA' | 'VENDA' para 'LONG' | 'SHORT'
   entry_price: number;
   entry_time: string;
   target_price: number;
   status: string;
   quality_score: number;
   signal_class: string;
+  projection_percentage?: number;
   trend_timeframe?: string;
   entry_timeframe?: string;
   leverage?: number;
@@ -89,22 +91,22 @@ function DashboardPage() {
   const fetchSignals = useCallback(async () => {
     setLoading(true);
     setError(null);
-    console.log('fetchSignals: Iniciando busca de sinais.'); // Log 1
+    console.log('fetchSignals: Iniciando busca de sinais.');
 
     try {
-      const authToken = localStorage.getItem('authToken'); // Recupera o token do localStorage
+      const authToken = localStorage.getItem('authToken');
       if (!authToken) {
         console.warn('fetchSignals: Token de autenticação não encontrado. Redirecionando para login.');
-        navigate('/login'); // Redireciona para login se não houver token
+        navigate('/login');
         return;
       }
 
-      console.log('fetchSignals: Token encontrado, fazendo requisição.'); // Log 2
-      const response = await fetch('http://localhost:5000/signals', { // ALTERADO: Porta para 5000 e IP para localhost
+      console.log('fetchSignals: Token encontrado, fazendo requisição.');
+      const response = await fetch('http://localhost:5000/signals', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`, // Adiciona o token ao cabeçalho Authorization
+          'Authorization': `Bearer ${authToken}`,
         },
       });
 
@@ -123,7 +125,6 @@ function DashboardPage() {
 
       let rawSignals;
       try {
-        // Tenta analisar o texto como JSON. Isso pode resolver problemas de "JSON dentro de uma string".
         rawSignals = JSON.parse(responseText);
       } catch (parseError) {
         console.error('Erro ao analisar a resposta como JSON:', parseError);
@@ -133,27 +134,25 @@ function DashboardPage() {
       console.log('fetchSignals: Dados analisados a partir do texto:', rawSignals);
 
       const transformedSignals: Signal[] = (rawSignals as any[]).map(item => {
-        // Adicionar logs para depuração dos valores de preço
-        console.log(`DEBUG: Sinal ${item.symbol}`);
-        console.log(`DEBUG: item.entry_price (raw): '${item.entry_price}', type: ${typeof item.entry_price}`);
-        console.log(`DEBUG: item.target_price (raw): '${item.target_price}', type: ${typeof item.target_price}`);
-
-        // Garante que entry_price e target_price são números válidos
         const entryPrice = parseFloat(item.entry_price);
         const targetPrice = parseFloat(item.target_price);
 
         console.log(`DEBUG: entryPrice (parsed): ${entryPrice}, isNaN: ${isNaN(entryPrice)}`);
         console.log(`DEBUG: targetPrice (parsed): ${targetPrice}, isNaN: ${isNaN(targetPrice)}`);
 
+        const projectionPercentage = item.projection_percentage || 
+          (targetPrice && entryPrice ? ((targetPrice / entryPrice - 1) * 100) : 0);
+      
         return {
           symbol: item.symbol || '',
-          type: (item.type === 'LONG' || item.type === 'SHORT') ? item.type : 'LONG', // Garante que o tipo é válido
-          entry_price: isNaN(entryPrice) ? 0 : entryPrice, // Fallback para 0 se NaN
+          type: (item.type === 'LONG' || item.type === 'SHORT') ? item.type : 'LONG', // Manter LONG/SHORT
+          entry_price: isNaN(entryPrice) ? 0 : entryPrice,
           entry_time: item.entry_time || '',
-          target_price: isNaN(targetPrice) ? 0 : targetPrice, // Fallback para 0 se NaN
+          target_price: isNaN(targetPrice) ? 0 : targetPrice,
           status: item.status || '',
-          quality_score: parseFloat(item.quality_score) || 0, // Garante que é número
-          signal_class: item.signal_class || '',
+          quality_score: parseFloat(item.quality_score) || 0,
+          signal_class: item.signal_class || 'PADRÃO',
+          projection_percentage: projectionPercentage,
         };
       });
 
@@ -164,20 +163,27 @@ function DashboardPage() {
         return dateB.getTime() - dateA.getTime();
       });
 
-      console.log('Dados transformados para validação:', sortedSignals);
-  
+      // Filtrar apenas sinais ELITE e PREMIUM
+      const filteredSignals = sortedSignals.filter(signal => {
+        return signal.signal_class === 'ELITE' || signal.signal_class === 'PREMIUM';
+      });
+      // REMOVIDO: const filteredSignals = sortedSignals; // Mostrar todos os sinais
+      
+      console.log('fetchSignals: Sinais filtrados:', filteredSignals);
+
       // Validação simplificada para garantir que é um array
-      if (!Array.isArray(sortedSignals)) {
-        console.error('fetchSignals: Dados transformados não são um array:', sortedSignals);
+      if (!Array.isArray(filteredSignals)) {
+        console.error('fetchSignals: Dados filtrados não são um array:', filteredSignals);
         throw new Error('Formato de dados de sinais inválido recebido do servidor.');
       }
 
-      setSignals(sortedSignals);
-      console.log('fetchSignals: Sinais atualizados no estado:', transformedSignals); // Log 7
+      setSignals(filteredSignals);
+      console.log('fetchSignals: Sinais atualizados no estado:', filteredSignals);
 
-      // NOVO: Calcular contagem de sinais de compra e venda
-      const buyCount = sortedSignals.filter(signal => signal.type === 'COMPRA').length;
-      const sellCount = sortedSignals.filter(signal => signal.type === 'VENDA').length;
+      // Calcular contagem de sinais de compra e venda apenas dos filtrados
+      // Calcular contagem de sinais de compra e venda apenas dos filtrados
+      const buyCount = filteredSignals.filter(signal => signal.type === 'LONG').length;
+      const sellCount = filteredSignals.filter(signal => signal.type === 'SHORT').length;
       setBuySignalsCount(buyCount);
       setSellSignalsCount(sellCount);
 
@@ -186,9 +192,9 @@ function DashboardPage() {
       setError(err instanceof Error ? err.message : 'Erro desconhecido ao buscar sinais.');
     } finally {
       setLoading(false);
-      console.log('fetchSignals: Busca de sinais finalizada.'); // Log 8
+      console.log('fetchSignals: Busca de sinais finalizada.');
     }
-  }, [navigate]); // Dependency array for useCallback
+  }, [navigate]);
 
   // Novo useEffect para chamar fetchSignals quando o componente for montado
   useEffect(() => {
@@ -233,18 +239,54 @@ function DashboardPage() {
               <p>Nenhum sinal disponível no momento.</p>
             )}
             <div className={styles.signalCardsContainer}>
-              {!loading && !error && signals.length > 0 && signals.map((signal, index) => (
-                <SignalCard
-                  key={index} // Usar um ID único do sinal seria melhor se disponível
-                  symbol={signal.symbol}
-                  type={signal.type === 'LONG' ? 'COMPRA' : 'VENDA'}
-                  entryPrice={String(signal.entry_price)}
-                  targetPrice={String(signal.target_price)}
-                  changePercentage={`${(((signal.target_price / signal.entry_price) - 1) * 100).toFixed(2)}%`}
-                  date={signal.entry_time}
-                  isPremium={signal.signal_class === 'Sinais Premium'}
-                />
-              ))}
+              {!loading && !error && signals.length > 0 && signals.map((signal, index) => {
+                // Calcular a projeção percentual sempre como valor absoluto positivo
+                const calculateProjectionPercentage = () => {
+                  if (!signal.target_price || !signal.entry_price) return '0.00';
+                  
+                  // Para sinais de COMPRA (LONG): (target - entry) / entry * 100
+                  // Para sinais de VENDA (SHORT): (entry - target) / entry * 100
+                  let percentage;
+                  if (signal.type === 'LONG') {
+                    percentage = ((signal.target_price - signal.entry_price) / signal.entry_price) * 100;
+                  } else {
+                    percentage = ((signal.entry_price - signal.target_price) / signal.entry_price) * 100;
+                  }
+                  
+                  // Garantir que sempre seja positivo e maior que 6%
+                  const absolutePercentage = Math.abs(percentage);
+                  return Math.max(absolutePercentage, 6.0).toFixed(2);
+                };
+                
+                // Mapear a classificação corretamente
+                const getSignalClass = (signalClass: string): 'PREMIUM' | 'ELITE' => {
+                  if (signalClass === 'ELITE') return 'ELITE';
+                  return 'PREMIUM'; // Default para PREMIUM
+                };
+              
+                return (
+                  <SignalCard
+                    key={index}
+                    symbol={signal.symbol}
+                    type={signal.type === 'LONG' ? 'COMPRA' : 'VENDA'} // Converter para exibição
+                    entryPrice={(() => {
+                      // Determinar o número de casas decimais do preço de entrada
+                      const entryStr = signal.entry_price.toString();
+                      const decimalPlaces = entryStr.includes('.') ? entryStr.split('.')[1].length : 0;
+                      return signal.entry_price.toFixed(Math.max(decimalPlaces, 3)); // Mínimo 3 casas decimais
+                    })()}
+                    targetPrice={(() => {
+                      // Usar o mesmo número de casas decimais do preço de entrada
+                      const entryStr = signal.entry_price.toString();
+                      const decimalPlaces = entryStr.includes('.') ? entryStr.split('.')[1].length : 0;
+                      return signal.target_price.toFixed(Math.max(decimalPlaces, 3)); // Mínimo 3 casas decimais
+                    })()}
+                    projectionPercentage={calculateProjectionPercentage()}
+                    date={signal.entry_time}
+                    signalClass={getSignalClass(signal.signal_class)}
+                  />
+                );
+              })}
             </div>
           </div>
           {/* REMOVIDO: BtcSentimentCard */}

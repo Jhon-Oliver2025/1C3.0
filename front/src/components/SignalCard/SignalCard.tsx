@@ -8,7 +8,7 @@ interface SignalCardProps {
   targetPrice: string;
   projectionPercentage: string;
   date: string;
-  signalClass: 'PREMIUM' | 'ELITE' | 'PADRÃO';
+  signalClass: 'PREMIUM' | 'ELITE'; // Removido 'PADRÃO'
 }
 
 const SignalCard: React.FC<SignalCardProps> = ({
@@ -41,8 +41,7 @@ const SignalCard: React.FC<SignalCardProps> = ({
       
       <span className={
         signalClass === 'ELITE' ? styles.eliteText :
-        signalClass === 'PREMIUM' ? styles.premiumText :
-        styles.standardText
+        styles.premiumText
       }>
         SINAIS {signalClass}
       </span>
@@ -60,7 +59,7 @@ const SignalCard: React.FC<SignalCardProps> = ({
       <div className={styles.projectionDetail}>
         <span className={styles.label}>Projeção</span>
         <span className={styles.changePercentage}>
-          ({projectionPercentage}%) Mínimo
+          ({projectionPercentage}%)
         </span>
       </div>
       

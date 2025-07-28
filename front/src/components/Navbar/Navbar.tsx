@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import logo2 from '../../assets/logo2.png';
-import { FaHome, FaChartBar, FaUser, FaCog, FaQuestionCircle, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
+// CORRIGIDO: Removidos FaChartBar, FaUser, FaCog que não são mais utilizados
+import { FaHome, FaQuestionCircle, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
 
 interface NavbarProps {
   isAuthenticated: boolean;
@@ -32,18 +33,16 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout, isBackendOnl
         {isAuthenticated ? (
           <>
             <NavLink to="/dashboard" end className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Dashboard</NavLink>
-            <NavLink to="/btc-sentiment" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Sentimento BTC</NavLink>
-            <NavLink to="/minha-conta" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Minha Conta</NavLink>
+            {/* REMOVIDO: <NavLink to="/btc-sentiment" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Sentimento BTC</NavLink> */}
+            {/* REMOVIDO: <NavLink to="/minha-conta" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Minha Conta</NavLink> */}
             <NavLink to="/suporte" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Suporte</NavLink>
-            <NavLink to="/configuracoes" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Configurações</NavLink>
-            {/* NEW: Zion link for desktop */}
-            <NavLink to="/chat" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Zion</NavLink>
+            {/* REMOVIDO: <NavLink to="/configuracoes" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Configurações</NavLink> */}
+            {/* REMOVIDO: <NavLink to="/chat" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Zion</NavLink> */}
             <Link to="/" className={`${styles.navLink} ${styles.logoutLink}`} onClick={onLogout}>Sair</Link>
           </>
         ) : (
           <>
-            {/* NEW: Zion link for desktop (unauthenticated) */}
-            <NavLink to="/chat" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Zion</NavLink>
+            {/* REMOVIDO: <NavLink to="/chat" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Zion</NavLink> */}
             <NavLink to="/login" className={({ isActive }) => `${styles.navLink} ${isActive ? styles.activeNavLink : ''} ${styles.loginLink}`}>Login</NavLink>
           </>
         )}
@@ -65,30 +64,30 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout, isBackendOnl
                 <NavLink to="/dashboard" end className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
                   <FaHome /> Dashboard
                 </NavLink>
-                <NavLink to="/btc-sentiment" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
+                {/* REMOVIDO: <NavLink to="/btc-sentiment" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
                   <FaChartBar /> Sentimento BTC
-                </NavLink>
-                <NavLink to="/minha-conta" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
+                </NavLink> */}
+                {/* REMOVIDO: <NavLink to="/minha-conta" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
                   <FaUser /> Minha Conta
-                </NavLink>
+                </NavLink> */}
                 <NavLink to="/suporte" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
                   <FaQuestionCircle /> Suporte
                 </NavLink>
-                <NavLink to="/configuracoes" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
+                {/* REMOVIDO: <NavLink to="/configuracoes" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
                   <FaCog /> Configurações
-                </NavLink>
-                <NavLink to="/chat" className={`${styles.mobileNavLink} ${styles.zionMobileButton}`} onClick={toggleMobileMenu}>
+                </NavLink> */}
+                {/* REMOVIDO: <NavLink to="/chat" className={`${styles.mobileNavLink} ${styles.zionMobileButton}`} onClick={toggleMobileMenu}>
                   Zion
-                </NavLink>
+                </NavLink> */}
                 <Link to="/" className={`${styles.mobileNavLink} ${styles.logoutLink}`} onClick={() => { onLogout(); toggleMobileMenu(); }}>
                   <FaSignOutAlt /> Sair
                 </Link>
               </>
             ) : (
               <>
-                <NavLink to="/chat" className={`${styles.mobileNavLink} ${styles.zionMobileButton}`} onClick={toggleMobileMenu}>
+                {/* REMOVIDO: <NavLink to="/chat" className={`${styles.mobileNavLink} ${styles.zionMobileButton}`} onClick={toggleMobileMenu}>
                   Zion
-                </NavLink>
+                </NavLink> */}
                 <NavLink to="/login" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
                   <FaSignInAlt /> Login
                 </NavLink>

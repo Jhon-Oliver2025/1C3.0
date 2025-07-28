@@ -19,14 +19,14 @@ class GerenciadorSinais:
         ])
         self._empty_df = DataFrame(columns=self.SIGNAL_COLUMNS)
 
-    def _get_signal_class(self, quality_score: float) -> str:
+    def _get_signal_class(self, quality_score: float) -> Optional[str]:
         """Retorna a classificação do sinal baseado no quality_score"""
         if quality_score >= 90:
             return "ELITE"
-        elif quality_score >= 80:
+        elif quality_score >= 70:  # Alterado de 75 para 70
             return "PREMIUM"
         else:
-            return "PADRÃO"
+            return None  # Não retorna classificação para scores baixos
 
     def save_signal(self, signal_data: Dict) -> bool:
         try:
@@ -121,14 +121,15 @@ class GerenciadorSinais:
             ]
             
             # Agrupar por symbol e pegar o sinal mais recente
-            result_df = (result_df
-                        .sort_values(by='entry_time', ascending=True)
-                        .groupby('symbol')
-                        .first()
-                        .reset_index())
-            
-            # Ordenar o resultado final por horário
-            result_df = result_df.sort_values(by='entry_time', ascending=True)
+            if not result_df.empty:
+                result_df = (result_df
+                            .sort_values(by='entry_time', ascending=False)
+                            .groupby('symbol')
+                            .first()
+                            .reset_index())
+                
+                # Ordenar o resultado final por horário
+                result_df = result_df.sort_values(by='entry_time', ascending=True)
             
             if isinstance(result_df, pd.Series):
                 result_df = result_df.to_frame().T
