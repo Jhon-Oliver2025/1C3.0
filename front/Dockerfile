@@ -9,9 +9,9 @@ WORKDIR /app
 # Copiar package.json e package-lock.json
 COPY package*.json ./
 
-# Limpar cache do npm e instalar dependências
+# Limpar cache do npm e instalar TODAS as dependências (incluindo devDependencies)
 RUN npm cache clean --force
-RUN npm ci --silent --no-audit --no-fund
+RUN npm ci
 
 # Copiar código fonte
 COPY . .
