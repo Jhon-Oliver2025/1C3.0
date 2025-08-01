@@ -14,21 +14,28 @@ import traceback
 import signal
 import logging
 from typing import cast
+import importlib.util
 
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
 
-# Core components
-from core.database import Database
-from core.technical_analysis import TechnicalAnalysis
-from core.telegram_notifier import TelegramNotifier
-from core.gerenciar_sinais import GerenciadorSinais
-
-# Flask configuration
+# Flask imports
 from config import server
 
-# Import API routes - CORRIGIDO: importar diretamente do arquivo api.py
-from api import register_api_routes
+# Core imports
+from core.database import Database
+from core.binance_client import BinanceClient
+from core.technical_analysis import TechnicalAnalysis
+from core.gerenciar_sinais import GerenciadorSinais
+from core.telegram_notifier import TelegramNotifier
+# Corrigir esta linha - importar a função em vez da classe
+from core.email_service import send_email
+
+# Importar diretamente do arquivo api.py (CORRIGIDO)
+from api import create_app, register_api_routes
+
+# Import market scheduler
+from market_scheduler import setup_market_scheduler
 
 def start_nodejs_backend():
     """Inicia o servidor Node.js em segundo plano."""
@@ -115,17 +122,16 @@ def run_bot_scanning():
 class KryptonBot:
     def __init__(self):
         self.db = Database()
-        self.gerenciador = GerenciadorSinais(self.db)
         self.analyzer = TechnicalAnalysis(self.db)
-        # Configurar notificador Telegram
-        self.notifier = TelegramNotifier()
-        
-# No final do app.py:
+        self.notifier = TelegramNotifier(self.db)
+        self.gerenciador_sinais = GerenciadorSinais(self.db)
+
 if __name__ == '__main__':
-    # Inicializar o bot
+    # Inicializar o bot ANTES de usar
+    print("🤖 Inicializando KryptonBot...")
     bot = KryptonBot()
     
-    # Configure o nível de log para DEBUG
+    # Configurar logging
     server.logger.setLevel(logging.DEBUG)
     if not server.logger.handlers:
         handler = logging.StreamHandler()
@@ -134,7 +140,7 @@ if __name__ == '__main__':
         handler.setFormatter(formatter)
         server.logger.addHandler(handler)
 
-    # Verificar credenciais do Telegram
+    # Verificar e atualizar credenciais do Telegram
     with server.app_context():
         db_instance = Database()
         current_db_token = db_instance.get_config_value('telegram_token')
@@ -161,9 +167,16 @@ if __name__ == '__main__':
     monitor_thread = threading.Thread(target=bot.analyzer.start_monitoring, daemon=True)
     monitor_thread.start()
     
-    # Register API routes
-    register_api_routes(server, bot)
+    # Configurar agendador de limpeza automática
+    print("🕐 Configurando agendador de limpeza automática...")
+    scheduler = setup_market_scheduler(bot.db, bot.gerenciador_sinais)
+    
+    # Usar a app configurada do api.py
+    app = create_app()
+    
+    # Register API routes (APENAS UMA VEZ)
+    register_api_routes(app, bot)
     
     print("🚀 Iniciando servidor Flask...")
     flask_port = int(os.getenv('FLASK_PORT', 5000))
-    server.run(debug=False, host='0.0.0.0', port=flask_port, use_reloader=False)
+    app.run(debug=False, host='0.0.0.0', port=flask_port, use_reloader=False)

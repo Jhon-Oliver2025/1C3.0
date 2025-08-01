@@ -3,26 +3,57 @@ import requests
 import time
 import json
 import logging
+import os
 from datetime import datetime
 from config import server
 from logging import Logger
 
 class BinanceClient:
     def __init__(self):
+        # Verificar se deve usar a API da Binance
+        self.use_binance_api = os.getenv('USE_BINANCE_API', 'true').lower() == 'true'
+        
+        if not self.use_binance_api:
+            self.logger = self.setup_logging()
+            self.logger.info("🔒 BinanceClient inicializado em modo DESABILITADO (USE_BINANCE_API=false)")
+            return
+            
+        # Verificar se as chaves estão configuradas
+        api_key = os.getenv('BINANCE_API_KEY', '')
+        api_secret = os.getenv('BINANCE_SECRET_KEY', '')
+        
+        if not api_key or not api_secret:
+            self.logger = self.setup_logging()
+            self.logger.warning("⚠️ Chaves da API Binance não configuradas. Usando modo DESABILITADO.")
+            self.use_binance_api = False
+            return
+            
         self.config = server.config['BINANCE_FUTURES']
         self.base_url = self.config['api_url']
         self.ws_base_url = self.config['ws_url']
-        self.api_key = self.config['API_KEY']
-        self.api_secret = self.config['API_SECRET']
+        self.api_key = api_key
+        self.api_secret = api_secret
         self.logger: Logger = self.setup_logging()
-        self.time_offset = 0  # Novo atributo para armazenar a diferença de tempo
-        self._init_time_offset()  # Nova chamada para inicializar o offset
+        self.time_offset = 0
+        self._init_time_offset()
+        self.logger.info("✅ BinanceClient inicializado com sucesso")
+
+    def _check_api_enabled(self) -> bool:
+        """Verifica se a API está habilitada antes de fazer chamadas"""
+        if not hasattr(self, 'use_binance_api') or not self.use_binance_api:
+            if hasattr(self, 'logger'):
+                self.logger.warning("🚫 Tentativa de usar API Binance com USE_BINANCE_API=false")
+            return False
+        return True
 
     def _init_time_offset(self) -> None:
         """Inicializa o offset de tempo com o servidor da Binance"""
+        if not self._check_api_enabled():
+            return
+            
         try:
             success = False
-            for attempt in range(5):  # Aumentado para 5 tentativas
+            for attempt in range(5):
                 try:
                     server_time = requests.get(f"{self.base_url}/fapi/v1/time", timeout=10).json()
                     if 'serverTime' not in server_time:
@@ -49,6 +80,9 @@ class BinanceClient:
     
     def get_timestamp(self) -> int:
         """Retorna o timestamp correto considerando o offset"""
+        if not self._check_api_enabled():
+            return int(time.time() * 1000)
+            
         # Adiciona verificação periódica do offset a cada 30 minutos
         current_time = time.time()
         if not hasattr(self, '_last_sync_time') or current_time - getattr(self, '_last_sync_time', 0) > 1800:
@@ -61,6 +95,10 @@ class BinanceClient:
         """Configura o logger para a classe"""
         logger = logging.getLogger('BinanceClient')
         logger.setLevel(logging.INFO)
+        
+        # Evitar duplicação de handlers
+        if logger.handlers:
+            return logger
         
         # Criar handler para arquivo
         file_handler = logging.FileHandler('binance_client.log')
@@ -81,9 +119,11 @@ class BinanceClient:
         
         return logger
 
-    # Adicionar este método para gerar assinatura
     def _generate_signature(self, params: Dict) -> str:
         """Gera assinatura para requisições autenticadas"""
+        if not self._check_api_enabled():
+            return ""
+            
         import hmac
         import hashlib
         from urllib.parse import urlencode
@@ -97,6 +137,9 @@ class BinanceClient:
 
     def make_request(self, endpoint: str, method: str = 'GET', params: Optional[Dict] = None, auth: bool = False) -> Optional[Dict]:
         """Faz requisição para API Binance com rate limiting"""
+        if not self._check_api_enabled():
+            return None
+            
         max_retries = 3
         retry_delay = 1
         
@@ -154,20 +197,26 @@ class BinanceClient:
         
     def get_exchange_info(self) -> Optional[Dict]:
         """Get exchange information with validation"""
+        if not self._check_api_enabled():
+            return {}
+            
         try:
             data = self.make_request('/fapi/v1/exchangeInfo')
             if not data or 'symbols' not in data:
                 self.logger.error("Invalid exchange info response")
-                return {}  # Return empty dict instead of None
+                return {}
             return data
         except Exception as e:
             self.logger.error(f"Exchange info error: {e}")
-            return {}  # Return empty dict instead of None
+            return {}
             
     def get_leverage_brackets(self, symbol: Optional[str] = None) -> Dict[str, List[Dict[str, Any]]]:
         """Obtém informações sobre alavancagem dos pares"""
+        if not self._check_api_enabled():
+            return {}
+            
         try:
-            params: Dict[str, Any] = {'timestamp': self.get_timestamp()}  # Usar novo método
+            params: Dict[str, Any] = {'timestamp': self.get_timestamp()}
             if symbol is not None:
                 params['symbol'] = str(symbol)
             
@@ -182,11 +231,9 @@ class BinanceClient:
                 return {}
             
             if symbol is not None:
-                # Garantir que o retorno seja uma lista de dicionários
                 brackets = response if isinstance(response, list) else [response]
                 return {symbol: brackets}
             
-            # Garantir que brackets seja sempre uma lista
             return {
                 str(item['symbol']): item['brackets'] if isinstance(item['brackets'], list) else [item['brackets']]
                 for item in response
@@ -198,6 +245,9 @@ class BinanceClient:
 
     def get_all_usdt_perpetual_pairs(self) -> List[str]:
         """Obtém todos os pares USDT perpétuos ativos"""
+        if not self._check_api_enabled():
+            return []
+            
         try:
             exchange_info = self.get_exchange_info()
             if not exchange_info:
@@ -219,6 +269,9 @@ class BinanceClient:
             
     def get_24h_ticker_data(self, symbols: List[str]) -> Dict[str, Dict]:
         """Obtém dados de volume e variação 24h dos pares"""
+        if not self._check_api_enabled():
+            return {}
+            
         try:
             response = self.make_request('/fapi/v1/ticker/24hr')
             if not response:
@@ -240,6 +293,9 @@ class BinanceClient:
             
     def filter_high_leverage_pairs(self, pairs: List[str]) -> List[str]:
         """Filtra pares com alavancagem >= 50x"""
+        if not self._check_api_enabled():
+            return []
+            
         try:
             leverage_info = self.get_leverage_brackets()
             if not leverage_info:
@@ -260,6 +316,9 @@ class BinanceClient:
             
     def get_top_pairs(self, limit: int = 100) -> List[str]:
         """Obtém os top pares baseado em volume e volatilidade"""
+        if not self._check_api_enabled():
+            return []
+            
         try:
             # 1. Obter todos os pares USDT perpétuos
             all_pairs = self.get_all_usdt_perpetual_pairs()
@@ -279,9 +338,9 @@ class BinanceClient:
             # 4. Calcular score final
             scored_pairs = []
             for symbol, data in ticker_data.items():
-                volume_score = min(data['volume'] / 1000000, 10)  # Normalizar para 0-10
-                volatility_score = min(data['volatility'], 10)    # Normalizar para 0-10
-                final_score = (volume_score * 0.6) + (volatility_score * 0.4)  # Peso: 60% volume, 40% volatilidade
+                volume_score = min(data['volume'] / 1000000, 10)
+                volatility_score = min(data['volatility'], 10)
+                final_score = (volume_score * 0.6) + (volatility_score * 0.4)
                 
                 scored_pairs.append((symbol, final_score))
             
@@ -298,6 +357,9 @@ class BinanceClient:
 
     def get_klines(self, symbol, interval='1h', limit=100):
         """Obtém dados históricos (klines) para um símbolo"""
+        if not self._check_api_enabled():
+            return []
+            
         try:
             endpoint = '/fapi/v1/klines'
             params = {
@@ -306,7 +368,6 @@ class BinanceClient:
                 'limit': limit
             }
             
-            # CORREÇÃO: Usar make_request ao invés de _make_request
             response = self.make_request(endpoint, 'GET', params)
             
             if not response:

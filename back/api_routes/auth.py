@@ -31,9 +31,15 @@ def login():
         if not bot_instance:
             return jsonify({'error': 'Sistema não inicializado'}), 500
             
-        # Remover linha incorreta que usa 'token' não definido
-        # token_data = bot_instance.db.get_password_reset_token(token)  # LINHA REMOVIDA
+        # Tentar encontrar usuário por username ou email
         user = bot_instance.db.get_user_by_username(username)
+        if not user:
+            # Se não encontrou por username, tentar por email
+            try:
+                user = bot_instance.db.get_user_by_email(username)
+            except AttributeError:
+                # Método get_user_by_email não existe
+                pass
 
         if not user:
             current_app.logger.debug(f"Tentativa de login falhou para username: {username} (usuário não encontrado)")
@@ -52,6 +58,7 @@ def login():
                 "user": {
                     "id": user['id'],
                     "username": user['username'],
+                    "email": user.get('email', ''),
                     "is_admin": user['is_admin']
                 },
                 "token": auth_token

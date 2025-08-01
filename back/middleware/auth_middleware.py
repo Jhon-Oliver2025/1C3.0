@@ -1,10 +1,9 @@
 from flask import request, jsonify, g, current_app
 from functools import wraps
-from typing import cast
-import jwt
+from typing import Any
 
 def jwt_required(f):
-    """Decorador para autenticação JWT"""
+    """Decorador para autenticação usando tokens do banco de dados"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Adicionar logs para debug
@@ -25,22 +24,25 @@ def jwt_required(f):
             return jsonify({'message': 'Token de autenticação ausente.'}), 401
 
         try:
-            # Decodificar o token JWT usando o segredo compartilhado
-            secret_key: str = cast(str, current_app.config['JWT_SECRET'])
-            decoded_token = jwt.decode(token, secret_key, algorithms=["HS256"])
-            current_app.logger.debug(f"Token decodificado com sucesso: {decoded_token}")
-
-            # Armazenar os dados do usuário do token no objeto 'g' do Flask
-            g.user_data = decoded_token
+            # Usar o sistema de tokens do banco de dados
+            bot_instance: Any = getattr(current_app, 'bot_instance', None)
+            if not bot_instance:
+                return jsonify({'message': 'Sistema não inicializado.'}), 500
+            
+            # Verificar token no banco de dados
+            user_data = bot_instance.db.get_user_by_token(token)
+            
+            if not user_data:
+                current_app.logger.warning("Token inválido ou expirado.")
+                return jsonify({'message': 'Token inválido ou expirado.'}), 403
+            
+            current_app.logger.debug(f"Token validado com sucesso para usuário: {user_data.get('username')}")
+            
+            # Armazenar os dados do usuário no objeto 'g' do Flask
+            g.user_data = user_data
             
             return f(*args, **kwargs)
 
-        except jwt.ExpiredSignatureError:
-            current_app.logger.warning("Token expirado.")
-            return jsonify({'message': 'Token expirado.'}), 403
-        except jwt.InvalidTokenError as e:
-            current_app.logger.error(f"Token inválido: {e}")
-            return jsonify({'message': 'Token inválido.'}), 403
         except Exception as e:
             current_app.logger.error(f"Erro na verificação do token: {str(e)}", exc_info=True)
             return jsonify({'message': 'Erro interno na verificação do token.'}), 500

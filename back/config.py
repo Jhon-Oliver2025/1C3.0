@@ -3,57 +3,107 @@ from flask_login import LoginManager
 from flask_cors import CORS
 import time
 import os
+import logging
 from dotenv import load_dotenv
 
 # Carregar variáveis de ambiente
 load_dotenv()
 
+# Detectar ambiente
+# Detectar ambiente
+ENVIRONMENT = os.getenv('FLASK_ENV', 'development')
+IS_PRODUCTION = ENVIRONMENT == 'production'
+
+# Forçar desenvolvimento para ambiente local
+if not os.getenv('FLASK_ENV'):
+    IS_PRODUCTION = False
+    ENVIRONMENT = 'development'
+
 # Configurar Flask com pasta static correta
 server = Flask(__name__, static_folder='static', static_url_path='')
-# Permite requisições de http://localhost:5173 e de qualquer outra origem
-CORS(server, resources={r"/*": {"origins": ["http://localhost:5173", "*"]}})
-server.config['SECRET_KEY'] = 'crypto_signals_secret_key_2025_muito_segura'
 
-# Adicionar configurações JWT e outras variáveis de ambiente
+# Configuração de CORS para produção
+if IS_PRODUCTION:
+    # CORS restritivo para produção
+    allowed_origins = os.getenv('CORS_ORIGINS', 'https://1crypten.space').split(',')
+    # Sempre permitir localhost para testes locais
+    localhost_origins = ['http://localhost:3000', 'http://localhost:5173']
+    allowed_origins.extend(localhost_origins)
+    
+    CORS(server, resources={
+        r"/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }
+    })
+else:
+    # CORS permissivo para desenvolvimento
+    CORS(server, resources={
+        r"/*": {
+            "origins": ["http://localhost:3000", "http://localhost:5173", "*"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }
+    })
+
+# Configurações de segurança
+# Configurações de segurança
+server.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'crypto_signals_secret_key_2025_muito_segura')
 server.config['JWT_SECRET'] = os.getenv('JWT_SECRET')
-server.config['EVO_AI_AGENT_BASE_URL'] = os.getenv('EVO_AI_AGENT_BASE_URL')
-server.config['EVO_AI_API_KEY'] = os.getenv('EVO_AI_API_KEY')
+# Remover as linhas 39-40
+# server.config['EVO_AI_AGENT_BASE_URL'] = os.getenv('EVO_AI_AGENT_BASE_URL')
+# server.config['EVO_AI_API_KEY'] = os.getenv('EVO_AI_API_KEY')
+
+# Configurações de produção
+if IS_PRODUCTION:
+    server.config['SESSION_COOKIE_SECURE'] = True
+    server.config['SESSION_COOKIE_HTTPONLY'] = True
+    server.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+    server.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hora
 
 # Validar configurações obrigatórias
 if not server.config['JWT_SECRET']:
     raise ValueError("❌ JWT_SECRET não está definido!")
 
-if not server.config['EVO_AI_AGENT_BASE_URL']:
-    raise ValueError("❌ EVO_AI_AGENT_BASE_URL não está definido!")
-
+print(f"✅ Ambiente: {ENVIRONMENT}")
 print(f"✅ JWT_SECRET configurado: {server.config['JWT_SECRET'][:5]}...")
 
-# --- Início da Edição ---
-# Adicionar chaves da API da Binance diretamente ao config do Flask
-# Binance Futures API Configuration
-# Adicionar após a configuração da Binance
+# Configuração da Binance
+# Configuração da Binance
+# Configuração da Binance
 server.config['BINANCE_FUTURES'] = {
     'api_url': 'https://fapi.binance.com',
     'ws_url': 'wss://fstream.binance.com',
-    'API_KEY': 'CBeEjFuDgfCCdAuyC9ITwP9cRd5mc4AIGaK8eWgDisEdzjdt32S2JflZwMLwIjFp',
-    'API_SECRET': 'RS5p0K6l6802saRfE23erEZMtwoZu65GrAfBWP6r5BCAyrUasN4fQCGjS9UzB7Xk',
-    'time_offset': 0  # Adicionar esta linha
+    'API_KEY': os.getenv('BINANCE_API_KEY', ''),
+    'API_SECRET': os.getenv('BINANCE_SECRET_KEY', ''),
+    'time_offset': 0
 }
 
-# Adicionar função para sincronizar o tempo
-def sync_binance_time():
-    from binance.client import Client
-    client = Client()
-    server_time = client.get_server_time()
-    return server_time['serverTime'] - int(time.time() * 1000)
+# Configuração do Telegram
+server.config['TELEGRAM_TOKEN'] = os.getenv('TELEGRAM_BOT_TOKEN', "7690455274:AAHB64l8csWoE5UpV1Pnn9c8chJzd5sZTXQ")
+server.config['TELEGRAM_CHAT_ID'] = os.getenv('TELEGRAM_CHAT_ID', "1249100206")
 
-# Atualizar o time_offset
-server.config['BINANCE_FUTURES']['time_offset'] = sync_binance_time()
-# --- Fim da Edição ---
-
-# Telegram Configuration
-server.config['TELEGRAM_TOKEN'] = "7690455274:AAHB64l8csWoE5UpV1Pnn9c8chJzd5sZTXQ"
-server.config['TELEGRAM_CHAT_ID'] = "1249100206"
+# Configuração de Logs
+if IS_PRODUCTION:
+    # Criar diretório de logs se não existir
+    logs_dir = os.path.join(os.path.dirname(__file__), 'logs')
+    os.makedirs(logs_dir, exist_ok=True)
+    
+    log_file_path = os.path.join(logs_dir, 'app.log')
+    
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)s %(name)s %(message)s',
+        handlers=[
+            logging.FileHandler(log_file_path),
+            logging.StreamHandler()
+        ]
+    )
+else:
+    logging.basicConfig(level=logging.DEBUG)
 
 # Trading Configuration
 server.config['TRADING'] = {

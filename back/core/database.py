@@ -39,7 +39,7 @@ class Database:
                 'exit_price', 'result'
             ],
             self.config_file: ['key', 'value'],
-            self.users_file: ['username', 'password', 'is_admin', 'id'], # Adicionado 'id' para usuários
+            self.users_file: ['username', 'password', 'email', 'is_admin', 'id'], # Adicionado 'email' para usuários
             self.tickers_file: ['symbol', 'baseAsset', 'quoteAsset'], # Colunas para tickers
             self.password_reset_tokens_file: ['user_id', 'token', 'expiration_time', 'used'], # Colunas para tokens de redefinição
             self.auth_tokens_file: ['token', 'user_id', 'created_at', 'expires_at'] # Colunas para tokens de autenticação
@@ -275,6 +275,14 @@ class Database:
         users = self.get_all_users()
         for user in users:
             if user.get('username') == username:
+                return user
+        return None
+
+    def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
+        """Retorna um usuário pelo e-mail."""
+        users = self.get_all_users()
+        for user in users:
+            if user.get('email') == email:
                 return user
         return None
 

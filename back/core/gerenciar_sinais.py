@@ -3,6 +3,7 @@ import os
 import csv
 import traceback  # Adicionando import do traceback
 from datetime import datetime, timedelta
+import pytz  # Adicionar esta importação
 from typing import Dict, List, Optional, Union
 from pandas import DataFrame, Series
 from .database import Database
@@ -12,6 +13,8 @@ class GerenciadorSinais:
         self.db = db_instance
         self.signals_file = 'sinais_lista.csv'
         self.history_file = 'historico_sinais.csv'
+        # Adicionar timezone
+        self.timezone = pytz.timezone('America/Sao_Paulo')
         # Simplificar colunas para apenas as informações do Telegram
         self.SIGNAL_COLUMNS = pd.Index([
             'symbol', 'type', 'entry_price', 'entry_time',
@@ -30,7 +33,8 @@ class GerenciadorSinais:
 
     def save_signal(self, signal_data: Dict) -> bool:
         try:
-            entry_time = datetime.now()
+            # Usar timezone correto
+            entry_time = datetime.now(self.timezone)
             
             # Calcular porcentagem de projeção
             entry_price = float(signal_data['entry_price'])
@@ -92,6 +96,7 @@ class GerenciadorSinais:
         # Para executar clean_scalping_signals() à meia-noite
 
     def processar_sinais_abertos(self) -> DataFrame:
+        """Processa sinais abertos baseado no horário atual de limpeza"""
         try:
             df = pd.read_csv(self.signals_file)
             
@@ -107,18 +112,28 @@ class GerenciadorSinais:
             for col in numeric_cols:
                 if col in df.columns:
                     df[col] = pd.to_numeric(df[col], errors='coerce')
+        
+            # Determinar horário de corte baseado na hora atual
+            agora = datetime.now(self.timezone)  # Usar timezone
             
-            # --- Início da Correção ---
-            # Pegar apenas sinais do dia atual (desde 00:00:00 até 23:59:59)
-            hoje = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-            amanha = hoje + timedelta(days=1)
+            if agora.hour >= 21:  # Após 21:00 - mostrar apenas sinais gerados após 21:00 de hoje
+                corte = agora.replace(hour=21, minute=0, second=0, microsecond=0)
+                print(f"🌙 Modo noturno: Exibindo sinais gerados após 21:00")
+            elif agora.hour >= 10:  # Entre 10:00-21:00 - mostrar sinais gerados após 10:00 de hoje
+                corte = agora.replace(hour=10, minute=0, second=0, microsecond=0)
+                print(f"☀️ Modo diurno: Exibindo sinais gerados após 10:00")
+            else:  # Antes das 10:00 - mostrar sinais gerados após 21:00 do dia anterior
+                ontem = agora - timedelta(days=1)
+                corte = ontem.replace(hour=21, minute=0, second=0, microsecond=0)
+                print(f"🌅 Modo madrugada: Exibindo sinais gerados após 21:00 de ontem")
             
-            # Filtrar sinais do dia atual e com status OPEN
+            # Filtrar sinais após o horário de corte e com status OPEN
             result_df = df[
-                (df['entry_time'] >= hoje) & 
-                (df['entry_time'] < amanha) & 
+                (df['entry_time'] >= corte) & 
                 (df['status'] == 'OPEN')
             ]
+            
+            print(f"📊 Filtro aplicado: {len(result_df)} sinais OPEN encontrados após {corte.strftime('%d/%m/%Y %H:%M')}")
             
             # Agrupar por symbol e pegar o sinal mais recente
             if not result_df.empty:
@@ -184,7 +199,7 @@ class GerenciadorSinais:
             df.loc[mask, 'variation'] = str(variation)
             df.loc[mask, 'status'] = 'CLOSED'
             df.loc[mask, 'result'] = 'WIN' if variation > 0 else 'LOSS'
-            df.loc[mask, 'exit_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            df.loc[mask, 'exit_time'] = datetime.now(self.timezone).strftime('%Y-%m-%d %H:%M:%S')
             
             df.to_csv(self.signals_file, index=False)
             print(f"✅ Sinal atualizado: {symbol}")
@@ -244,6 +259,80 @@ class GerenciadorSinais:
 
         except Exception as e:
             print(f"❌ Erro ao limpar sinais 'OPEN' do dia anterior: {e}")
+            traceback.print_exc()
+
+    def limpar_sinais_antes_das_10h(self) -> None:
+        """Remove todos os sinais OPEN gerados antes das 10:00 do dia atual."""
+        try:
+            if not os.path.exists(self.signals_file):
+                print("⚠️ Arquivo de sinais não encontrado para limpeza.")
+                return
+
+            df = pd.read_csv(self.signals_file)
+            
+            # Converter entry_time para datetime
+            df['entry_time'] = pd.to_datetime(df['entry_time'])
+            
+            # Definir o horário de corte (10:00 de hoje)
+            hoje = datetime.now(self.timezone).replace(hour=10, minute=0, second=0, microsecond=0)
+            
+            # Contar sinais que serão removidos
+            sinais_para_remover = df[
+                (df['status'] == 'OPEN') & 
+                (df['entry_time'] < hoje)
+            ]
+            
+            # Manter apenas sinais que NÃO estão 'OPEN' OU que foram gerados após as 10:00
+            df_cleaned = df[
+                (df['status'] != 'OPEN') | 
+                (df['entry_time'] >= hoje)
+            ].copy()
+    
+            # Salvar o DataFrame limpo
+            df_cleaned.to_csv(self.signals_file, index=False)
+            
+            print(f"✨ {len(sinais_para_remover)} sinais OPEN anteriores às 10:00 foram removidos.")
+            print(f"📊 {len(df_cleaned[df_cleaned['status'] == 'OPEN'])} sinais OPEN restantes (gerados após 10:00).")
+    
+        except Exception as e:
+            print(f"❌ Erro ao limpar sinais antes das 10:00: {e}")
+            traceback.print_exc()
+
+    def limpar_sinais_antes_das_21h(self) -> None:
+        """Remove todos os sinais OPEN gerados antes das 21:00 do dia atual."""
+        try:
+            if not os.path.exists(self.signals_file):
+                print("⚠️ Arquivo de sinais não encontrado para limpeza.")
+                return
+
+            df = pd.read_csv(self.signals_file)
+            
+            # Converter entry_time para datetime
+            df['entry_time'] = pd.to_datetime(df['entry_time'])
+            
+            # Definir o horário de corte (21:00 de hoje)
+            hoje = datetime.now(self.timezone).replace(hour=21, minute=0, second=0, microsecond=0)
+            
+            # Contar sinais que serão removidos
+            sinais_para_remover = df[
+                (df['status'] == 'OPEN') & 
+                (df['entry_time'] < hoje)
+            ]
+            
+            # Manter apenas sinais que NÃO estão 'OPEN' OU que foram gerados após as 21:00
+            df_cleaned = df[
+                (df['status'] != 'OPEN') | 
+                (df['entry_time'] >= hoje)
+            ].copy()
+    
+            # Salvar o DataFrame limpo
+            df_cleaned.to_csv(self.signals_file, index=False)
+            
+            print(f"✨ {len(sinais_para_remover)} sinais OPEN anteriores às 21:00 foram removidos.")
+            print(f"📊 {len(df_cleaned[df_cleaned['status'] == 'OPEN'])} sinais OPEN restantes (gerados após 21:00).")
+    
+        except Exception as e:
+            print(f"❌ Erro ao limpar sinais antes das 21:00: {e}")
             traceback.print_exc()
 
     def limpar_sinais_antigos(self) -> None:

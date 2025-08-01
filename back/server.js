@@ -1,17 +1,19 @@
 require('dotenv').config();
 
+// Remover as linhas 18-19 e 228-229
 const express = require('express');
 const cors = require('cors');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const fs = require('fs').promises;
 const path = require('path');
-const axios = require('axios'); // NEW: Import axios for making HTTP requests
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const app = express();
-// MODIFIED: Use NODE_PORT from .env, fallback to 5002
-const PORT = process.env.NODE_PORT || 5002; 
-const JWT_SECRET = process.env.JWT_SECRET;
+const PORT = process.env.PORT || 5002;
+
+// Configuração JWT
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
+
 const USERS_FILE = path.join(__dirname, 'users.json');
 
 // NEW: Environment variables for Evo AI agent
@@ -225,6 +227,4 @@ app.post('/api/chat', async (req, res) => { // MODIFIED: Added 'async' keyword h
 app.listen(PORT, () => {
     console.log(`Servidor Node.js rodando na porta ${PORT}`);
     console.log(`JWT_SECRET configurado: ${JWT_SECRET ? '✅' : '❌'}`);
-    console.log(`EVO_AI_AGENT_BASE_URL configurado: ${EVO_AI_AGENT_BASE_URL ? '✅' : '❌'}`);
-    console.log(`EVO_AI_API_KEY configurado: ${EVO_AI_API_KEY ? '✅' : '❌'}`);
 });

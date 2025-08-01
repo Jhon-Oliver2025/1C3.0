@@ -1,4 +1,4 @@
-import websocket
+from websocket import WebSocketApp
 import json
 import requests
 import time
