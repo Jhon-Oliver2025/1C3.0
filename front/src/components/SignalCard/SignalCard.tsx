@@ -30,6 +30,23 @@ const SignalCard: React.FC<SignalCardProps> = ({
     hour12: false,
   }) : '';
 
+  // Função para formatar preços com as mesmas casas decimais
+  const formatPrice = (price: string, referencePrice: string): string => {
+    const refDecimalPlaces = (referencePrice.split('.')[1] || '').length;
+    const numPrice = parseFloat(price);
+    return numPrice.toFixed(refDecimalPlaces);
+  };
+
+  // Função para formatar projeção (sempre positiva)
+  const formatProjection = (projection: string): string => {
+    const numProjection = parseFloat(projection);
+    return Math.abs(numProjection).toFixed(2);
+  };
+
+  // Formatar preços
+  const formattedTargetPrice = formatPrice(targetPrice, entryPrice);
+  const formattedProjection = formatProjection(projectionPercentage);
+
   return (
     <div className={styles.signalCard}>
       <div className={styles.cardHeader}>
@@ -53,13 +70,13 @@ const SignalCard: React.FC<SignalCardProps> = ({
       
       <div className={styles.priceDetail}>
         <span className={styles.label}>Alvo</span>
-        <span className={styles.value}>{targetPrice}</span>
+        <span className={styles.value}>{formattedTargetPrice}</span>
       </div>
       
       <div className={styles.projectionDetail}>
         <span className={styles.label}>Projeção</span>
         <span className={styles.changePercentage}>
-          ({projectionPercentage}%)
+          ({formattedProjection}%)
         </span>
       </div>
       

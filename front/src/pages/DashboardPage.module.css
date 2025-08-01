@@ -1,93 +1,37 @@
-/* Estilos para o contêiner principal do Dashboard */
+/* ========================================
+   DASHBOARD PAGE - ESTILOS ORGANIZADOS
+======================================== */
+
+/* ===== CONTÊINER PRINCIPAL ===== */
 .dashboardContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  padding-top: 80px; /* Adiciona padding para compensar a topBar fixa */
-  min-height: 100vh; /* Garante que o contêiner ocupe pelo menos 100% da altura da viewport */
+  min-height: 100vh;
   background: linear-gradient(135deg, #0A192F 0%, #000000 100%);
   color: white;
   font-family: 'Arial', sans-serif;
-  gap: 40px; /* Espaçamento entre as seções */
-  overflow-x: hidden; /* Evita rolagem horizontal indesejada */
+  overflow-x: hidden;
+  padding-top: 80px; /* Reduzido de 120px para 80px */
+  box-sizing: border-box;
 }
 
-.logoAndStatusDashboard {
-  display: flex;
-  align-items: center;
-  justify-content: center; /* Centraliza o conteúdo horizontalmente */
-  width: 100%; /* Garante que ocupe toda a largura para centralizar */
-  gap: 10px;
-  margin-bottom: 20px;
-  margin-top: 20px; /* Adiciona um espaço do topo */
-}
-
-.dashboardLogo {
-  width: 150px; /* Ajuste o tamanho da logo conforme necessário */
-  height: auto;
-}
-
-.dashboardLogo {
-  width: 150px; /* Ajuste o tamanho da logo conforme necessário */
-  height: auto;
-}
-
-.topBar {
-  position: fixed; /* Fixa a barra no topo */
-  top: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-between; /* Alinha a logo à esquerda e o status à direita */
-  align-items: center;
-  padding: 10px 20px;
-  background-color: #0A192F; /* Cor de fundo para a barra */
-  z-index: 1000; /* Garante que fique acima de outros elementos */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-.dashboardLogo {
-  width: 100px; /* Ajuste o tamanho da logo conforme necessário */
-  height: auto;
-}
-
-.statusIndicator {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
-}
-
-.statusIndicator.online {
-  background-color: #4CAF50; /* Verde para online */
-}
-
-.statusIndicator.offline {
-  background-color: #E53E3E; /* Vermelho para offline */
-}
-
-@keyframes pulse {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-/* Estilos para o cabeçalho (que contém a imagem da Terra e a seção de boas-vindas) */
-.headerSection {
+.mainContentContainer {
   width: 100%;
   max-width: 1200px;
-  min-height: 250px; /* Adjusted min-height */
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Reduzido de 30px para 20px */
+  box-sizing: border-box;
+}
+
+/* ===== SEÇÃO MOTIVACIONAL ===== */
+.motivationalSection {
+  width: 100%;
+  min-height: 200px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-image: url('../assets/terra.png'); /* Adiciona a imagem terra.png como background */
+  background-image: url('../assets/terra.png');
   border-radius: 15px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
   display: flex;
@@ -95,184 +39,397 @@
   justify-content: center;
   align-items: center;
   padding: 20px;
-  margin-top: 20px;
-  margin-bottom: 40px;
   position: relative;
-}
-
-.headerContent {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-  flex: 1;
-  min-width: 300px;
-  text-align: center;
+  z-index: 10;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .motivationalPhrase {
-  font-size: 2.5vw; /* Slightly smaller base font size */
+  font-size: 1.2rem;
   font-weight: bold;
   text-align: center;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-  padding: 20px;
+  padding: 15px;
   border-radius: 10px;
   color: white;
-  max-width: 80%; /* Limit width to prevent stretching */
-  box-sizing: border-box; /* Include padding in width calculation */
+  max-width: 90%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.3);
+  transition: opacity 0.5s ease-in-out;
 }
 
-@media (max-width: 768px) {
-  .motivationalPhrase {
-    font-size: 4vw;
+/* ===== ANIMAÇÕES ===== */
+@keyframes slideText {
+  0% {
+    transform: translateX(100%);
   }
-}
-
-@media (max-width: 480px) {
-  .motivationalPhrase {
-    font-size: 6vw;
-  }
-}
-
-
-
-
-
-.terraImage { /* Esta regra não é mais usada diretamente, mas mantida caso precise */
-  max-width: 150px;
-  height: auto;
-  display: block;
-}
-
-/* Media queries para a seção de boas-vindas */
-@media (max-width: 768px) {
-  .headerSection {
-    flex-direction: column;
-    align-items: center;
-  }
-  .headerContent {
-    width: 100%;
-  }
-  .terraImage {
-    max-width: 100px;
-  }
-  .headerContent h1 {
-    font-size: 1.8em;
-  }
-  .headerContent p {
-    font-size: 1em;
+  100% {
+    transform: translateX(-100%);
   }
 }
 
-@media (max-width: 480px) {
-  .headerContent {
-    padding: 15px;
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.4;
   }
-  .terraImage {
-    max-width: 80px;
-  }
-  .headerContent h1 {
-    font-size: 1.5em;
-  }
-  .headerContent p {
-    font-size: 0.9em;
+  50% {
+    opacity: 1;
   }
 }
 
-/* Estilos para a seção de conteúdo principal (que contém os sinais) */
-.contentSection {
-  width: 100%;
-  max-width: 1200px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px; /* Espaçamento entre as sub-seções */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Estilos para a seção de Sinais de Trading */
+/* ===== SEÇÃO DE SINAIS ===== */
 .signalsSection {
   width: 100%;
-  padding: 20px;
-  border-radius: 15px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  box-sizing: border-box;
 }
 
-/* REMOVIDO: .signalsSection h2 {
-  text-align: center;
-  color: #64FFDA;
-  font-size: 2em;
-  margin-bottom: 20px;
-} */
-
-/* Estilos para o cabeçalho de estatísticas dos sinais (NOVO) */
+/* ===== CABEÇALHO DOS SINAIS ===== */
 .signalsHeader {
+  width: 100%;
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  gap: 15px;
+  padding: 25px 30px;
+  background: rgba(10, 25, 47, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(100, 255, 218, 0.1);
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.signalsHeader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(100, 255, 218, 0.5), transparent);
+}
+
+/* ===== TEMPO E MERCADOS ===== */
+.timeAndMarkets {
+  display: flex;
+  gap: 15px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.currentTimeItem {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 15px;
-  background-color: rgba(10, 25, 47, 0.7);
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  color: white;
-  font-size: 1em;
-  font-weight: normal;
+  justify-content: center;
+  padding: 15px 20px;
+  background: rgba(26, 43, 64, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 15px;
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  flex: 1;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  min-height: 80px;
 }
 
-.signalStat {
+.currentTimeItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(100, 255, 218, 0.3);
+  border-color: rgba(100, 255, 218, 0.4);
+}
+
+.timeLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64FFDA;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.currentTimeValue {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 8px rgba(100, 255, 218, 0.3);
+}
+
+.dateValue {
+  font-size: 9px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Arial', sans-serif;
+}
+
+/* Indicador sutil de refresh */
+.refreshIndicator {
+  color: #00d4aa;
+  margin-left: 8px;
+  animation: pulse 1.5s ease-in-out infinite;
+  font-size: 0.8em;
+}
+
+/* ===== CRONÔMETROS DOS MERCADOS ===== */
+.marketCountdowns {
+  display: flex;
+  gap: 15px;
+  flex: 2;
+}
+
+.countdownItem {
+  display: flex;
+  flex-direction: column;
+  background: rgba(26, 43, 64, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 15px;
+  border: 1px solid rgba(0, 127, 255, 0.2);
+  flex: 1;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-height: 80px;
+}
+
+.countdownItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 127, 255, 0.3);
+  border-color: rgba(0, 127, 255, 0.4);
+}
+
+.marketBanner {
+  position: relative;
+  width: 100%;
+  height: 35px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.marketBannerImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.marketBannerText {
+  position: relative;
+  z-index: 2;
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 8px;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+}
+
+.countdownValue {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 8px rgba(100, 255, 218, 0.3);
+  padding: 10px;
   text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.signalStat span {
-  font-size: 1.2em;
-  color: #64FFDA; /* Cor padrão para os números */
+/* ===== ESTATÍSTICAS DOS SINAIS ===== */
+.signalsStats {
+  display: flex;
+  gap: 15px;
+  align-items: stretch;
+  width: 100%;
 }
 
-.signalStat .buyText {
-  color: #4CAF50; /* Verde para compra */
-  font-weight: bold;
+.totalSignalsItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 20px;
+  background: rgba(26, 43, 64, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 15px;
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  flex: 1;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  min-height: 80px;
 }
 
-.signalStat .sellText {
-  color: #E53E3E; /* Vermelho para venda */
-  font-weight: bold;
+.totalSignalsItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(100, 255, 218, 0.3);
+  border-color: rgba(100, 255, 218, 0.4);
 }
 
-/* Estilos para o contêiner dos cards de sinais */
+.totalLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64FFDA;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.totalValue {
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 8px rgba(100, 255, 218, 0.3);
+}
+
+.buySellContainer {
+  display: flex;
+  gap: 0;
+  background: rgba(26, 43, 64, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 15px;
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  box-sizing: border-box;
+  flex: 2;
+  transition: all 0.3s ease;
+  min-height: 80px;
+}
+
+.buySellContainer:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(100, 255, 218, 0.3);
+  border-color: rgba(100, 255, 218, 0.4);
+}
+
+.buySellItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 20px;
+  flex: 1;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.buySellItem:first-child::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 1px;
+  background: rgba(100, 255, 218, 0.2);
+}
+
+.buySellLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64FFDA;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.buySellValue {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+}
+
+.buyText {
+  color: #00ff88;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+}
+
+.sellText {
+  color: #ff4757;
+  text-shadow: 0 0 8px rgba(255, 71, 87, 0.4);
+}
+
+/* ===== CONTÊINER DOS CARDS ===== */
 .signalCardsContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  justify-content: center;
-  max-height: 500px; /* Altura máxima para habilitar a rolagem */
-  overflow-y: auto; /* Adiciona a barra de rolagem vertical apenas para os cards */
-  padding-right: 15px; /* Adiciona um padding para evitar que o conteúdo fique colado na barra de rolagem */
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 15px 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* Estilização da barra de rolagem para navegadores WebKit (Chrome, Safari) */
+/* Transição suave durante refresh */
+.signalCardsContainer.refreshing {
+  opacity: 0.95;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Animação para novos sinais */
+.signalCardsContainer > * {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* ===== BARRA DE ROLAGEM ===== */
 .signalCardsContainer::-webkit-scrollbar {
-  width: 8px; /* Largura da barra de rolagem */
+  width: 8px;
 }
 
 .signalCardsContainer::-webkit-scrollbar-track {
-  background: #1A2B40; /* Cor do fundo da trilha da barra de rolagem - Azul escuro */
+  background: #1A2B40;
   border-radius: 10px;
 }
 
 .signalCardsContainer::-webkit-scrollbar-thumb {
-  background: #3A506B; /* Cor do "polegar" da barra de rolagem - Azul escuro */
+  background: #3A506B;
   border-radius: 10px;
 }
 
 .signalCardsContainer::-webkit-scrollbar-thumb:hover {
-  background: #4A6585; /* Cor do "polegar" ao passar o mouse - Azul um pouco mais claro */
+  background: #4A6585;
 }
 
-/* Estilos para mensagens de carregamento, erro e sem sinais */
+/* ===== MENSAGENS DE ESTADO ===== */
 .loadingMessage,
 .errorMessage,
 .noSignalsMessage {
@@ -286,52 +443,250 @@
   color: #ff4d4d;
 }
 
-/* Estilos para os cards individuais de sinal (se ainda existirem e forem usados) */
-/* Mantidos comentados como estavam, caso você os use em outro lugar */
-/*
-.signalCard {
-  background-color: #1A202C;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: left;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease-in-out;
+/* ========================================
+   RESPONSIVIDADE
+======================================== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .mainContentContainer {
+    padding: 0 15px;
+    gap: 25px;
+  }
+  
+  .motivationalSection {
+    min-height: 220px;
+  }
 }
 
-.signalCard:hover {
-  transform: translateY(-5px);
+/* Mobile */
+@media (max-width: 768px) {
+  .mainContentContainer {
+    padding: 0 15px;
+    gap: 20px;
+  }
+  
+  .motivationalSection {
+    min-height: 200px;
+    padding: 20px 15px;
+  }
+  
+  .motivationalPhrase {
+    font-size: 1rem; /* Reduzido de 4vw para 1rem */
+    line-height: 1.4; /* Adicionar altura de linha consistente */
+  }
+  
+  .signalsHeader {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 15px;
+  }
+  
+  .signalsStats {
+    width: 100%;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  
+  .totalSignalsItem {
+    flex: 1;
+    min-width: auto;
+    padding: 12px 15px;
+  }
+  
+  .totalLabel {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  
+  .totalValue {
+    font-size: 24px;
+  }
+  
+  .buySellContainer {
+    flex: 2;
+    justify-content: space-around;
+  }
+  
+  .buySellItem {
+    padding: 10px 12px;
+    min-width: 70px;
+  }
+  
+  .buySellLabel {
+    font-size: 10px;
+  }
+  
+  .buySellValue {
+    font-size: 18px;
+  }
+  
+  .timeAndMarkets {
+    width: 100%;
+    gap: 15px;
+    justify-content: space-between;
+  }
+  
+  .currentTimeItem {
+    flex: 1;
+    min-width: auto;
+    padding: 12px 15px;
+  }
+  
+  .timeLabel {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  
+  .currentTimeValue {
+    font-size: 20px;
+    margin-bottom: 0;
+  }
+  
+  .dateValue {
+    display: none;
+  }
+  
+  .marketCountdowns {
+    flex: 2;
+    gap: 10px;
+  }
+  
+  .countdownItem {
+    min-width: auto;
+    flex: 1;
+  }
+  
+  .marketBanner {
+    height: 45px;
+  }
+  
+  .marketBannerText {
+    font-size: 9px;
+    padding: 2px 6px;
+  }
+  
+  .countdownValue {
+    font-size: 14px;
+    padding: 10px 8px;
+  }
+  
+  .signalCardsContainer {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 8px 0;
+  }
 }
 
-.signalCard h3 {
-  color: #64FFDA;
-  font-size: 1.5em;
-  margin-bottom: 10px;
+/* Mobile pequeno */
+@media (max-width: 480px) {
+  .mainContentContainer {
+    padding: 0 10px;
+    gap: 15px;
+  }
+  
+  .motivationalSection {
+    min-height: 180px;
+    padding: 15px 10px;
+  }
+  
+  .motivationalPhrase {
+    font-size: 0.9rem; /* Reduzido de 6vw para 0.9rem */
+    line-height: 1.3;
+    padding: 12px; /* Reduzir padding também */
+  }
+  
+  .signalsHeader {
+    gap: 15px;
+    padding: 15px 10px;
+  }
+  
+  .signalsStats {
+    gap: 8px;
+  }
+  
+  .totalSignalsItem {
+    padding: 10px 12px;
+  }
+  
+  .totalLabel {
+    font-size: 11px;
+  }
+  
+  .totalValue {
+    font-size: 22px;
+  }
+  
+  .buySellItem {
+    padding: 8px 10px;
+    min-width: 60px;
+  }
+  
+  .buySellLabel {
+    font-size: 9px;
+  }
+  
+  .buySellValue {
+    font-size: 16px;
+  }
+  
+  .timeAndMarkets {
+    gap: 10px;
+  }
+  
+  .currentTimeItem {
+    padding: 10px 12px;
+  }
+  
+  .timeLabel {
+    font-size: 9px;
+  }
+  
+  .currentTimeValue {
+    font-size: 18px;
+  }
+  
+  .marketCountdowns {
+    gap: 8px;
+  }
+  
+  .marketBanner {
+    height: 40px;
+  }
+  
+  .marketBannerText {
+    font-size: 8px;
+    padding: 2px 4px;
+  }
+  
+  .countdownValue {
+    font-size: 12px;
+    padding: 8px 6px;
+  }
+  
+  .signalCardsContainer {
+    gap: 12px;
+    padding: 8px 0;
+  }
 }
 
-.signalCard p {
-  font-size: 1em;
-  color: #A0AEC0;
-  margin-bottom: 5px;
+/* Mobile muito pequeno */
+@media (max-width: 360px) {
+  .mainContentContainer {
+    padding: 0 8px;
+    gap: 12px;
+  }
+  
+  .motivationalSection {
+    min-height: 160px;
+    padding: 12px 8px;
+  }
+  
+  .motivationalPhrase {
+    font-size: 0.85rem; /* Adicionar tamanho específico */
+    line-height: 1.3;
+    padding: 10px;
+  }
+}  .errorMessage {
+  color: #ff4d4d;
 }
-
-.signalCard .typeBuy {
-  color: #4CAF50;
-  font-weight: bold;
-}
-
-.signalCard .typeSell {
-  color: #E53E3E;
-  font-weight: bold;
-}
-
-.signalCard .premiumBadge {
-  background-color: #FFD700;
-  color: #333;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 0.8em;
-  font-weight: bold;
-  margin-top: 10px;
-  display: inline-block;
-}
-*/

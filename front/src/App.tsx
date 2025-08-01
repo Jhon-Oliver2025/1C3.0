@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -21,28 +21,26 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Rotas que NÃO usam a Navbar (ex: login, registro) */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+    <Routes>
+      {/* Rotas que NÃO usam a Navbar (ex: login, registro) */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
 
-        {/* Rotas que usam a Navbar e o contexto de autenticação */}
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          {/* REMOVIDO: <Route path="/btc-sentiment" element={<BtcSentimentPage />} /> */}
-          {/* REMOVIDO: <Route path="/minha-conta" element={<MinhaContaPage />} /> */}
-          <Route path="/suporte" element={<UnderConstructionPage />} />
-          {/* REMOVIDO: <Route path="/configuracoes" element={<UnderConstructionPage />} /> */}
-          {/* REMOVIDO: <Route path="/chat" element={<ChatInterface />} /> */}
-        </Route>
-      </Routes>
-    </Router>
+      {/* Rotas que usam a Navbar e o contexto de autenticação */}
+      <Route element={<MainLayout />}>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        {/* REMOVIDO: <Route path="/btc-sentiment" element={<BtcSentimentPage />} /> */}
+        {/* REMOVIDO: <Route path="/minha-conta" element={<MinhaContaPage />} /> */}
+        <Route path="/suporte" element={<UnderConstructionPage />} />
+        {/* REMOVIDO: <Route path="/configuracoes" element={<UnderConstructionPage />} /> */}
+        {/* REMOVIDO: <Route path="/chat" element={<ChatInterface />} /> */}
+      </Route>
+    </Routes>
   );
 }
 

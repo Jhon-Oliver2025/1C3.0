@@ -1,11 +1,27 @@
 version: '3.8'
 
 services:
+  app:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    networks:
+      - crypto-network
+    restart: unless-stopped
+    labels:
+      - "coolify.managed=true"
+      - "coolify.type=application"
+
   backend:
     build:
       context: ./back
       dockerfile: Dockerfile
-    container_name: crypto-backend
     environment:
       - FLASK_ENV=production
       - FLASK_DEBUG=0
@@ -29,35 +45,12 @@ services:
     networks:
       - crypto-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  frontend:
-    build:
-      context: ./front
-      dockerfile: Dockerfile
-    container_name: crypto-frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-    networks:
-      - crypto-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    labels:
+      - "coolify.managed=true"
+      - "coolify.type=service"
 
   db:
     image: postgres:15-alpine
-    container_name: crypto-db
     environment:
       - POSTGRES_DB=cryptodb
       - POSTGRES_USER=postgres
@@ -68,28 +61,21 @@ services:
     networks:
       - crypto-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    labels:
+      - "coolify.managed=true"
+      - "coolify.type=database"
 
   redis:
     image: redis:7-alpine
-    container_name: crypto-redis
     command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
     networks:
       - crypto-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    labels:
+      - "coolify.managed=true"
+      - "coolify.type=cache"
 
 volumes:
   postgres_data:

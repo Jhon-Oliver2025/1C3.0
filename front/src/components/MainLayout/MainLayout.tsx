@@ -23,7 +23,8 @@ const MainLayout: React.FC = () => {
   // Function to check backend status
   const checkBackendStatus = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:5000/status');
+      // Alterar linha 26
+      const response = await fetch('/api/status');
       setIsBackendOnline(response.ok);
     } catch (error) {
       console.error('Erro ao verificar status do backend:', error);

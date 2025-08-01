@@ -57,8 +57,8 @@ const ResetPasswordPage: React.FC = () => {
     }
 
     try {
-      // Alterado de 8050 para 5000 para apontar para o backend Flask
-      const response = await fetch('http://localhost:5000/api/reset-password', {
+      // Alterar linha 61
+      const response = await fetch('/api/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, userId, newPassword }),

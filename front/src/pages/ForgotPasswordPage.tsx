@@ -16,8 +16,8 @@ const ForgotPasswordPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // Alterado de 5001 para 5000 para apontar para o backend Flask
-      const response = await fetch('http://localhost:5000/api/forgot-password', {
+      // Alterar linha 20
+      const response = await fetch('/api/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: email }),

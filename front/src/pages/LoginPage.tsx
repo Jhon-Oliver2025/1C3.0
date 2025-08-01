@@ -17,13 +17,15 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      // MODIFICADO: Aponta para o backend Node.js na porta 5002
-      const response = await fetch('http://localhost:5002/api/login', { 
+      // CORRIGIDO: URL correta para o endpoint de login
+      // Alterar linha 21
+      const response = await fetch('/api/auth/login', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        // CORRIGIDO: O backend espera 'username' e 'password', não 'email'
+        body: JSON.stringify({ username: email, password }),
       });
 
       const data = await response.json();
@@ -53,7 +55,7 @@ function LoginPage() {
           {/* Se você tiver um texto específico para o logo, pode adicioná-lo aqui */}
           {/* <span className={styles.crypTenText}>CrypTen</span> */}
         </div>
-        <h2>Aceda à sua conta</h2>
+        <h2>Vamos Começar</h2>
         <p>Insira os seus dados para continuar</p>
 
         <form onSubmit={handleLogin}>

@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './DashboardPage.module.css';
 import SignalCard from '../components/SignalCard/SignalCard';
-// Removed unused imports:
-// import logo2 from '../assets/logo2.png';
-import terra from '../assets/terra.png';
-// import layoutStyles from '../components/Layout/Layout.module.css';
-
+// Adicionar as importações das imagens
+import usaFlag from '../assets/usa.png';
+import asiaFlag from '../assets/asia.png';
+// Remover import não utilizado
+// import terra from '../assets/terra.png';
 
 const motivationalPhrases: string[] = [
   "Invista em conhecimento, ele paga os melhores juros.",
@@ -21,11 +21,10 @@ const motivationalPhrases: string[] = [
   "Seja seu próprio banco. Seja sua própria soberania."
 ];
 
-// Definir a interface para o tipo de sinal
-// Corrigir a interface Signal para usar os tipos corretos do backend
+// Interface para o tipo de sinal
 interface Signal {
   symbol: string;
-  type: 'LONG' | 'SHORT'; // Alterado de 'COMPRA' | 'VENDA' para 'LONG' | 'SHORT'
+  type: 'LONG' | 'SHORT';
   entry_price: number;
   entry_time: string;
   target_price: number;
@@ -39,57 +38,36 @@ interface Signal {
   expected_duration?: string;
 }
 
-// REMOVIDAS AS INTERFACES DE SENTIMENTO DO BTC DAQUI
-
 function DashboardPage() {
   const navigate = useNavigate();
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [signals, setSignals] = useState<Signal[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false); // NOVO: indicador de refresh sutil
   const [error, setError] = useState<string | null>(null);
   const [buySignalsCount, setBuySignalsCount] = useState<number>(0);
   const [sellSignalsCount, setSellSignalsCount] = useState<number>(0);
-  // Since isBackendOnline is used for status checking but not in the UI anymore:
-  // REMOVIDO: const [, setIsBackendOnline] = useState<boolean>(false);
+  
+  // Estados para os relógios regressivos
+  const [usaCountdown, setUsaCountdown] = useState<number>(0);
+  const [asiaCountdown, setAsiaCountdown] = useState<number>(0);
+  const [currentTime, setCurrentTime] = useState<string>(''); // ADICIONAR esta linha
 
-  // Função para verificar o status do backend
-  // REMOVIDO:
-  // const checkBackendStatus = useCallback(async () => {
-  //   try {
-  //     const response = await fetch('http://localhost:5000/status'); // Endpoint de status do seu backend
-  //     setIsBackendOnline(response.ok); // Se a resposta for 200-299, está online
-  //   } catch (error) {
-  //     console.error('Erro ao verificar status do backend:', error);
-  //     setIsBackendOnline(false);
-  //   }
-  // }, []);
+  // Função para formatar countdown em HH:MM:SS
+  const formatCountdown = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
-  useEffect(() => {
-    // REMOVIDO:
-    // // Verifica o status do backend imediatamente ao montar
-    // checkBackendStatus();
-
-    // // Configura um intervalo para verificar o status a cada 5 segundos
-    // const intervalId = setInterval(checkBackendStatus, 5000);
-
-    // // Limpa o intervalo quando o componente é desmontado
-    // return () => clearInterval(intervalId);
-  }, [
-    // REMOVIDO: checkBackendStatus
-  ]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentPhraseIndex((prevIndex) =>
-        (prevIndex + 1) % motivationalPhrases.length
-      );
-    }, 8000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchSignals = useCallback(async () => {
-    setLoading(true);
+  // Função para buscar sinais - MODIFICADA para refresh sutil
+  const fetchSignals = useCallback(async (isRefresh = false) => {
+    if (isRefresh && signals.length > 0) {
+      setRefreshing(true); // Mostrar indicador sutil apenas
+    } else {
+      setLoading(true); // Loading completo apenas na primeira vez
+    }
     setError(null);
     console.log('fetchSignals: Iniciando busca de sinais.');
 
@@ -101,8 +79,9 @@ function DashboardPage() {
         return;
       }
 
+      // Substituir as linhas 79-83 por:
       console.log('fetchSignals: Token encontrado, fazendo requisição.');
-      const response = await fetch('http://localhost:5000/signals', {
+      const response = await fetch('/api/signals', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -127,172 +106,203 @@ function DashboardPage() {
       try {
         rawSignals = JSON.parse(responseText);
       } catch (parseError) {
-        console.error('Erro ao analisar a resposta como JSON:', parseError);
-        throw new Error('A resposta do servidor não é um JSON válido.');
-      }
-      
-      console.log('fetchSignals: Dados analisados a partir do texto:', rawSignals);
-
-      const transformedSignals: Signal[] = (rawSignals as any[]).map(item => {
-        const entryPrice = parseFloat(item.entry_price);
-        const targetPrice = parseFloat(item.target_price);
-
-        console.log(`DEBUG: entryPrice (parsed): ${entryPrice}, isNaN: ${isNaN(entryPrice)}`);
-        console.log(`DEBUG: targetPrice (parsed): ${targetPrice}, isNaN: ${isNaN(targetPrice)}`);
-
-        const projectionPercentage = item.projection_percentage || 
-          (targetPrice && entryPrice ? ((targetPrice / entryPrice - 1) * 100) : 0);
-      
-        return {
-          symbol: item.symbol || '',
-          type: (item.type === 'LONG' || item.type === 'SHORT') ? item.type : 'LONG', // Manter LONG/SHORT
-          entry_price: isNaN(entryPrice) ? 0 : entryPrice,
-          entry_time: item.entry_time || '',
-          target_price: isNaN(targetPrice) ? 0 : targetPrice,
-          status: item.status || '',
-          quality_score: parseFloat(item.quality_score) || 0,
-          signal_class: item.signal_class || 'PADRÃO',
-          projection_percentage: projectionPercentage,
-        };
-      });
-
-      // Ordenar os sinais por data (do mais recente para o mais antigo)
-      const sortedSignals = transformedSignals.sort((a, b) => {
-        const dateA = new Date(a.entry_time);
-        const dateB = new Date(b.entry_time);
-        return dateB.getTime() - dateA.getTime();
-      });
-
-      // Filtrar apenas sinais ELITE e PREMIUM
-      const filteredSignals = sortedSignals.filter(signal => {
-        return signal.signal_class === 'ELITE' || signal.signal_class === 'PREMIUM';
-      });
-      // REMOVIDO: const filteredSignals = sortedSignals; // Mostrar todos os sinais
-      
-      console.log('fetchSignals: Sinais filtrados:', filteredSignals);
-
-      // Validação simplificada para garantir que é um array
-      if (!Array.isArray(filteredSignals)) {
-        console.error('fetchSignals: Dados filtrados não são um array:', filteredSignals);
-        throw new Error('Formato de dados de sinais inválido recebido do servidor.');
+        console.error('fetchSignals: Erro ao fazer parse do JSON:', parseError);
+        throw new Error('Resposta inválida do servidor.');
       }
 
-      setSignals(filteredSignals);
-      console.log('fetchSignals: Sinais atualizados no estado:', filteredSignals);
+      console.log('fetchSignals: Dados parseados do backend:', rawSignals);
 
-      // Calcular contagem de sinais de compra e venda apenas dos filtrados
-      // Calcular contagem de sinais de compra e venda apenas dos filtrados
-      const buyCount = filteredSignals.filter(signal => signal.type === 'LONG').length;
-      const sellCount = filteredSignals.filter(signal => signal.type === 'SHORT').length;
-      setBuySignalsCount(buyCount);
-      setSellSignalsCount(sellCount);
+      if (!Array.isArray(rawSignals)) {
+        console.error('fetchSignals: Dados recebidos não são um array:', rawSignals);
+        throw new Error('Formato de dados inválido recebido do servidor.');
+      }
 
-    } catch (err) {
-      console.error('fetchSignals: Erro ao buscar sinais:', err);
-      setError(err instanceof Error ? err.message : 'Erro desconhecido ao buscar sinais.');
+      const filteredSignals = rawSignals.filter((signal: any) => 
+        signal.signal_class === 'ELITE' || signal.signal_class === 'PREMIUM'
+      );
+
+      console.log('fetchSignals: Sinais filtrados (ELITE/PREMIUM):', filteredSignals);
+
+      const processedSignals: Signal[] = filteredSignals.map((signal: any) => ({
+        ...signal,
+        projection_percentage: signal.projection_percentage || 
+          ((signal.target_price - signal.entry_price) / signal.entry_price * 100),
+      }));
+
+      // Transição suave para novos sinais
+      setTimeout(() => {
+        setSignals(processedSignals);
+
+        // Calcular contadores
+        const buyCount = processedSignals.filter(signal => signal.type === 'LONG').length;
+        const sellCount = processedSignals.filter(signal => signal.type === 'SHORT').length;
+        
+        setBuySignalsCount(buyCount);
+        setSellSignalsCount(sellCount);
+      }, isRefresh ? 100 : 0); // Pequeno delay apenas no refresh
+
+      console.log('fetchSignals: Sinais processados e estados atualizados.');
+      console.log('fetchSignals: Total de sinais:', processedSignals.length);
+
+    } catch (error: any) {
+      console.error('fetchSignals: Erro capturado:', error);
+      setError(error.message || 'Erro desconhecido ao buscar sinais.');
     } finally {
       setLoading(false);
-      console.log('fetchSignals: Busca de sinais finalizada.');
+      setRefreshing(false);
+      console.log('fetchSignals: Processo finalizado.');
     }
-  }, [navigate]);
+  }, [navigate, signals.length]);
 
-  // Novo useEffect para chamar fetchSignals quando o componente for montado
+  // Função para buscar dados dos relógios
+  const fetchMarketCountdown = useCallback(async () => {
+    try {
+      const authToken = localStorage.getItem('authToken');
+      if (!authToken) return; // Sai silenciosamente se não há token
+      
+      const response = await fetch('/api/market-countdown', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsaCountdown(data.usa_countdown);
+        setAsiaCountdown(data.asia_countdown);
+        setCurrentTime(data.current_time);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar countdown dos mercados:', error);
+    }
+  }, []);
+
+  // Effect para carregar dados iniciais
   useEffect(() => {
     fetchSignals();
-  }, [fetchSignals]);
+    fetchMarketCountdown();
+  }, [fetchSignals, fetchMarketCountdown]);
 
-  // Calculate total signals count
-  const totalSignalsCount = buySignalsCount + sellSignalsCount;
+  // Effect para atualizar relógios a cada segundo
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setUsaCountdown(prev => Math.max(0, prev - 1));
+      setAsiaCountdown(prev => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Effect separado para atualizar dados do servidor (menos frequente) - MODIFICADO
+  useEffect(() => {
+    const serverInterval = setInterval(() => {
+      fetchSignals(true); // Indicar que é um refresh
+      fetchMarketCountdown();
+    }, 60000); // Atualizar a cada 1 minuto
+
+    return () => clearInterval(serverInterval);
+  }, [fetchSignals, fetchMarketCountdown]);
+
+  // Effect para rotacionar frases motivacionais
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPhraseIndex((prevIndex) => (prevIndex + 1) % motivationalPhrases.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    
-      <div className={styles.dashboardContainer}>
-        {/* REMOVIDO: Logo e status do backend que estavam duplicados aqui */}
-        {/* <div className={styles.logoAndStatusDashboard}>
-          <img src={logo2} alt="Logo" className={styles.dashboardLogo} />
-          <div className={`${layoutStyles.statusIndicator} ${isBackendOnline ? layoutStyles.statusOnline : layoutStyles.statusOffline}`}></div>
-        </div> */}
-        <div className={styles.headerSection} style={{ backgroundImage: `url(${terra})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-          <div className={styles.headerContent}>
-            <p className={styles.motivationalPhrase}>
-              {motivationalPhrases[currentPhraseIndex]}
-            </p>
+    <div className={styles.dashboardContainer}>
+      {/* Contêiner principal com toda a estrutura */}
+      <div className={styles.mainContentContainer}>
+        {/* 1. Seção motivacional no topo */}
+        <div className={styles.motivationalSection}>
+          <p className={styles.motivationalPhrase}>
+            {motivationalPhrases[currentPhraseIndex]}
+          </p>
+        </div>
+
+        {/* 2. Cabeçalho reorganizado */}
+        <div className={styles.signalsHeader}>
+          {/* PRIMEIRA LINHA: Data e Horário com indicador de refresh */}
+          <div className={styles.timeAndMarkets}>
+            {/* Horário simplificado - APENAS UMA DATA */}
+            <div className={styles.currentTimeItem}>
+              <span className={styles.timeLabel}>AGORA</span>
+              <span className={styles.currentTimeValue}>
+                {currentTime}
+                {refreshing && <span className={styles.refreshIndicator}>●</span>}
+              </span>
+            </div>
+          </div>
+          
+          {/* SEGUNDA LINHA: Cronômetros dos Mercados */}
+          <div className={styles.marketCountdowns}>
+            <div className={styles.countdownItem}>
+              <div className={styles.marketBanner}>
+                <img src={usaFlag} alt="Mercado EUA" className={styles.marketBannerImg} />
+                <span className={styles.marketBannerText}>MERCADO EUA</span>
+              </div>
+              <span className={styles.countdownValue}>{formatCountdown(usaCountdown)}</span>
+            </div>
+            <div className={styles.countdownItem}>
+              <div className={styles.marketBanner}>
+                <img src={asiaFlag} alt="Mercado ÁSIA" className={styles.marketBannerImg} />
+                <span className={styles.marketBannerText}>MERCADO ÁSIA</span>
+              </div>
+              <span className={styles.countdownValue}>{formatCountdown(asiaCountdown)}</span>
+            </div>
+          </div>
+          
+          {/* TERCEIRA LINHA: Estatísticas dos Sinais */}
+          <div className={styles.signalsStats}>
+            {/* Total em destaque */}
+            <div className={styles.totalSignalsItem}>
+              <span className={styles.totalLabel}>Total:</span>
+              <span className={styles.totalValue}>{buySignalsCount + sellSignalsCount}</span>
+            </div>
+            
+            {/* Compra e Venda juntos */}
+            <div className={styles.buySellContainer}>
+              <div className={styles.buySellItem}>
+                <span className={styles.buySellLabel}>Compra:</span>
+                <span className={`${styles.buySellValue} ${styles.buyText}`}>{buySignalsCount}</span>
+              </div>
+              <div className={styles.buySellItem}>
+                <span className={styles.buySellLabel}>Venda:</span>
+                <span className={`${styles.buySellValue} ${styles.sellText}`}>{sellSignalsCount}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className={styles.contentSection}>
-          <div className={styles.signalsSection}>
-            {/* REMOVIDO: <h2>Sinais de Trading</h2> */}
-            <div className={styles.signalsHeader}> {/* NOVO: Contêiner para o cabeçalho dos cards */}
-              {/* Displaying total, buy, and sell signals as requested */}
-              <div className={styles.signalStat}>
-                <p>
-                  Total: <span className={styles.totalText}>{totalSignalsCount.toString().padStart(2, '0')}</span>{' '}
-                  Compra: <span className={styles.buyText}>{buySignalsCount.toString().padStart(2, '0')}</span>{' '}
-                  e Venda: <span className={styles.sellText}>{sellSignalsCount.toString().padStart(2, '0')}</span>
-                </p>
-              </div>
-            </div>
-            {loading && <p>Carregando sinais...</p>}
-            {error && <p className={styles.errorMessage}>Erro: {error}</p>}
-            {!loading && !error && signals.length === 0 && (
-              <p>Nenhum sinal disponível no momento.</p>
-            )}
-            <div className={styles.signalCardsContainer}>
-              {!loading && !error && signals.length > 0 && signals.map((signal, index) => {
-                // Calcular a projeção percentual sempre como valor absoluto positivo
-                const calculateProjectionPercentage = () => {
-                  if (!signal.target_price || !signal.entry_price) return '0.00';
-                  
-                  // Para sinais de COMPRA (LONG): (target - entry) / entry * 100
-                  // Para sinais de VENDA (SHORT): (entry - target) / entry * 100
-                  let percentage;
-                  if (signal.type === 'LONG') {
-                    percentage = ((signal.target_price - signal.entry_price) / signal.entry_price) * 100;
-                  } else {
-                    percentage = ((signal.entry_price - signal.target_price) / signal.entry_price) * 100;
-                  }
-                  
-                  // Garantir que sempre seja positivo e maior que 6%
-                  const absolutePercentage = Math.abs(percentage);
-                  return Math.max(absolutePercentage, 6.0).toFixed(2);
-                };
-                
-                // Mapear a classificação corretamente
-                const getSignalClass = (signalClass: string): 'PREMIUM' | 'ELITE' => {
-                  if (signalClass === 'ELITE') return 'ELITE';
-                  return 'PREMIUM'; // Default para PREMIUM
-                };
-              
-                return (
-                  <SignalCard
-                    key={index}
-                    symbol={signal.symbol}
-                    type={signal.type === 'LONG' ? 'COMPRA' : 'VENDA'} // Converter para exibição
-                    entryPrice={(() => {
-                      // Determinar o número de casas decimais do preço de entrada
-                      const entryStr = signal.entry_price.toString();
-                      const decimalPlaces = entryStr.includes('.') ? entryStr.split('.')[1].length : 0;
-                      return signal.entry_price.toFixed(Math.max(decimalPlaces, 3)); // Mínimo 3 casas decimais
-                    })()}
-                    targetPrice={(() => {
-                      // Usar o mesmo número de casas decimais do preço de entrada
-                      const entryStr = signal.entry_price.toString();
-                      const decimalPlaces = entryStr.includes('.') ? entryStr.split('.')[1].length : 0;
-                      return signal.target_price.toFixed(Math.max(decimalPlaces, 3)); // Mínimo 3 casas decimais
-                    })()}
-                    projectionPercentage={calculateProjectionPercentage()}
-                    date={signal.entry_time}
-                    signalClass={getSignalClass(signal.signal_class)}
-                  />
-                );
-              })}
-            </div>
+        {/* 3. Conteúdo dos sinais - MODIFICADO para não sumir durante refresh */}
+        {loading && signals.length === 0 && <p className={styles.loadingMessage}>Carregando sinais...</p>}
+        {error && <p className={styles.errorMessage}>Erro: {error}</p>}
+        {!loading && !error && signals.length === 0 && <p className={styles.noSignalsMessage}>Nenhum sinal disponível no momento.</p>}
+        
+        {/* Sempre mostrar sinais se existirem, mesmo durante refresh */}
+        {signals.length > 0 && (
+          <div className={`${styles.signalCardsContainer} ${refreshing ? styles.refreshing : ''}`}>
+            {signals.map((signal, index) => (
+              <SignalCard
+                key={`${signal.symbol}-${signal.entry_time}-${index}`} // Key mais específica
+                symbol={signal.symbol}
+                type={signal.type === 'LONG' ? 'COMPRA' : 'VENDA'}
+                entryPrice={String(signal.entry_price)}
+                targetPrice={String(signal.target_price)}
+                projectionPercentage={String(signal.projection_percentage || 0)}
+                date={signal.entry_time}
+                signalClass={signal.signal_class as 'PREMIUM' | 'ELITE'}
+              />
+            ))}
           </div>
-          {/* REMOVIDO: BtcSentimentCard */}
-        </div>
+        )}
       </div>
-    
+    </div>
   );
 }
 
