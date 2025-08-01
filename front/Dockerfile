@@ -9,7 +9,7 @@ WORKDIR /app
 # Copiar package.json e package-lock.json
 COPY package*.json ./
 
-# Limpar cache do npm e instalar TODAS as dependências (incluindo devDependencies)
+# Limpar cache do npm e instalar TODAS as dependências
 RUN npm cache clean --force
 RUN npm ci
 
@@ -20,6 +20,7 @@ COPY . .
 ENV NODE_ENV=production
 ENV GENERATE_SOURCEMAP=false
 ENV CI=false
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 # Build da aplicação para produção
 RUN npm run build
