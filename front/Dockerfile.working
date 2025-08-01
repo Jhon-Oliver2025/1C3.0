@@ -1,4 +1,4 @@
-# Dockerfile simplificado e funcional
+﻿# Dockerfile simplificado e funcional
 FROM node:18-alpine
 
 # Instalar dependências do sistema
@@ -22,9 +22,13 @@ COPY index.html ./
 # Configurar ambiente
 ENV NODE_ENV=production
 ENV CI=false
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 # Build da aplicação
 RUN npm run build
+
+# Verificar se o build foi criado
+RUN ls -la dist/
 
 # Servir com servidor simples
 RUN npm install -g serve
@@ -32,3 +36,58 @@ RUN npm install -g serve
 EXPOSE 3000
 
 CMD ["serve", "-s", "dist", "-l", "3000"]
+
+
+# Dockerfile otimizado para Alpine Linux
+FROM node:18-alpine
+
+# Instalar dependências do sistema necessárias
+RUN apk add --no-cache git python3 make g++
+
+WORKDIR /app
+
+# Copiar arquivos de configuração
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY vite.config.ts ./
+
+# Limpar cache e instalar dependências
+RUN npm cache clean --force
+RUN rm -rf node_modules package-lock.json
+RUN npm install
+
+# Copiar código fonte
+COPY src/ ./src/
+COPY public/ ./public/
+COPY index.html ./
+
+# Configurar ambiente
+ENV NODE_ENV=production
+ENV CI=false
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Build da aplicação
+RUN npm run build
+
+# Verificar se o build foi criado
+RUN ls -la dist/
+
+# Servir com servidor simples
+RUN npm install -g serve
+
+EXPOSE 3000
+
+CMD ["serve", "-s", "dist", "-l", "3000"]
+
+
+## 🎯 Excelente! O Dockerfile.working Está Funcionando!
+
+O build chegou até a etapa 11/12 e só falhou no `npm run build` por um problema específico do **Rollup** no ambiente Alpine Linux.
+
+## 🔍 Diagnóstico do Erro
+
+O erro `Cannot find module @rollup/rollup-linux-x64-musl` é um problema conhecido do npm com dependências opcionais no Alpine Linux.
+
+## ✅ Solução: Dockerfile.working Otimizado
+
+Vamos corrigir com uma versão que resolve o problema do Rollup:
