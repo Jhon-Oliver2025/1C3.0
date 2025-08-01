@@ -1,54 +1,34 @@
-# Estágio 1: Build da aplicação React
-FROM node:18-alpine as build
+# Dockerfile simplificado e funcional
+FROM node:18-alpine
 
-# Instalar dependências do sistema necessárias
-RUN apk add --no-cache git python3 make g++
+# Instalar dependências do sistema
+RUN apk add --no-cache git
 
 WORKDIR /app
 
-# Copiar package.json e package-lock.json
+# Copiar arquivos de configuração
 COPY package*.json ./
+COPY tsconfig.json ./
+COPY vite.config.ts ./
 
-# Limpar cache do npm e instalar TODAS as dependências
-RUN npm cache clean --force
-RUN npm ci
+# Instalar TODAS as dependências
+RUN npm install
 
 # Copiar código fonte
-COPY . .
+COPY src/ ./src/
+COPY public/ ./public/
+COPY index.html ./
 
-# Definir variáveis de ambiente para build
+# Configurar ambiente
 ENV NODE_ENV=production
-ENV GENERATE_SOURCEMAP=false
 ENV CI=false
-ENV NODE_OPTIONS="--max-old-space-size=4096"
 
-# Build da aplicação para produção
+# Build da aplicação
 RUN npm run build
 
-# Verificar se o build foi criado
-RUN ls -la dist/
+# Servir com servidor simples
+RUN npm install -g serve
 
-# Estágio 2: Servir com Nginx
-FROM nginx:alpine
+EXPOSE 3000
 
-# Instalar curl para health check
-RUN apk add --no-cache curl
-
-# Copiar configuração customizada do Nginx
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Copiar arquivos buildados do estágio anterior
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Criar arquivo index.html se não existir (fallback)
-RUN test -f /usr/share/nginx/html/index.html || echo '<h1>Build Error</h1>' > /usr/share/nginx/html/index.html
-
-# Expor porta 80
-EXPOSE 80
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost/ || exit 1
-
-# Comando padrão do Nginx
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", "dist", "-l", "3000"]
