@@ -21,12 +21,16 @@ const RegisterPage: React.FC = () => {
         }
 
         try {
-            const response = await fetch('/api/register', { // CORRIGIDO: Usar proxy do Vite
+            const response = await fetch('/api/auth/register', { // CORRIGIDO: endpoint correto
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ 
+                    username: email, // CORRIGIDO: backend espera username
+                    email: email,
+                    password 
+                }),
             });
 
             const data = await response.json();
@@ -58,35 +62,38 @@ const RegisterPage: React.FC = () => {
 
                 <form onSubmit={handleRegister}>
                     <div className={styles.formGroup}>
-                        <label htmlFor="email">Email:</label>
+                        <label htmlFor="email">Email</label>
                         <input
                             type="email"
                             id="email"
                             placeholder="seuemail@exemplo.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            autoComplete="username"
                             required
                         />
                     </div>
                     <div className={styles.formGroup}>
-                        <label htmlFor="password">Senha:</label>
+                        <label htmlFor="password">Senha</label>
                         <input
                             type="password"
                             id="password"
                             placeholder="********"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
+                            autoComplete="new-password"
                             required
                         />
                     </div>
-                    <div className={styles.formGroup}> {/* Novo campo para confirmar senha */}
-                        <label htmlFor="confirmPassword">Confirmar Senha:</label>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="confirmPassword">Confirmar Senha</label>
                         <input
                             type="password"
                             id="confirmPassword"
                             placeholder="********"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
+                            autoComplete="new-password"
                             required
                         />
                     </div>

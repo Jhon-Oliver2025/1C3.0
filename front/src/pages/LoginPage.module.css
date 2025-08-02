@@ -1,25 +1,31 @@
 .loginPageContainer {
   min-height: 100vh;
+  width: 100vw; /* Adicionar largura total da viewport */
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url('../assets/terra.png'); /* Referencia terra.png */
+  background-image: url('../assets/terra.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  /* REMOVED: padding: 20px; */ /* Removido para que o fundo ocupe 100% da tela */
+  margin: 0; /* Remover margens */
+  padding: 0; /* Remover padding */
+  position: fixed; /* Fixar posição */
+  top: 0;
+  left: 0;
 }
 
 .loginCard {
-  background-color: rgba(10, 25, 47, 0.4); /* Cor de fundo do card: azul mais escuro e profundo, com mais transparência */
+  background-color: rgba(10, 25, 47, 0.4);
   border-radius: 10px;
   padding: 40px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Sombra mais pronunciada */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
   text-align: center;
-  max-width: 400px; /* Largura máxima do card */
-  width: 100%; /* Garante que o card ocupe a largura total disponível */
-  color: #E2E8F0; /* Cor do texto dentro do card */
+  max-width: 400px;
+  width: 90%; /* Ajustar para responsividade */
+  color: #E2E8F0;
+  margin: 20px; /* Adicionar margem para espaçamento */
 }
 
 .logoSection {
