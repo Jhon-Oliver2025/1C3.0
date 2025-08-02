@@ -25,7 +25,7 @@ server = Flask(__name__, static_folder='static', static_url_path='')
 # Configuração de CORS para produção
 if IS_PRODUCTION:
     # CORS restritivo para produção
-    allowed_origins = os.getenv('CORS_ORIGINS', 'https://1crypten.space').split(',')
+    allowed_origins = os.getenv('CORS_ORIGINS', 'https://1crypten.space,https://www.1crypten.space').split(',')
     # Sempre permitir localhost para testes locais
     localhost_origins = ['http://localhost:3000', 'http://localhost:5173']
     allowed_origins.extend(localhost_origins)
