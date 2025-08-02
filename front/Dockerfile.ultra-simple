@@ -1,23 +1,26 @@
 # Dockerfile ultra-simples para Coolify
 FROM node:18-alpine
 
-# Instalar dependências do sistema necessárias
-RUN apk add --no-cache python3 make g++
+# Instalar dependências do sistema
+RUN apk add --no-cache python3 make g++ git
 
 WORKDIR /app
 
 # Copiar package.json
 COPY package.json ./
 
-# Limpar cache do npm e instalar dependências
+# Instalar dependências
 RUN npm cache clean --force && \
-    npm install --legacy-peer-deps --no-optional
+    npm install --legacy-peer-deps --verbose
 
 # Copiar código fonte
 COPY . .
 
-# Build da aplicação
-RUN npm run build
+# Verificar se os arquivos necessários existem
+RUN ls -la src/ && ls -la src/pages/ && ls -la src/components/
+
+# Build da aplicação com mais detalhes de erro
+RUN npm run build --verbose
 
 # Servir com nginx
 FROM nginx:alpine
