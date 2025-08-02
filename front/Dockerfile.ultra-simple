@@ -3,14 +3,20 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copiar tudo
+# Instalar yarn globalmente
+RUN npm install -g yarn
+
+# Copiar package.json e yarn.lock
+COPY package.json yarn.lock ./
+
+# Instalar dependências com yarn
+RUN yarn install --frozen-lockfile
+
+# Copiar código fonte
 COPY . .
 
-# Instalar dependências sem flags especiais
-RUN npm install
-
 # Build
-RUN npm run build
+RUN yarn build
 
 # Servir com nginx
 FROM nginx:alpine
