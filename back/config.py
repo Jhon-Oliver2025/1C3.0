@@ -148,3 +148,14 @@ def load_user(user_id):
     if user_id == 'admin':
         return User(user_id)
     return None
+
+# Adicionar após as configurações existentes
+# Configurações de performance
+server.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # 1 ano
+server.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
+server.config['JSON_SORT_KEYS'] = False
+server.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+
+# Configurações de timeout para requests
+server.config['REQUESTS_TIMEOUT'] = 60
+server.config['BINANCE_TIMEOUT'] = 60

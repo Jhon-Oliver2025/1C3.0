@@ -31,10 +31,10 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      interval: 60s        # Aumentar de 30s para 60s
+      timeout: 30s         # Aumentar de 10s para 30s
+      retries: 5           # Aumentar de 3 para 5
+      start_period: 120s   # Aumentar de 40s para 120s
 
   frontend:
     build:
@@ -50,10 +50,10 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      interval: 60s        # Aumentar de 30s para 60s
+      timeout: 30s         # Aumentar de 10s para 30s
+      retries: 5           # Aumentar de 3 para 5
+      start_period: 120s   # Aumentar de 40s para 120s
 
   db:
     image: postgres:15-alpine

@@ -161,10 +161,14 @@ class BinanceClient:
                     request_params['signature'] = self._generate_signature(request_params)
                 
                 # Fazer a requisição com timeout maior
+                # No método make_request, linha ~165
                 if method == 'GET':
-                    response = requests.get(url, params=request_params, headers=headers, timeout=30)  # Aumentar timeout
+                    response = requests.get(url, params=request_params, headers=headers, timeout=60)  # Aumentar de 30s para 60s
                 else:
-                    response = requests.post(url, json=request_params, headers=headers, timeout=30)
+                    response = requests.post(url, json=request_params, headers=headers, timeout=60)
+                
+                # Também otimizar o rate limiting
+                time.sleep(0.01)  # Reduzir de 0.02 para 0.01 (10ms)
                 
                 # Verificar resposta
                 if response.status_code == 200:
