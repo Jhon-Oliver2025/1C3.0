@@ -1,10 +1,10 @@
 # Dockerfile ultra-simples para Coolify
 FROM node:18-alpine
 
-WORKDIR /app
+# Habilitar corepack para usar yarn
+RUN corepack enable
 
-# Instalar yarn globalmente
-RUN npm install -g yarn
+WORKDIR /app
 
 # Copiar package.json e yarn.lock
 COPY package.json yarn.lock ./
