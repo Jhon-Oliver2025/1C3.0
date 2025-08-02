@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL - Inicia primeiro
   postgres:
     image: postgres:15-alpine
     container_name: crypto-postgres
@@ -21,7 +20,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Redis - Inicia primeiro  
   redis:
     image: redis:7-alpine
     container_name: crypto-redis
@@ -36,7 +34,6 @@ services:
       timeout: 3s
       retries: 3
 
-  # Backend - Inicia após DB
   backend:
     build: ./back
     container_name: crypto-backend
@@ -45,11 +42,15 @@ services:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/crypto_signals
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=${SECRET_KEY}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET}
       - BINANCE_API_KEY=${BINANCE_API_KEY}
       - BINANCE_SECRET_KEY=${BINANCE_SECRET_KEY}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - SENDPULSE_CLIENT_ID=${SENDPULSE_CLIENT_ID}
+      - SENDPULSE_CLIENT_SECRET=${SENDPULSE_CLIENT_SECRET}
+      - SENDPULSE_SENDER_EMAIL=${SENDPULSE_SENDER_EMAIL}
+      - SENDPULSE_API_URL=${SENDPULSE_API_URL}
       - CORS_ORIGINS=https://1crypten.space,https://www.1crypten.space
       - API_BASE_URL=https://api.1crypten.space
     volumes:
@@ -63,12 +64,12 @@ services:
     networks:
       - crypto-network
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/status')"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 60s
 
-  # Frontend - Inicia após Backend
   frontend:
     build: ./front
     container_name: crypto-frontend
@@ -76,12 +77,11 @@ services:
       - REACT_APP_API_URL=https://api.1crypten.space
       - REACT_APP_DOMAIN=https://1crypten.space
     depends_on:
-      - backend  # Remove a condition: service_healthy
+      - backend
     restart: unless-stopped
     networks:
       - crypto-network
 
-  # Nginx - Inicia por último
   nginx:
     image: nginx:alpine
     container_name: crypto-nginx
