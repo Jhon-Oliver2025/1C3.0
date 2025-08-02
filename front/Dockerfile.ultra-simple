@@ -6,17 +6,17 @@ RUN corepack enable
 
 WORKDIR /app
 
-# Copiar package.json e yarn.lock
-COPY package.json yarn.lock ./
+# Copiar package.json
+COPY package.json ./
 
-# Instalar dependências com yarn
-RUN yarn install --frozen-lockfile
+# Instalar dependências com npm
+RUN npm install --legacy-peer-deps
 
 # Copiar código fonte
 COPY . .
 
-# Build
-RUN yarn build
+# Build da aplicação
+RUN npm run build
 
 # Servir com nginx
 FROM nginx:alpine
