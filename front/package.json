@@ -1,28 +1,35 @@
 {
-  "name": "frontend7",
+  "name": "crypto-frontend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build --mode production",
+    "preview": "vite preview"
+  },
   "dependencies": {
+    "@chatscope/chat-ui-kit-react": "^2.1.1",
+    "@chatscope/chat-ui-kit-styles": "^1.4.0",
+    "@types/react-chat-widget": "^2.1.0",
+    "axios": "^1.10.0",
     "react": "^18.2.0",
+    "react-chatbot-kit": "^2.2.2",
     "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.26.1"
   },
   "devDependencies": {
+    "@types/node": "^24.0.10",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^8.57.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
+    "terser": "^5.43.1",
     "@rollup/rollup-linux-x64-gnu": "latest",
     "@rollup/rollup-linux-x64-musl": "latest"
-  },
-  "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build --mode production",
-    "preview": "vite preview"
   }
 }
