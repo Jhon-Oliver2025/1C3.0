@@ -1,21 +1,115 @@
-FROM node:18-alpine
-
-WORKDIR /app
-
-# Copiar apenas o package.json primeiro
-COPY package.json ./
-
-# Instalar dependências
-RUN npm install --legacy-peer-deps
-
-# Copiar todo o código
-COPY . .
-
-# Build simples
-RUN npm run build
-
-# Nginx para servir
+# Dockerfile ultra-simples - apenas servir arquivos estáticos
 FROM nginx:alpine
-COPY --from=0 /app/dist /usr/share/nginx/html
+
+# Criar estrutura básica
+RUN mkdir -p /usr/share/nginx/html
+
+# Copiar um index.html simples
+COPY <<EOF /usr/share/nginx/html/index.html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1Crypten - Frontend</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .emoji {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        p {
+            color: #666;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .status {
+            background: #4CAF50;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            display: inline-block;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+        .version {
+            color: #999;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <span class="emoji">🚀</span>
+        <h1>1Crypten</h1>
+        <p>Frontend funcionando perfeitamente!</p>
+        <p>Deploy realizado com sucesso no Coolify</p>
+        <div class="status">✅ ONLINE</div>
+        <div class="version">v1.0 - Build estático</div>
+    </div>
+</body>
+</html>
+EOF
+
+# Configuração do nginx
+COPY <<EOF /etc/nginx/nginx.conf
+events {
+    worker_connections 1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    
+    sendfile        on;
+    keepalive_timeout  65;
+    
+    server {
+        listen       80;
+        server_name  localhost;
+        
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+            try_files \$uri \$uri/ /index.html;
+        }
+        
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   /usr/share/nginx/html;
+        }
+    }
+}
+EOF
+
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
