@@ -6,7 +6,7 @@ services:
       context: ./front
       dockerfile: Dockerfile.ultra-simple  # MUDANÇA: usar o Dockerfile ultra-simples
     ports:
-      - "80:80"
+      - "3000:80"  # MUDANÇA: mapear porta 3000 externa para 80 interna
     depends_on:
       - backend
     networks:
