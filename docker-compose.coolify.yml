@@ -4,9 +4,12 @@ services:
   app:
     build:
       context: ./front
-      dockerfile: Dockerfile.ultra-simple  # MUDANÇA: usar o Dockerfile ultra-simples
+      dockerfile: Dockerfile  # MUDANÇA: usar o Dockerfile principal do React
     ports:
-      - "3000:80"  # MUDANÇA: mapear porta 3000 externa para 80 interna
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=https://1crypten.space/api  # Configurar URL da API
     depends_on:
       - backend
     networks:
@@ -15,6 +18,11 @@ services:
     labels:
       - "coolify.managed=true"
       - "coolify.type=application"
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`1crypten.space`) || Host(`www.1crypten.space`)"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
 
   backend:
     build:
@@ -37,6 +45,7 @@ services:
       - SENDPULSE_CLIENT_SECRET=${SENDPULSE_CLIENT_SECRET}
       - SENDPULSE_SENDER_EMAIL=${SENDPULSE_SENDER_EMAIL}
       - SENDPULSE_API_URL=${SENDPULSE_API_URL}
+      - CORS_ORIGINS=https://1crypten.space,https://www.1crypten.space
     depends_on:
       - db
       - redis
@@ -46,6 +55,11 @@ services:
     labels:
       - "coolify.managed=true"
       - "coolify.type=service"
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`1crypten.space`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=5000"
 
   db:
     image: postgres:15-alpine
