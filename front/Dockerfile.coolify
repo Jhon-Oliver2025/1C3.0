@@ -6,12 +6,14 @@ RUN apk add --no-cache git python3 make g++
 
 WORKDIR /app
 
-# Copiar package.json e package-lock.json
-COPY package*.json ./
+# Copiar package.json
+COPY package.json ./
 
-# Limpar cache e instalar dependências
+# Limpar cache npm
 RUN npm cache clean --force
-RUN npm ci --only=production --silent
+
+# Instalar dependências (sem package-lock.json)
+RUN npm install --production --silent
 
 # Copiar código fonte
 COPY . .
