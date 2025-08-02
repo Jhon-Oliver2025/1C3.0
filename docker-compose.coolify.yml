@@ -4,14 +4,9 @@ services:
   app:
     build:
       context: ./front
-      dockerfile: Dockerfile.working
+      dockerfile: Dockerfile.coolify  # MUDANÇA: usar o novo Dockerfile
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - CI=false
-      - GENERATE_SOURCEMAP=false
-      - NODE_OPTIONS=--max-old-space-size=4096
+      - "80:80"  # MUDANÇA: porta 80 do nginx
     depends_on:
       - backend
     networks:
