@@ -21,7 +21,7 @@ const RegisterPage: React.FC = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5001/api/register', { // ALTERADO: Porta para 5001
+            const response = await fetch('/api/register', { // CORRIGIDO: Usar proxy do Vite
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

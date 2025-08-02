@@ -118,7 +118,7 @@ def forgot_password():
             return jsonify({"message": "Erro ao gerar token de redefinição de senha."}), 500
 
         # Construir o link de redefinição
-        frontend_reset_url = "http://localhost:5173/reset-password"
+        frontend_reset_url = "https://1crypten.space/reset-password"  # CORRIGIDO: URL de produção
         query_string = urlencode({'token': token, 'userId': user_id})
         reset_link = f"{frontend_reset_url}?{query_string}"
 
@@ -213,4 +213,67 @@ def reset_password():
 
     except Exception as e:
         current_app.logger.error(f"Erro inesperado ao redefinir senha: {e}", exc_info=True)
+        return jsonify({"error": "Erro interno do servidor"}), 500
+
+@auth_bp.route('/register', methods=['POST'])
+def register():
+    """Endpoint para registro de usuário"""
+    try:
+        data = request.get_json()
+        if data is None:
+            current_app.logger.warning("Corpo da requisição inválido ou vazio para /api/auth/register.")
+            return jsonify({"message": "Corpo da requisição inválido ou vazio. Esperado JSON."}), 400
+
+        email = data.get('email')
+        password = data.get('password')
+
+        if not email or not password:
+            current_app.logger.warning("Tentativa de registro sem e-mail ou senha.")
+            return jsonify({"message": "E-mail e senha são obrigatórios."}), 400
+
+        # Type hint para resolver o erro do Pyright
+        bot_instance: Any = getattr(current_app, 'bot_instance', None)
+        if not bot_instance:
+            return jsonify({'error': 'Sistema não inicializado'}), 500
+            
+        # Verificar se usuário já existe
+        existing_user = None
+        try:
+            existing_user = bot_instance.db.get_user_by_email(email)
+        except AttributeError:
+            # Método get_user_by_email pode não existir, usar get_user_by_username
+            existing_user = bot_instance.db.get_user_by_username(email)
+
+        if existing_user:
+            current_app.logger.warning(f"Tentativa de registro com e-mail já existente: {email}")
+            return jsonify({"message": "E-mail já registrado."}), 409
+
+        # Gerar hash da senha
+        password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+        # Criar novo usuário (adapte conforme sua estrutura de banco)
+        try:
+            # Assumindo que existe um método para criar usuário
+            user_data = {
+                'username': email,  # Usando email como username
+                'email': email,
+                'password': password_hash,
+                'is_active': True
+            }
+            
+            # Você precisará implementar este método no database.py
+            new_user_id = bot_instance.db.create_user(user_data)
+            
+            if new_user_id:
+                current_app.logger.info(f"Novo usuário registrado: {email}")
+                return jsonify({"message": "Usuário registrado com sucesso!"}), 201
+            else:
+                return jsonify({"message": "Erro ao criar usuário."}), 500
+                
+        except Exception as e:
+            current_app.logger.error(f"Erro ao criar usuário: {e}")
+            return jsonify({"message": "Erro interno ao criar usuário."}), 500
+            
+    except Exception as e:
+        current_app.logger.error(f"Erro inesperado no registro: {e}", exc_info=True)
         return jsonify({"error": "Erro interno do servidor"}), 500
