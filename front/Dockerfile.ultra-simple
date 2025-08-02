@@ -1,16 +1,17 @@
 # Dockerfile ultra-simples para Coolify
 FROM node:18-alpine
 
-# Habilitar corepack para usar yarn
-RUN corepack enable
+# Instalar dependências do sistema necessárias
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
 # Copiar package.json
 COPY package.json ./
 
-# Instalar dependências com npm
-RUN npm install --legacy-peer-deps
+# Limpar cache do npm e instalar dependências
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps --no-optional
 
 # Copiar código fonte
 COPY . .

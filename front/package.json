@@ -28,8 +28,6 @@
     "eslint": "^8.57.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
-    "terser": "^5.43.1",
-    "@rollup/rollup-linux-x64-gnu": "latest",
-    "@rollup/rollup-linux-x64-musl": "latest"
+    "terser": "^5.43.1"
   }
 }
