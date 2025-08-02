@@ -36,7 +36,7 @@ class BinanceClient:
         self.logger: Logger = self.setup_logging()
         self.time_offset = 0
         self._init_time_offset()
-        self.logger.info("✅ BinanceClient inicializado com sucesso")
+        self.logger.info("BinanceClient inicializado com sucesso")
 
     def _check_api_enabled(self) -> bool:
         """Verifica se a API está habilitada antes de fazer chamadas"""
