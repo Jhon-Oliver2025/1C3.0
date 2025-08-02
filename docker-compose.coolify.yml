@@ -4,9 +4,9 @@ services:
   app:
     build:
       context: ./front
-      dockerfile: Dockerfile.coolify  # MUDANÇA: usar o novo Dockerfile
+      dockerfile: Dockerfile.ultra-simple  # MUDANÇA: usar o Dockerfile ultra-simples
     ports:
-      - "80:80"  # MUDANÇA: porta 80 do nginx
+      - "80:80"
     depends_on:
       - backend
     networks:
