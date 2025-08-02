@@ -159,3 +159,8 @@ server.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 # Configurações de timeout para requests
 server.config['REQUESTS_TIMEOUT'] = 60
 server.config['BINANCE_TIMEOUT'] = 60
+CORS_ORIGINS = [
+    "https://1crypten.space",
+    "https://www.1crypten.space",
+    "http://localhost:3000"  # Para desenvolvimento local
+]

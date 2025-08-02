@@ -57,6 +57,11 @@ def register_api_routes(app_instance, bot_instance):
     def api_health_check():
         return {"status": "ok"}, 200
     
+    # NOVA: Adicionar rota /api/health
+    @app_instance.route('/api/health', methods=['GET', 'HEAD'])
+    def api_health():
+        return {"status": "healthy", "service": "crypto-signals-api"}, 200
+    
     # Adicionar rota direta para compatibilidade com frontend
     @app_instance.route('/signals', methods=['GET'])
     def get_signals_direct():
