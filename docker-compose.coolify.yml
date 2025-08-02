@@ -4,11 +4,14 @@ services:
   app:
     build:
       context: ./front
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.working  # ALTERADO: usar Dockerfile.working
     ports:
-      - "80:80"
+      - "3000:3000"  # ALTERADO: porta correta
     environment:
       - NODE_ENV=production
+      - CI=false
+      - GENERATE_SOURCEMAP=false
+      - NODE_OPTIONS=--max-old-space-size=4096
     depends_on:
       - backend
     networks:
