@@ -579,3 +579,29 @@ class Database:
             # print(f"DEBUG DB: Nenhum token válido encontrado para '{token}' ou token expirado.") # Removido
             pass # Não é necessário imprimir nada aqui se o token não for encontrado/válido
         return None
+
+    def save_signal_to_database(self, signal_data):
+        """Salva sinal no banco de dados com correção do warning pandas"""
+        try:
+            # ... existing code ...
+            
+            # Corrigir warning do pandas concat
+            if not existing_df.empty and not new_signal_df.empty:
+                # Verificar se há colunas vazias antes do concat
+                existing_df = existing_df.dropna(how='all', axis=1)
+                new_signal_df = new_signal_df.dropna(how='all', axis=1)
+                updated_df = pd.concat([existing_df, new_signal_df], ignore_index=True)
+            elif not new_signal_df.empty:
+                updated_df = new_signal_df.copy()
+            else:
+                updated_df = existing_df.copy()
+                
+            # Salva o DataFrame atualizado de volta no arquivo
+            updated_df.to_csv(self.signals_list_file, index=False)
+            print(f"✅ Sinal adicionado para {signal_data.get('symbol')}")
+            return True # Sinal adicionado com sucesso
+
+        except Exception as e:
+            print(f"❌ Erro ao adicionar sinal: {e}")
+            traceback.print_exc()
+            return False # Indica que ocorreu um erro

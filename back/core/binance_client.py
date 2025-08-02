@@ -136,15 +136,15 @@ class BinanceClient:
         ).hexdigest()
 
     def make_request(self, endpoint: str, method: str = 'GET', params: Optional[Dict] = None, auth: bool = False) -> Optional[Dict]:
-        """Faz requisição para API Binance com rate limiting"""
+        """Faz requisição para API Binance com rate limiting otimizado"""
         if not self._check_api_enabled():
             return None
             
         max_retries = 3
         retry_delay = 1
         
-        # Rate limiting: máximo 1200 requests por minuto
-        time.sleep(0.05)  # 50ms entre requests
+        # Rate limiting otimizado: reduzir delay entre requests
+        time.sleep(0.02)  # 20ms entre requests (era 50ms)
         
         for attempt in range(max_retries):
             try:
@@ -154,18 +154,17 @@ class BinanceClient:
                 # Preparar parâmetros
                 request_params = params or {}
                 if auth:
-                    # Adicionar recvWindow para dar mais margem de tempo
                     if 'recvWindow' not in request_params:
-                        request_params['recvWindow'] = 5000  # 5 segundos
+                        request_params['recvWindow'] = 10000  # Aumentar para 10 segundos
                     
                     request_params['timestamp'] = self.get_timestamp()
                     request_params['signature'] = self._generate_signature(request_params)
                 
-                # Fazer a requisição
+                # Fazer a requisição com timeout maior
                 if method == 'GET':
-                    response = requests.get(url, params=request_params, headers=headers, timeout=10)
+                    response = requests.get(url, params=request_params, headers=headers, timeout=30)  # Aumentar timeout
                 else:
-                    response = requests.post(url, json=request_params, headers=headers, timeout=10)
+                    response = requests.post(url, json=request_params, headers=headers, timeout=30)
                 
                 # Verificar resposta
                 if response.status_code == 200:

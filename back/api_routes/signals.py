@@ -1,9 +1,23 @@
 from flask import Blueprint, request, jsonify, current_app, g
 import csv
 import os
+import threading
+import time
+from datetime import datetime
+
 from middleware.auth_middleware import jwt_required
 
 signals_bp = Blueprint('signals', __name__)
+
+# Variável global para status da análise
+analysis_status = {
+    'running': False,
+    'progress': 0,
+    'total': 0,
+    'current_symbol': '',
+    'start_time': None,
+    'errors': []
+}
 
 def get_signals_from_csv():
     """Função para ler sinais do arquivo CSV"""
@@ -95,3 +109,77 @@ def get_signals():
     except Exception as e:
         current_app.logger.error(f"Erro ao obter sinais: {e}", exc_info=True)
         return jsonify({"error": "Erro interno do servidor ao obter sinais"}), 500
+
+@signals_bp.route('/start-analysis', methods=['POST'])
+@jwt_required
+def start_analysis():
+    """Inicia análise assíncrona de criptomoedas"""
+    global analysis_status
+    
+    if analysis_status['running']:
+        return jsonify({
+            'success': False,
+            'message': 'Análise já está em execução'
+        }), 400
+    
+    # Iniciar análise em thread separada
+    thread = threading.Thread(target=run_crypto_analysis)
+    thread.daemon = True
+    thread.start()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Análise iniciada com sucesso'
+    })
+
+@signals_bp.route('/analysis-status', methods=['GET'])
+@jwt_required
+def get_analysis_status():
+    """Retorna status da análise em tempo real"""
+    return jsonify(analysis_status)
+
+@signals_bp.route('/stop-analysis', methods=['POST'])
+@jwt_required
+def stop_analysis():
+    """Para a análise em execução"""
+    global analysis_status
+    analysis_status['running'] = False
+    
+    return jsonify({
+        'success': True,
+        'message': 'Análise interrompida'
+    })
+
+def run_crypto_analysis():
+    """Executa análise de criptomoedas em background"""
+    global analysis_status
+    
+    try:
+        analysis_status.update({
+            'running': True,
+            'progress': 0,
+            'total': 100,
+            'start_time': datetime.now().isoformat(),
+            'errors': []
+        })
+        
+        # Aqui você pode integrar com sua lógica real de análise
+        # Por exemplo, chamar o BinanceClient e TechnicalAnalysis
+        
+        for i in range(100):
+            if not analysis_status['running']:  # Permitir cancelamento
+                break
+                
+            analysis_status.update({
+                'progress': i + 1,
+                'current_symbol': f'SYMBOL{i+1}USDT'
+            })
+            
+            # Simular processamento (substituir pela lógica real)
+            time.sleep(0.1)
+            
+    except Exception as e:
+        analysis_status['errors'].append(str(e))
+        current_app.logger.error(f"Erro na análise: {e}")
+    finally:
+        analysis_status['running'] = False

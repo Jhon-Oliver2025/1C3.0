@@ -232,7 +232,7 @@ class GerenciadorSinais:
             # Converter entry_time para datetime
             df['entry_time'] = pd.to_datetime(df['entry_time'])
             
-            # Definir a data de corte como o início do dia atual
+            # Define o início do dia atual
             hoje_inicio = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
             
             # Manter apenas sinais que NÃO estão 'OPEN' OU que são de HOJE
@@ -443,3 +443,27 @@ class GerenciadorSinais:
         except Exception as e:
             print(f"❌ Erro ao limpar sinais futuros: {e}")
             traceback.print_exc()
+
+    # No método onde ocorre o warning
+    def save_signal_to_file(self, signal_data):
+        """Salva sinal no arquivo CSV com correção do warning pandas"""
+        try:
+            # ... existing code ...
+            
+            # Corrigir warning do pandas concat (linha 454)
+            if not existing_df.empty and not new_signal_df.empty:
+                # Verificar se há colunas vazias antes do concat
+                existing_df = existing_df.dropna(how='all', axis=1)
+                new_signal_df = new_signal_df.dropna(how='all', axis=1)
+                updated_df = pd.concat([existing_df, new_signal_df], ignore_index=True)
+            elif not new_signal_df.empty:
+                updated_df = new_signal_df.copy()
+            else:
+                updated_df = existing_df.copy()
+                
+            df.to_csv(self.signals_file, index=False)
+            print(f"✅ Sinal atualizado: {symbol}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Erro ao atualizar sinal: {e}")
