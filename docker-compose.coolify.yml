@@ -56,7 +56,9 @@ services:
       - "coolify.managed=true"
       - "coolify.type=service"
       - "traefik.enable=true"
+      # MUDANÇA: Aumentar prioridade da rota da API
       - "traefik.http.routers.backend.rule=Host(`1crypten.space`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.priority=100"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.backend.loadbalancer.server.port=5000"
