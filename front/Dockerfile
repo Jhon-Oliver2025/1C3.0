@@ -11,10 +11,11 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
-# Copiar arquivos de configuração
+# Copiar arquivos de configuração (CORRIGIDO)
 COPY package*.json ./
-COPY tsconfig.json ./
+COPY tsconfig*.json ./
 COPY vite.config.ts ./
+COPY eslint.config.js ./
 
 # Limpar cache e instalar dependências
 RUN npm cache clean --force
