@@ -39,7 +39,7 @@ class Database:
                 'exit_price', 'result'
             ],
             self.config_file: ['key', 'value'],
-            self.users_file: ['username', 'password', 'email', 'is_admin', 'id'], # Adicionado 'email' para usuários
+            self.users_file: ['username', 'password', 'email', 'is_admin', 'id', 'status'], # Adicionado 'status'
             self.tickers_file: ['symbol', 'baseAsset', 'quoteAsset'], # Colunas para tickers
             self.password_reset_tokens_file: ['user_id', 'token', 'expiration_time', 'used'], # Colunas para tokens de redefinição
             self.auth_tokens_file: ['token', 'user_id', 'created_at', 'expires_at'] # Colunas para tokens de autenticação
@@ -604,4 +604,4 @@ class Database:
         except Exception as e:
             print(f"❌ Erro ao adicionar sinal: {e}")
             traceback.print_exc()
-            return False # Indica que ocorreu um erro
+            return False
