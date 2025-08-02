@@ -5,8 +5,9 @@ export default defineConfig({
   plugins: [react()],
   build: {
     target: 'es2015',
-    minify: 'terser',
+    minify: 'esbuild',
     sourcemap: false,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -18,5 +19,9 @@ export default defineConfig({
   },
   define: {
     'process.env.NODE_ENV': '"production"'
+  },
+  server: {
+    port: 3000,
+    host: true
   }
 });
