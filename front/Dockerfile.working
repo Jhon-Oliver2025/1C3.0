@@ -1,60 +1,42 @@
-﻿# Dockerfile simplificado e funcional
-FROM node:18-alpine
-
-# Instalar dependências do sistema
-RUN apk add --no-cache git
-
-WORKDIR /app
-
-# Copiar arquivos de configuração
-COPY package*.json ./
-COPY tsconfig.json ./
-COPY vite.config.ts ./
-
-# Instalar TODAS as dependências
-RUN npm install
-
-# Copiar código fonte
-COPY src/ ./src/
-COPY public/ ./public/
-COPY index.html ./
-
-# Configurar ambiente
-ENV NODE_ENV=production
-ENV CI=false
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-
-# Build da aplicação
-RUN npm run build
-
-# Verificar se o build foi criado
-RUN ls -la dist/
-
-# Servir com servidor simples
-RUN npm install -g serve
-
-EXPOSE 3000
-
-CMD ["serve", "-s", "dist", "-l", "3000"]
-
-
-# Dockerfile otimizado para Alpine Linux
+﻿# Dockerfile otimizado para resolver problemas do Rollup e tsconfig no Alpine
 FROM node:18-alpine
 
 # Instalar dependências do sistema necessárias
-RUN apk add --no-cache git python3 make g++
+RUN apk add --no-cache \
+    git \
+    python3 \
+    make \
+    g++ \
+    curl \
+    libc6-compat
 
 WORKDIR /app
 
-# Copiar arquivos de configuração
+# Limpar cache do npm
+RUN npm cache clean --force
+
+# Copiar package.json primeiro
 COPY package*.json ./
+
+# Remover package-lock.json e reinstalar dependências
+RUN rm -f package-lock.json
+RUN npm install --verbose
+
+# Instalar terser globalmente (necessário para Vite build)
+RUN npm install -g terser
+
+# Instalar terser localmente também
+RUN npm install terser --save-dev
+
+# Criar tsconfig.node.json limpo (sem BOM)
+RUN echo '{"compilerOptions":{"target":"ES2022","lib":["ES2023"],"module":"ESNext","skipLibCheck":true,"moduleResolution":"bundler","allowSyntheticDefaultImports":true,"strict":true,"noEmit":true},"include":["vite.config.ts"]}' > tsconfig.node.json
+
+# Copiar outros arquivos de configuração
 COPY tsconfig.json ./
 COPY vite.config.ts ./
 
-# Limpar cache e instalar dependências
-RUN npm cache clean --force
-RUN rm -rf node_modules package-lock.json
-RUN npm install
+# Forçar reinstalação do Rollup
+RUN npm rebuild rollup --verbose
 
 # Copiar código fonte
 COPY src/ ./src/
@@ -64,7 +46,17 @@ COPY index.html ./
 # Configurar ambiente
 ENV NODE_ENV=production
 ENV CI=false
+ENV GENERATE_SOURCEMAP=false
 ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Verificar se o tsconfig.node.json está válido
+RUN node -e "console.log('tsconfig.node.json válido:', JSON.parse(require('fs').readFileSync('tsconfig.node.json', 'utf8')))"
+
+# Verificar se o Rollup está funcionando
+RUN npx rollup --version
+
+# Verificar se o terser está disponível
+RUN npx terser --version
 
 # Build da aplicação
 RUN npm run build
@@ -72,22 +64,11 @@ RUN npm run build
 # Verificar se o build foi criado
 RUN ls -la dist/
 
-# Servir com servidor simples
+# Instalar serve para servir arquivos estáticos
 RUN npm install -g serve
 
+# Expor porta
 EXPOSE 3000
 
+# Servir aplicação
 CMD ["serve", "-s", "dist", "-l", "3000"]
-
-
-## 🎯 Excelente! O Dockerfile.working Está Funcionando!
-
-O build chegou até a etapa 11/12 e só falhou no `npm run build` por um problema específico do **Rollup** no ambiente Alpine Linux.
-
-## 🔍 Diagnóstico do Erro
-
-O erro `Cannot find module @rollup/rollup-linux-x64-musl` é um problema conhecido do npm com dependências opcionais no Alpine Linux.
-
-## ✅ Solução: Dockerfile.working Otimizado
-
-Vamos corrigir com uma versão que resolve o problema do Rollup:
