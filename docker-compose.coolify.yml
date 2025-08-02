@@ -4,9 +4,9 @@ services:
   app:
     build:
       context: ./front
-      dockerfile: Dockerfile.working  # ALTERADO: usar Dockerfile.working
+      dockerfile: Dockerfile.working
     ports:
-      - "3000:3000"  # ALTERADO: porta correta
+      - "3000:3000"
     environment:
       - NODE_ENV=production
       - CI=false
@@ -31,7 +31,7 @@ services:
       - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/cryptodb
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=${SECRET_KEY}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET}
       - BINANCE_API_KEY=${BINANCE_API_KEY}
       - BINANCE_SECRET_KEY=${BINANCE_SECRET_KEY}
       - USE_BINANCE_API=true

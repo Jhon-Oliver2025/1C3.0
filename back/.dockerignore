@@ -1,0 +1,13 @@
+# Arquivos de configuração local
+fix_env.py
+fix_env_clean.py
+.env.backup
+.env.corrupted
+.env
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+.DS_Store
+*.log
+data/
