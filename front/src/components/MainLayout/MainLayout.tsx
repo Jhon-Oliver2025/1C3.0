@@ -2,14 +2,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom';
 import TopHeader from '../Layout/TopHeader';
-// Remove this import:
-// import BottomNavBar from '../Layout/BottomNavBar';
 import Navbar from '../Navbar/Navbar';
 import styles from '../Layout/Layout.module.css';
-// CORRIGIDO: Removidos FaChartBar, FaUser, FaCog que não são mais utilizados
 import { FaHome, FaQuestionCircle, FaSignOutAlt } from 'react-icons/fa';
 
-const MainLayout: React.FC = () => {
+// Adicionar interface para props
+interface MainLayoutProps {
+  children?: React.ReactNode;
+}
+
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isBackendOnline, setIsBackendOnline] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -118,7 +120,7 @@ const MainLayout: React.FC = () => {
 
       {/* Main Content */}
       <main className={styles.mainContent}>
-        <Outlet />
+        {children || <Outlet />}
       </main>
     </div>
   );
