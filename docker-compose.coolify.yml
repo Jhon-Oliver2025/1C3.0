@@ -4,7 +4,7 @@ services:
   app:
     build:
       context: ./front
-      dockerfile: Dockerfile.ultra-simple
+      dockerfile: Dockerfile  # ← Mudança aqui!
     environment:
       - NODE_ENV=production
       - VITE_API_URL=https://1crypten.space/api
