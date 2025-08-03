@@ -55,6 +55,16 @@ services:
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.backend.loadbalancer.server.port=5000"
+      # Adicionar timeouts
+      - "traefik.http.services.backend.loadbalancer.responseForwarding.flushInterval=1s"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.timeout=10s"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.interval=30s"
+    healthcheck:  # ← Indentação corrigida (4 espaços)
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   db:
     image: postgres:15-alpine
