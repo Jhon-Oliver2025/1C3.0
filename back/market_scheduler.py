@@ -64,6 +64,10 @@ def execute_morning_cleanup(gerenciador):
     try:
         logger.info("🌅 === INICIANDO LIMPEZA MATINAL (10:00) ===")
         
+        # Registrar execução no arquivo de log
+        with open('/tmp/scheduler_log.txt', 'a') as f:
+            f.write(f"MORNING_CLEANUP_EXECUTED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
         # 1. Limpar sinais antigos (antes das 10:00)
         logger.info("🧹 Limpando sinais antes das 10:00...")
         gerenciador.limpar_sinais_antes_das_10h()
@@ -77,11 +81,17 @@ def execute_morning_cleanup(gerenciador):
         
     except Exception as e:
         logger.error(f"❌ Erro durante limpeza matinal: {e}")
+        with open('/tmp/scheduler_log.txt', 'a') as f:
+            f.write(f"MORNING_CLEANUP_ERROR: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {str(e)}\n")
 
 def execute_evening_cleanup(gerenciador):
     """Executa limpeza noturna às 21:00 - Preparação para mercado ÁSIA"""
     try:
         logger.info("🌙 === INICIANDO LIMPEZA NOTURNA (21:00) ===")
+        
+        # Registrar execução no arquivo de log
+        with open('/tmp/scheduler_log.txt', 'a') as f:
+            f.write(f"EVENING_CLEANUP_EXECUTED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         
         # 1. Limpar sinais antigos (antes das 21:00)
         logger.info("🧹 Limpando sinais antes das 21:00...")
@@ -96,6 +106,8 @@ def execute_evening_cleanup(gerenciador):
         
     except Exception as e:
         logger.error(f"❌ Erro durante limpeza noturna: {e}")
+        with open('/tmp/scheduler_log.txt', 'a') as f:
+            f.write(f"EVENING_CLEANUP_ERROR: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {str(e)}\n")
 
 # REMOVIDO: Função execute_midnight_maintenance
 

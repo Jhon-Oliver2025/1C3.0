@@ -132,6 +132,37 @@ def register_api_routes(app_instance, bot_instance):
         except Exception as e:
             return {"error": f"Erro ao executar limpeza: {str(e)}"}, 500
     
+    # NOVA: Adicionar rota /api/scheduler-logs
+    @app_instance.route('/api/scheduler-logs', methods=['GET'])
+    def scheduler_logs():
+        """Endpoint para verificar logs do scheduler"""
+        try:
+            import os
+            
+            log_file = '/tmp/scheduler_log.txt'
+            
+            if os.path.exists(log_file):
+                with open(log_file, 'r') as f:
+                    logs = f.read().strip().split('\n')
+                
+                # Retornar apenas as últimas 50 linhas
+                recent_logs = logs[-50:] if len(logs) > 50 else logs
+                
+                return {
+                    'logs': recent_logs,
+                    'total_entries': len(logs),
+                    'log_file_exists': True
+                }, 200
+            else:
+                return {
+                    'logs': [],
+                    'total_entries': 0,
+                    'log_file_exists': False,
+                    'message': 'Arquivo de log não encontrado - scheduler pode não ter executado ainda'
+                }, 200
+        except Exception as e:
+            return {"error": str(e)}, 500
+    
     # Adicionar rota direta para compatibilidade com frontend
     @app_instance.route('/signals', methods=['GET'])
     def get_signals_direct():
