@@ -24,6 +24,9 @@ def get_signals_from_csv():
     signals_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'sinais_lista.csv')
     signals_list = []
     
+    current_app.logger.debug(f"Tentando ler arquivo CSV: {signals_file}")
+    current_app.logger.debug(f"Arquivo existe: {os.path.exists(signals_file)}")
+    
     try:
         with open(signals_file, 'r', encoding='utf-8') as file:
             csv_reader = csv.DictReader(file)
