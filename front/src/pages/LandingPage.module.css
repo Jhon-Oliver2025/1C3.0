@@ -1,18 +1,32 @@
 .landingPageContainer {
-  min-height: calc(100vh - 102px); /* Garante que o contêiner ocupe a altura restante da viewport, abaixo da Navbar */
-  /* Removido: padding-top: 150px; */
+  min-height: 100vh; /* Mudança aqui: ocupa toda a altura da viewport */
+  margin: 0; /* Remove margens */
+  padding: 0; /* Remove padding inicial */
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Centraliza o conteúdo verticalmente dentro do espaço disponível */
+  justify-content: center;
   align-items: center;
   text-align: center;
-  color: white; /* Ensure text is visible on dark background */
+  color: white;
   background-image: url('../assets/terra.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  padding: 20px; /* Mantém um padding geral para as laterais e um pouco no topo/base do conteúdo */
+  /* Adicionar estas propriedades para garantir cobertura total */
+  position: relative;
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+/* Adicionar estilo para o body para remover margens padrão */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 .landingPageContainer h1 {
