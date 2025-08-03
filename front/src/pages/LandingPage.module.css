@@ -1,7 +1,8 @@
 .landingPageContainer {
-  min-height: 100vh; /* Mudança aqui: ocupa toda a altura da viewport */
-  margin: 0; /* Remove margens */
-  padding: 0; /* Remove padding inicial */
+  min-height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -13,13 +14,10 @@
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  /* Adicionar estas propriedades para garantir cobertura total */
-  position: relative;
-  width: 100vw;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
 }
 
 /* Adicionar estilo para o body para remover margens padrão */

@@ -1,20 +1,32 @@
 .registerPageContainer {
+  min-height: 100vh;
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f0f2f5; /* Cor de fundo suave */
+  background-image: url('../assets/terra.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
   font-family: Arial, sans-serif;
 }
 
 .registerCard {
-  background-color: #ffffff;
+  background-color: rgba(10, 25, 47, 0.4);
   padding: 40px;
   border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
   text-align: center;
-  width: 100%;
+  width: 90%;
   max-width: 400px;
+  color: #E2E8F0;
+  margin: 20px;
 }
 
 .logoSection {
@@ -27,13 +39,13 @@
 }
 
 .registerCard h2 {
-  color: #333;
+  color: #64FFDA;
   margin-bottom: 10px;
   font-size: 1.8em;
 }
 
 .registerCard p {
-  color: #666;
+  color: #A0AEC0;
   margin-bottom: 30px;
   font-size: 0.9em;
 }
@@ -46,41 +58,44 @@
 .formGroup label {
   display: block;
   margin-bottom: 8px;
-  color: #555;
+  color: #E2E8F0;
   font-weight: bold;
   font-size: 0.9em;
 }
 
 .formGroup input {
-  width: calc(100% - 20px); /* Padding de 10px em cada lado */
-  padding: 12px 10px;
-  border: 1px solid #ddd;
+  width: calc(100% - 20px);
+  padding: 10px;
+  border: 1px solid #4A5568;
   border-radius: 5px;
+  background-color: #2D3748;
+  color: #E2E8F0;
   font-size: 1em;
-  box-sizing: border-box; /* Inclui padding e borda no width */
+  outline: none;
+  transition: border-color 0.3s ease;
 }
 
 .formGroup input:focus {
-  outline: none;
-  border-color: #007bff; /* Cor de destaque ao focar */
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  border-color: #64FFDA;
 }
 
 .registerButton {
   width: 100%;
   padding: 12px;
-  background-color: #007bff; /* Cor primária */
+  background-color: #00BCD4;
   color: white;
   border: none;
   border-radius: 5px;
   font-size: 1.1em;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 5px rgba(0, 188, 212, 0.5);
 }
 
 .registerButton:hover {
-  background-color: #0056b3; /* Cor mais escura ao passar o mouse */
+  background-color: #00ACC1;
+  box-shadow: 0 0 10px rgba(0, 188, 212, 0.8);
 }
 
 .errorMessage {
