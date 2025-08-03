@@ -67,7 +67,7 @@ def register_api_routes(app_instance, bot_instance):
     def scheduler_status():
         """Retorna o status do agendador de limpeza de sinais"""
         try:
-            from market_scheduler import get_scheduler_status
+            from market_scheduler import get_scheduler_status, restart_scheduler
             from datetime import datetime
             import pytz
             
@@ -169,6 +169,36 @@ def register_api_routes(app_instance, bot_instance):
         """Rota direta para /signals (compatibilidade)"""
         from api_routes.signals import get_signals
         return get_signals()
+    
+    # NOVA: Adicionar rota /api/restart-scheduler
+    @app_instance.route('/api/restart-scheduler', methods=['POST'])
+    def restart_scheduler_endpoint():
+        """Reinicia o scheduler se não estiver rodando"""
+        try:
+            from datetime import datetime
+            import pytz
+            
+            # Obter timezone de São Paulo
+            tz = pytz.timezone('America/Sao_Paulo')
+            now = datetime.now(tz)
+            
+            # Reiniciar o scheduler
+            from market_scheduler import restart_scheduler
+            scheduler_instance = restart_scheduler()
+            
+            return {
+                'success': True,
+                'message': 'Scheduler reiniciado com sucesso',
+                'scheduler_running': scheduler_instance.running if scheduler_instance else False,
+                'timestamp': now.strftime('%Y-%m-%d %H:%M:%S %z')
+            }, 200
+            
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e),
+                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            }, 500
     
     # Armazenar bot_instance para uso nos blueprints
     app_instance.bot_instance = bot_instance

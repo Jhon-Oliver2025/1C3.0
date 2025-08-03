@@ -10,8 +10,18 @@ import pytz
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Variável global para manter o scheduler ativo
+scheduler = None
+
 def setup_market_scheduler(db_instance=None, gerenciador_sinais=None):
     """Configura o agendador de tarefas do mercado com limpezas automáticas"""
+    global scheduler
+    
+    # Se o scheduler já estiver rodando, parar primeiro
+    if scheduler is not None and scheduler.running:
+        logger.info("🔄 Parando scheduler existente...")
+        scheduler.shutdown(wait=False)
+    
     # Configurar timezone para São Paulo (UTC-3)
     timezone = pytz.timezone('America/Sao_Paulo')
     scheduler = BackgroundScheduler(timezone=timezone)
@@ -58,6 +68,22 @@ def setup_market_scheduler(db_instance=None, gerenciador_sinais=None):
     atexit.register(lambda: scheduler.shutdown())
     
     return scheduler
+
+def is_scheduler_running():
+    """Verifica se o scheduler está rodando"""
+    global scheduler
+    return scheduler is not None and scheduler.running
+
+def restart_scheduler(db_instance=None, gerenciador_sinais=None):
+    """Reinicia o scheduler se não estiver rodando"""
+    global scheduler
+    
+    if not is_scheduler_running():
+        logger.info("🔄 Reiniciando scheduler...")
+        return setup_market_scheduler(db_instance, gerenciador_sinais)
+    else:
+        logger.info("✅ Scheduler já está rodando")
+        return scheduler
 
 def execute_morning_cleanup(gerenciador):
     """Executa limpeza matinal às 10:00 - Preparação para mercado USA"""
