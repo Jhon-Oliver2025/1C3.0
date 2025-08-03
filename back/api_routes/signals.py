@@ -110,6 +110,21 @@ def get_signals():
         current_app.logger.error(f"Erro ao obter sinais: {e}", exc_info=True)
         return jsonify({"error": "Erro interno do servidor ao obter sinais"}), 500
 
+@signals_bp.route('/test', methods=['GET'])
+def get_signals_test():
+    """Endpoint de teste para obter sinais sem autenticação"""
+    current_app.logger.debug("Rota /api/signals/test foi acessada!")
+    try:
+        # Obter sinais do CSV
+        all_signals = get_signals_from_csv()
+        
+        current_app.logger.debug(f"DEBUG: Sinais de teste: {len(all_signals)}")
+        return jsonify(all_signals), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Erro ao obter sinais de teste: {e}", exc_info=True)
+        return jsonify({"error": "Erro interno do servidor ao obter sinais"}), 500
+
 @signals_bp.route('/start-analysis', methods=['POST'])
 @jwt_required
 def start_analysis():
