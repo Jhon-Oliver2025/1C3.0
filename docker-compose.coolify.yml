@@ -4,12 +4,10 @@ services:
   app:
     build:
       context: ./front
-      dockerfile: Dockerfile  # MUDANÇA: usar o Dockerfile principal do React
-    ports:
-      - "3000:80"
+      dockerfile: Dockerfile.ultra-simple
     environment:
       - NODE_ENV=production
-      - VITE_API_URL=https://1crypten.space/api  # Configurar URL da API
+      - VITE_API_URL=https://1crypten.space/api
     depends_on:
       - backend
     networks:
@@ -37,10 +35,8 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - BINANCE_API_KEY=${BINANCE_API_KEY}
       - BINANCE_SECRET_KEY=${BINANCE_SECRET_KEY}
-      - USE_BINANCE_API=true
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
-      - USE_TELEGRAM=true
       - SENDPULSE_CLIENT_ID=${SENDPULSE_CLIENT_ID}
       - SENDPULSE_CLIENT_SECRET=${SENDPULSE_CLIENT_SECRET}
       - SENDPULSE_SENDER_EMAIL=${SENDPULSE_SENDER_EMAIL}
@@ -53,10 +49,7 @@ services:
       - crypto-network
     restart: unless-stopped
     labels:
-      - "coolify.managed=true"
-      - "coolify.type=service"
       - "traefik.enable=true"
-      # MUDANÇA: Aumentar prioridade da rota da API
       - "traefik.http.routers.backend.rule=Host(`1crypten.space`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.priority=100"
       - "traefik.http.routers.backend.tls=true"
@@ -75,9 +68,6 @@ services:
     networks:
       - crypto-network
     restart: unless-stopped
-    labels:
-      - "coolify.managed=true"
-      - "coolify.type=database"
 
   redis:
     image: redis:7-alpine
@@ -87,9 +77,6 @@ services:
     networks:
       - crypto-network
     restart: unless-stopped
-    labels:
-      - "coolify.managed=true"
-      - "coolify.type=cache"
 
 volumes:
   postgres_data:
