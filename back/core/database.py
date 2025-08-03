@@ -161,6 +161,37 @@ class Database:
         except Exception as e:
             print(f"❌ Erro ao adicionar sinal: {e}")
             traceback.print_exc()
+            return False
+
+    def save_auth_token(self, token: str, user_id: int, expires_at: datetime):
+        """Salva um token de autenticação no arquivo CSV"""
+        try:
+            # Lê o arquivo existente ou cria um DataFrame vazio
+            try:
+                tokens_df = pd.read_csv(self.auth_tokens_file)
+            except (pd.errors.EmptyDataError, FileNotFoundError):
+                tokens_df = pd.DataFrame(columns=['token', 'user_id', 'created_at', 'expires_at'])
+            
+            # Remove tokens antigos para o mesmo usuário
+            tokens_df = tokens_df[tokens_df['user_id'] != user_id]
+            
+            # Adiciona o novo token
+            new_token_data = pd.DataFrame([{
+                'token': token,
+                'user_id': user_id,
+                'created_at': datetime.now().isoformat(),
+                'expires_at': expires_at.isoformat()
+            }])
+            
+            tokens_df = pd.concat([tokens_df, new_token_data], ignore_index=True)
+            tokens_df.to_csv(self.auth_tokens_file, index=False)
+            
+            print(f"✅ Token de autenticação salvo para usuário {user_id}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Erro ao salvar token de autenticação: {e}")
+            traceback.print_exc()
             return False # Indica que ocorreu um erro
 
     def update_signal_status(self, symbol: str, entry_time: str, status: str, exit_price: Optional[float] = None, variation: Optional[float] = None, result: Optional[str] = None) -> None:
