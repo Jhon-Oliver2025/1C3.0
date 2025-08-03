@@ -55,7 +55,10 @@ services:
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
       - "traefik.http.services.backend.loadbalancer.server.port=5000"
-      # Adicionar timeouts
+      # Configurações de timeout mais agressivas
+      - "traefik.http.services.backend.loadbalancer.healthcheck.path=/api/status"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.interval=10s"
+      - "traefik.http.services.backend.loadbalancer.healthcheck.timeout=5s"
       - "traefik.http.services.backend.loadbalancer.responseForwarding.flushInterval=1s"
       - "traefik.http.services.backend.loadbalancer.healthcheck.timeout=10s"
       - "traefik.http.services.backend.loadbalancer.healthcheck.interval=30s"
