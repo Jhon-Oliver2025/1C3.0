@@ -84,6 +84,54 @@ def register_api_routes(app_instance, bot_instance):
         except Exception as e:
             return {"error": f"Erro ao obter status do scheduler: {str(e)}"}, 500
     
+    # NOVA: Adicionar rota /api/force-cleanup
+    @app_instance.route('/api/force-cleanup', methods=['POST'])
+    def force_cleanup():
+        """Endpoint para forçar limpeza manual dos sinais"""
+        try:
+            from core.gerenciar_sinais import GerenciadorSinais
+            from core.database import Database
+            import pytz
+            from datetime import datetime
+            
+            # Inicializar componentes
+            db = Database()
+            gerenciador = GerenciadorSinais(db)
+            
+            # Obter horário atual
+            tz = pytz.timezone('America/Sao_Paulo')
+            now = datetime.now(tz)
+            
+            results = {
+                'timestamp': now.strftime('%Y-%m-%d %H:%M:%S %Z'),
+                'cleanups_executed': []
+            }
+            
+            # Executar limpeza matinal
+            try:
+                gerenciador.limpar_sinais_antes_das_10h()
+                results['cleanups_executed'].append('morning_cleanup_10h')
+            except Exception as e:
+                results['morning_cleanup_error'] = str(e)
+            
+            # Executar limpeza noturna
+            try:
+                gerenciador.limpar_sinais_antes_das_21h()
+                results['cleanups_executed'].append('evening_cleanup_21h')
+            except Exception as e:
+                results['evening_cleanup_error'] = str(e)
+            
+            # Executar limpeza de sinais futuros
+            try:
+                gerenciador.limpar_sinais_futuros()
+                results['cleanups_executed'].append('future_signals_cleanup')
+            except Exception as e:
+                results['future_signals_error'] = str(e)
+            
+            return results, 200
+        except Exception as e:
+            return {"error": f"Erro ao executar limpeza: {str(e)}"}, 500
+    
     # Adicionar rota direta para compatibilidade com frontend
     @app_instance.route('/signals', methods=['GET'])
     def get_signals_direct():
