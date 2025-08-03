@@ -122,9 +122,23 @@ def generate_daily_stats(gerenciador):
 
 def get_scheduler_status():
     """Retorna o status do agendador para monitoramento"""
+    from datetime import datetime
+    import pytz
+    
+    # Obter timezone de São Paulo
+    tz = pytz.timezone('America/Sao_Paulo')
+    now = datetime.now(tz)
+    
     return {
         'morning_cleanup': '10:00 - Limpeza matinal (pré-mercado USA)',
         'evening_cleanup': '21:00 - Limpeza noturna (pré-mercado ÁSIA)',
-        # REMOVIDO: 'midnight_maintenance': '00:00 - Manutenção geral',
-        'status': 'active'
+        'status': 'active',
+        'timezone': 'America/Sao_Paulo',
+        'current_hour': now.hour,
+        'current_minute': now.minute,
+        'last_check': now.strftime('%Y-%m-%d %H:%M:%S'),
+        'jobs_configured': [
+            {'id': 'morning_cleanup', 'time': '10:00', 'description': 'Limpeza matinal'},
+            {'id': 'evening_cleanup', 'time': '21:00', 'description': 'Limpeza noturna'}
+        ]
     }

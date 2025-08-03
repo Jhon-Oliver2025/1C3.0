@@ -62,6 +62,28 @@ def register_api_routes(app_instance, bot_instance):
     def api_health():
         return {"status": "healthy", "service": "crypto-signals-api"}, 200
     
+    # NOVA: Adicionar rota /api/scheduler-status
+    @app_instance.route('/api/scheduler-status', methods=['GET'])
+    def scheduler_status():
+        """Retorna o status do agendador de limpeza de sinais"""
+        try:
+            from market_scheduler import get_scheduler_status
+            from datetime import datetime
+            import pytz
+            
+            # Obter timezone de São Paulo
+            tz = pytz.timezone('America/Sao_Paulo')
+            now = datetime.now(tz)
+            
+            status = get_scheduler_status()
+            status['current_time'] = now.strftime('%Y-%m-%d %H:%M:%S %Z')
+            status['next_morning_cleanup'] = '10:00 (Brasília)'
+            status['next_evening_cleanup'] = '21:00 (Brasília)'
+            
+            return status, 200
+        except Exception as e:
+            return {"error": f"Erro ao obter status do scheduler: {str(e)}"}, 500
+    
     # Adicionar rota direta para compatibilidade com frontend
     @app_instance.route('/signals', methods=['GET'])
     def get_signals_direct():
