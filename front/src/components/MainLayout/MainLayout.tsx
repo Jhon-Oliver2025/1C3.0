@@ -26,7 +26,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const checkBackendStatus = useCallback(async () => {
     try {
       // Alterar linha 26
-      const response = await fetch('/api/status');
+      const response = await fetch('/api/status/');
       setIsBackendOnline(response.ok);
     } catch (error) {
       console.error('Erro ao verificar status do backend:', error);

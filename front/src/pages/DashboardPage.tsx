@@ -81,7 +81,7 @@ function DashboardPage() {
 
       // Substituir as linhas 79-83 por:
       console.log('fetchSignals: Token encontrado, fazendo requisição.');
-      const response = await fetch('/api/signals', {
+      const response = await fetch('/api/signals/', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -160,7 +160,7 @@ function DashboardPage() {
       const authToken = localStorage.getItem('authToken');
       if (!authToken) return; // Sai silenciosamente se não há token
       
-      const response = await fetch('/api/market-countdown', {
+      const response = await fetch('/api/market-countdown/', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
