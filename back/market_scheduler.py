@@ -141,10 +141,32 @@ def get_scheduler_status():
     tz = pytz.timezone('America/Sao_Paulo')
     now = datetime.now(tz)
     
+    # Verificar se o scheduler global existe e está rodando
+    global scheduler
+    scheduler_running = False
+    jobs_info = []
+    
+    try:
+        if 'scheduler' in globals() and scheduler is not None:
+            scheduler_running = scheduler.running
+            
+            # Obter informações dos jobs
+            for job in scheduler.get_jobs():
+                next_run = job.next_run_time
+                jobs_info.append({
+                    'id': job.id,
+                    'name': job.name,
+                    'next_run': next_run.strftime('%Y-%m-%d %H:%M:%S') if next_run else 'N/A',
+                    'trigger': str(job.trigger)
+                })
+    except Exception as e:
+        jobs_info.append({'error': f'Erro ao obter jobs: {str(e)}'})
+    
     return {
         'morning_cleanup': '10:00 - Limpeza matinal (pré-mercado USA)',
         'evening_cleanup': '21:00 - Limpeza noturna (pré-mercado ÁSIA)',
-        'status': 'active',
+        'status': 'active' if scheduler_running else 'inactive',
+        'scheduler_running': scheduler_running,
         'timezone': 'America/Sao_Paulo',
         'current_hour': now.hour,
         'current_minute': now.minute,
@@ -152,5 +174,6 @@ def get_scheduler_status():
         'jobs_configured': [
             {'id': 'morning_cleanup', 'time': '10:00', 'description': 'Limpeza matinal'},
             {'id': 'evening_cleanup', 'time': '21:00', 'description': 'Limpeza noturna'}
-        ]
+        ],
+        'active_jobs': jobs_info
     }
