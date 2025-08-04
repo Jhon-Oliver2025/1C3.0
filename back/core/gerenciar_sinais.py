@@ -11,8 +11,11 @@ from .database import Database
 class GerenciadorSinais:
     def __init__(self, db_instance):
         self.db = db_instance
-        self.signals_file = 'sinais_lista.csv'
-        self.history_file = 'historico_sinais.csv'
+        # Usar caminhos absolutos para os arquivos CSV
+        import os
+        base_dir = os.path.dirname(os.path.dirname(__file__))
+        self.signals_file = os.path.join(base_dir, 'sinais_lista.csv')
+        self.history_file = os.path.join(base_dir, 'historico_sinais.csv')
         # Adicionar timezone
         self.timezone = pytz.timezone('America/Sao_Paulo')
         # Simplificar colunas para apenas as informações do Telegram
@@ -275,6 +278,8 @@ class GerenciadorSinais:
             
             # Definir o horário de corte (10:00 de hoje)
             hoje = datetime.now(self.timezone).replace(hour=10, minute=0, second=0, microsecond=0)
+            # Converter para timestamp do pandas sem timezone para comparação
+            hoje = pd.Timestamp(hoje.replace(tzinfo=None))
             
             # Contar sinais que serão removidos
             sinais_para_remover = df[
@@ -312,6 +317,8 @@ class GerenciadorSinais:
             
             # Definir o horário de corte (21:00 de hoje)
             hoje = datetime.now(self.timezone).replace(hour=21, minute=0, second=0, microsecond=0)
+            # Converter para timestamp do pandas sem timezone para comparação
+            hoje = pd.Timestamp(hoje.replace(tzinfo=None))
             
             # Contar sinais que serão removidos
             sinais_para_remover = df[

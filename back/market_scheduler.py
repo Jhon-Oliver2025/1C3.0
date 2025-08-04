@@ -90,8 +90,10 @@ def execute_morning_cleanup(gerenciador):
     try:
         logger.info("🌅 === INICIANDO LIMPEZA MATINAL (10:00) ===")
         
-        # Registrar execução no arquivo de log
-        with open('/tmp/scheduler_log.txt', 'a') as f:
+        # Registrar execução no arquivo de log (Windows compatible)
+        import os
+        log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+        with open(log_file, 'a', encoding='utf-8') as f:
             f.write(f"MORNING_CLEANUP_EXECUTED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         
         # 1. Limpar sinais antigos (antes das 10:00)
@@ -107,7 +109,9 @@ def execute_morning_cleanup(gerenciador):
         
     except Exception as e:
         logger.error(f"❌ Erro durante limpeza matinal: {e}")
-        with open('/tmp/scheduler_log.txt', 'a') as f:
+        import os
+        log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+        with open(log_file, 'a', encoding='utf-8') as f:
             f.write(f"MORNING_CLEANUP_ERROR: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {str(e)}\n")
 
 def execute_evening_cleanup(gerenciador):
@@ -115,8 +119,10 @@ def execute_evening_cleanup(gerenciador):
     try:
         logger.info("🌙 === INICIANDO LIMPEZA NOTURNA (21:00) ===")
         
-        # Registrar execução no arquivo de log
-        with open('/tmp/scheduler_log.txt', 'a') as f:
+        # Registrar execução no arquivo de log (Windows compatible)
+        import os
+        log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+        with open(log_file, 'a', encoding='utf-8') as f:
             f.write(f"EVENING_CLEANUP_EXECUTED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         
         # 1. Limpar sinais antigos (antes das 21:00)
@@ -132,7 +138,9 @@ def execute_evening_cleanup(gerenciador):
         
     except Exception as e:
         logger.error(f"❌ Erro durante limpeza noturna: {e}")
-        with open('/tmp/scheduler_log.txt', 'a') as f:
+        import os
+        log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+        with open(log_file, 'a', encoding='utf-8') as f:
             f.write(f"EVENING_CLEANUP_ERROR: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {str(e)}\n")
 
 # REMOVIDO: Função execute_midnight_maintenance

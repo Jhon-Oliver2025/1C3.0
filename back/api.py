@@ -200,6 +200,51 @@ def register_api_routes(app_instance, bot_instance):
                 'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }, 500
     
+    # NOVA: Endpoint público para estatísticas dos sinais
+    @app_instance.route('/api/signals/stats', methods=['GET'])
+    def signals_stats():
+        """Endpoint público para verificar estatísticas dos sinais"""
+        try:
+            from core.database import Database
+            from datetime import datetime
+            import pytz
+            
+            db = Database()
+            
+            # Obter estatísticas dos sinais
+            query = """
+            SELECT 
+                DATE(created_at) as signal_date,
+                COUNT(*) as count
+            FROM signals 
+            GROUP BY DATE(created_at)
+            ORDER BY signal_date DESC
+            LIMIT 10
+            """
+            
+            results = db.execute_query(query)
+            
+            # Obter contagem total
+            total_query = "SELECT COUNT(*) as total FROM signals"
+            total_result = db.execute_query(total_query)
+            total_signals = total_result[0]['total'] if total_result else 0
+            
+            # Obter timezone de São Paulo
+            tz = pytz.timezone('America/Sao_Paulo')
+            now = datetime.now(tz)
+            
+            stats = {
+                'timestamp': now.strftime('%Y-%m-%d %H:%M:%S %Z'),
+                'total_signals': total_signals,
+                'signals_by_date': results,
+                'current_date': now.strftime('%Y-%m-%d')
+            }
+            
+            return stats, 200
+            
+        except Exception as e:
+            return {"error": f"Erro ao obter estatísticas: {str(e)}"}, 500
+    
     # Armazenar bot_instance para uso nos blueprints
     app_instance.bot_instance = bot_instance
 
