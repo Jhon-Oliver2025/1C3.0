@@ -1,18 +1,44 @@
 version: '3.8'
 
 services:
-  frontend:
-    build:
-      context: ./front
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
     environment:
-      - NODE_ENV=production
+      POSTGRES_DB: trading_signals
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./back/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
     restart: unless-stopped
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend Flask API
   backend:
     build:
       context: ./back
@@ -21,19 +47,43 @@ services:
       - "5000:5000"
     environment:
       - FLASK_ENV=production
-      - DATABASE_URL=sqlite:///data/trading_signals.db
+      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/trading_signals
+      - REDIS_URL=redis://redis:6379/0
     volumes:
       - ./back/data:/app/data
     restart: unless-stopped
     networks:
       - app-network
     depends_on:
-      - frontend
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Frontend React App
+  frontend:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=http://backend:5000
+    restart: unless-stopped
+    networks:
+      - app-network
+    depends_on:
+      - backend
 
 networks:
   app-network:
     driver: bridge
 
 volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
   backend_data:
     driver: local

@@ -25,9 +25,8 @@ server = Flask(__name__, static_folder='static', static_url_path='')
 
 
 # Configurações de segurança
-# Configurações de segurança
-server.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'crypto_signals_secret_key_2025_muito_segura')
-server.config['JWT_SECRET'] = os.getenv('JWT_SECRET')
+server.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'gZ4vNpWq8sB2kF6a10prasempre')
+server.config['JWT_SECRET'] = os.getenv('JWT_SECRET', 'X9&eR3@cM7!zL10prasempre 1*kP5^f')
 # Remover as linhas 39-40
 # server.config['EVO_AI_AGENT_BASE_URL'] = os.getenv('EVO_AI_AGENT_BASE_URL')
 # server.config['EVO_AI_API_KEY'] = os.getenv('EVO_AI_API_KEY')
@@ -52,8 +51,8 @@ print(f"✅ JWT_SECRET configurado: {server.config['JWT_SECRET'][:5]}...")
 server.config['BINANCE_FUTURES'] = {
     'api_url': 'https://fapi.binance.com',
     'ws_url': 'wss://fstream.binance.com',
-    'API_KEY': os.getenv('BINANCE_API_KEY', ''),
-    'API_SECRET': os.getenv('BINANCE_SECRET_KEY', ''),
+    'API_KEY': os.getenv('BINANCE_API_KEY', 'aUApdM0jyXeyI1HPxHymi9hSD6QZ3TXFORTknlyc1jADrkCJ7SNSayoZ6oiPCYEj'),
+    'API_SECRET': os.getenv('BINANCE_SECRET_KEY', 'YGt2MXqsIhgjk6EsCwRCUjB3LpZ0L8xGAt9w4JYK6wyX2LveLHBFvRjoyBfIVcZM'),
     'time_offset': 0
 }
 
@@ -134,3 +133,15 @@ server.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 # Configurações de timeout para requests
 server.config['REQUESTS_TIMEOUT'] = 60
 server.config['BINANCE_TIMEOUT'] = 60
+
+# Configurações do SendPulse
+server.config['SENDPULSE'] = {
+    'CLIENT_ID': os.getenv('SENDPULSE_CLIENT_ID', '7b28b045d31c3d6d51591d7f56a26c99'),
+    'CLIENT_SECRET': os.getenv('SENDPULSE_CLIENT_SECRET', '26393054ce0cd24fc16a73382a3d5eef'),
+    'SENDER_EMAIL': os.getenv('SENDPULSE_SENDER_EMAIL', 'crypten@portaldigital10.com'),
+    'API_URL': os.getenv('SENDPULSE_API_URL', 'https://api.sendpulse.com')
+}
+
+# Configurações do PostgreSQL
+server.config['POSTGRES_PASSWORD'] = os.getenv('POSTGRES_PASSWORD', 'sD6*qY1@jV3^cK8#m10prasempre F5&g')
+server.config['DOCKER_PASSWORD'] = os.getenv('DOCKER_PASSWORD', 'sD311101jV3^c05#m10prasempre F5&g')
