@@ -1,0 +1,738 @@
+/* ===== MOBILE ESSENTIAL DESIGN - DESENHO TÉCNICO ===== */
+
+/* Variáveis CSS */
+:root {
+  --mobile-header-height: 72px;
+  --mobile-motivational-height: 90px;
+  --mobile-primary-color: #1a1a2e;
+  --mobile-secondary-color: #16213e;
+  --mobile-accent-color: #0f3460;
+  --mobile-success-color: #00d4aa;
+  --mobile-danger-color: #ff6b6b;
+  --mobile-warning-color: #ffa726;
+  --mobile-text-primary: #ffffff;
+  --mobile-text-secondary: #b0bec5;
+  --mobile-text-muted: #78909c;
+  --mobile-border-color: #37474f;
+  --mobile-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --mobile-border-radius: 12px;
+  --mobile-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --mobile-content-top: 162px; /* 72px header + 90px motivational */
+  
+  /* Cores Principais */
+  --primary-bg: #1a1a2e;
+  --secondary-bg: #16213e;
+  --accent-color: #0f3460;
+  
+  /* Cores dos Sinais */
+  --buy-color: #22c55e;
+  --buy-hover: #16a34a;
+  --sell-color: #ef4444;
+  --sell-hover: #dc2626;
+  
+  /* Cores de Status */
+  --market-open: #22c55e;
+  --market-closed: #ef4444;
+  --market-timer: #f59e0b;
+  
+  /* Cores de Texto */
+  --text-primary: #1a1a2e;
+  --text-secondary: #6b7280;
+  --text-white: #ffffff;
+  
+  /* Cores de Fundo */
+  --bg-white: #ffffff;
+  --bg-light: #f5f5f5;
+  --bg-card: #ffffff;
+  
+  /* Sombras */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ===== ESTRUTURA HIERÁRQUICA ===== */
+
+/* Container Principal Mobile */
+.mobile-container {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--mobile-primary-color) 0%, var(--mobile-secondary-color) 100%);
+  color: var(--mobile-text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ========================================
+   🔄 RESET E BASE
+======================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-primary);
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Header Superior Fixo - 72px */
+.mobile-top-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--mobile-header-height);
+  background: var(--mobile-primary-color);
+  border-bottom: 1px solid var(--mobile-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 1000;
+  box-shadow: var(--mobile-shadow);
+}
+
+.mobile-menu-button {
+  background: none;
+  border: none;
+  color: var(--mobile-text-primary);
+  font-size: 20px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--mobile-transition);
+}
+
+.mobile-menu-button:hover {
+  background: var(--mobile-accent-color);
+}
+
+.mobile-logo-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--mobile-text-primary);
+}
+
+.mobile-status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.mobile-status-indicator.online {
+  background: var(--mobile-success-color);
+  box-shadow: 0 0 8px var(--mobile-success-color);
+}
+
+.mobile-status-indicator.offline {
+  background: var(--mobile-danger-color);
+  box-shadow: 0 0 8px var(--mobile-danger-color);
+}
+
+/* Seção Motivacional Fixa - 90px */
+.mobile-motivational {
+  position: fixed;
+  top: var(--mobile-header-height);
+  left: 0;
+  right: 0;
+  height: var(--mobile-motivational-height);
+  background: linear-gradient(90deg, var(--mobile-secondary-color) 0%, var(--mobile-accent-color) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  z-index: 999;
+  border-bottom: 1px solid var(--mobile-border-color);
+}
+
+.mobile-motivational-text {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--mobile-text-primary);
+  line-height: 1.4;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Container Principal - margin-top: 162px */
+.mobile-main-container {
+  margin-top: var(--mobile-content-top);
+  padding: 16px;
+  min-height: calc(100vh - var(--mobile-content-top));
+}
+
+/* ===== CABEÇALHO DOS SINAIS - 2 LINHAS ===== */
+
+.mobile-signals-header {
+  background: var(--mobile-secondary-color);
+  border-radius: var(--mobile-border-radius);
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--mobile-border-color);
+  box-shadow: var(--mobile-shadow);
+}
+
+/* Linha 1: Horários dos Mercados */
+.mobile-market-times {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--mobile-border-color);
+}
+
+.mobile-market-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: var(--mobile-accent-color);
+  border-radius: 8px;
+  transition: var(--mobile-transition);
+  min-height: 70px;
+  justify-content: center;
+}
+
+.mobile-market-flag {
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.mobile-market-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--mobile-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-market-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--mobile-text-primary);
+  margin: 2px 0;
+}
+
+.mobile-market-status {
+  font-size: 7px;
+  font-weight: 600;
+  padding: 2px 4px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.mobile-market-status.open {
+  background: var(--mobile-success-color);
+  color: var(--mobile-primary-color);
+}
+
+.mobile-market-status.closed {
+  background: var(--mobile-danger-color);
+  color: var(--mobile-text-primary);
+}
+
+.mobile-market-status.timer {
+  background: var(--mobile-warning-color);
+  color: var(--mobile-primary-color);
+}
+
+/* Linha 2: Estatísticas */
+.mobile-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.mobile-stat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--mobile-primary-color);
+  border-radius: 8px;
+  border: 1px solid var(--mobile-border-color);
+  min-height: 40px;
+}
+
+.mobile-stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--mobile-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-stat-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mobile-text-primary);
+  min-width: 20px;
+  text-align: right;
+}
+
+/* ===== LISTA DE SINAIS ===== */
+
+.mobile-signals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ========================================
+   🃏 CARDS DOS SINAIS - FORMATO CONFORME IMAGEM
+======================================== */
+
+.mobile-signal-card {
+  background: var(--mobile-secondary-color);
+  border-radius: var(--mobile-border-radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--mobile-border-color);
+  box-shadow: var(--mobile-shadow);
+  transition: var(--mobile-transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-signal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Header do Card */
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.mobile-card-symbol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-symbol-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--mobile-text-primary);
+  letter-spacing: 0.5px;
+}
+
+.mobile-symbol-class {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--mobile-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-card-type {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.mobile-card-type.compra {
+  background: var(--mobile-success-color);
+  color: var(--mobile-primary-color);
+  box-shadow: 0 2px 8px rgba(0, 212, 170, 0.3);
+}
+
+.mobile-card-type.venda {
+  background: var(--mobile-danger-color);
+  color: var(--mobile-text-primary);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+/* Corpo do Card */
+.mobile-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Linha de Preços */
+.mobile-prices-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--mobile-primary-color);
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--mobile-border-color);
+}
+
+.mobile-price-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.mobile-price-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--mobile-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mobile-price-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mobile-text-primary);
+  font-family: 'Courier New', monospace;
+}
+
+.mobile-price-divider {
+  font-size: 16px;
+  color: var(--mobile-text-secondary);
+  margin: 0 8px;
+  font-weight: 700;
+}
+
+/* Footer do Card */
+.mobile-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--mobile-border-color);
+}
+
+.mobile-card-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobile-date-icon {
+  font-size: 12px;
+}
+
+.mobile-date-text {
+  font-size: 11px;
+  color: var(--mobile-text-muted);
+  font-weight: 500;
+}
+
+.mobile-card-projection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.mobile-projection-text {
+  font-size: 9px;
+  color: var(--mobile-text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.mobile-projection-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--mobile-warning-color);
+}
+
+/* ========================================
+   📱 ESTADOS DE FEEDBACK
+======================================== */
+.mobile-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.mobile-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid var(--primary-bg);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.mobile-loading-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.mobile-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.mobile-error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.mobile-error-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.mobile-retry-button {
+  background: var(--primary-bg);
+  color: var(--text-white);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobile-retry-button:hover {
+  background: var(--secondary-bg);
+}
+
+.mobile-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.mobile-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.mobile-empty-text {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ========================================
+   🔄 ANIMAÇÕES
+======================================== */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-signal-card {
+  animation: slideInUp 0.5s ease-out;
+}
+
+/* ========================================
+   📱 RESPONSIVIDADE
+======================================== */
+
+/* Mobile Small (até 480px) */
+@media (max-width: 480px) {
+  .mobile-main-container {
+    padding: 12px;
+  }
+  
+  .mobile-signals-header {
+    padding: 12px;
+  }
+  
+  .mobile-signal-card {
+    padding: 12px;
+  }
+  
+  .mobile-symbol {
+    font-size: 16px;
+  }
+  
+  .mobile-price-value {
+    font-size: 14px;
+  }
+}
+
+/* Tablet (768px+) */
+@media (min-width: 768px) {
+  .mobile-main-container {
+    padding: 24px;
+    max-width: 768px;
+    margin: 162px auto 0;
+  }
+  
+  .mobile-signals-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  
+  .mobile-signals-header {
+    margin-bottom: 24px;
+  }
+}
+
+/* Desktop (1024px+) */
+@media (min-width: 1024px) {
+  .mobile-main-container {
+    max-width: 1024px;
+  }
+  
+  .mobile-signals-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ========================================
+   🎯 UTILITÁRIOS
+======================================== */
+.mobile-hidden {
+  display: none !important;
+}
+
+.mobile-visible {
+  display: block !important;
+}
+
+.mobile-text-center {
+  text-align: center;
+}
+
+.mobile-text-left {
+  text-align: left;
+}
+
+.mobile-text-right {
+  text-align: right;
+}
+
+.mobile-mb-8 {
+  margin-bottom: 8px;
+}
+
+.mobile-mb-12 {
+  margin-bottom: 12px;
+}
+
+.mobile-mb-16 {
+  margin-bottom: 16px;
+}
+
+.mobile-mt-8 {
+  margin-top: 8px;
+}
+
+.mobile-mt-12 {
+  margin-top: 12px;
+}
+
+.mobile-mt-16 {
+  margin-top: 16px;
+}
+
+/* ========================================
+   ♿ ACESSIBILIDADE
+======================================== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus indicators */
+.mobile-menu-button:focus,
+.mobile-retry-button:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .mobile-signal-card {
+    border: 2px solid var(--text-primary);
+  }
+  
+  .mobile-type-button {
+    border: 2px solid currentColor;
+  }
+}
+
+/* ========================================
+   🚀 PERFORMANCE OPTIMIZATIONS
+======================================== */
+.mobile-signal-card {
+  contain: layout style paint;
+  will-change: transform;
+}
+
+.mobile-loading-spinner {
+  will-change: transform;
+}
+
+.mobile-status-indicator {
+  will-change: opacity;
+}
+
+/* Lazy loading placeholder */
+.mobile-card-placeholder {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  height: 120px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

@@ -14,23 +14,23 @@
   top: 0;
   left: 0;
   width: 100%;
-  background-color: #0A192F; /* Cor de fundo escura */
-  padding: 10px 20px;
+  background-color: #0A192F;
+  padding: 8px 15px;
   display: flex;
-  justify-content: flex-start; /* CORRIGIDO: Alinha à esquerda em vez de centralizar */
+  justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  z-index: 1000; /* Garante que fique acima de outros elementos */
-  height: 60px; /* Altura fixa para o cabeçalho */
+  z-index: 1000;
+  height: 60px;
 }
 
-.topHeader .logoContainer { /* Target logoContainer specifically within TopHeader */
+.topHeader .logoContainer {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* CORRIGIDO: Alinha à esquerda */
-  width: 80px; /* Ajuste para o tamanho do seu logo */
-  height: 40px; /* Ajuste para o tamanho do seu logo */
+  justify-content: center;
+  flex: 1;
+  height: 40px;
 }
 
 .topHeader .logoWrapper { /* NEW: Wrapper for the logo with the status border */
@@ -155,10 +155,9 @@
 /* Estilos para o conteúdo principal */
 .mainContent {
   flex-grow: 1;
-  padding-top: 60px; /* Espaço para o TopHeader fixo */
-  padding-bottom: 60px; /* Espaço para o BottomNavBar fixo */
-  overflow-y: auto; /* Permite rolagem do conteúdo principal */
-  -webkit-overflow-scrolling: touch; /* Rolagem suave em iOS */
+  padding-top: 0; /* Removido padding - será controlado pelo DashboardPage */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Estilos para o BottomNavBar */

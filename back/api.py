@@ -1,6 +1,7 @@
 from flask import Flask
 import os
 from typing import cast
+from flask_cors import CORS # Importar CORS
 
 # Importar a configuração do servidor do config.py
 from config import server
@@ -15,8 +16,10 @@ from api_routes.market_times import market_times_bp
 
 def create_app():
     """Factory function para criar a aplicação Flask"""
-    # Usar o servidor já configurado do config.py (que já tem CORS configurado)
+    # Usar o servidor já configurado do config.py
     app = server
+    app.url_map.strict_slashes = False # Desabilitar redirecionamento de barras finais
+    CORS(app, resources={r"/*": {"origins": ["http://localhost:3001", "http://localhost:3000", "http://localhost:5173", "https://1crypten.space", "https://www.1crypten.space"], "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"], "allow_headers": ["Content-Type", "Authorization"], "supports_credentials": True}})
     
     # Configurações adicionais
     app.config['JWT_SECRET'] = os.getenv('JWT_SECRET')

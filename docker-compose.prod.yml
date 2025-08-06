@@ -74,8 +74,8 @@ services:
     build: ./front
     container_name: crypto-frontend
     environment:
-      - REACT_APP_API_URL=https://api.1crypten.space
-      - REACT_APP_DOMAIN=https://1crypten.space
+      - REACT_APP_API_URL=
+      - REACT_APP_DOMAIN=http://localhost
     depends_on:
       - backend
     restart: unless-stopped

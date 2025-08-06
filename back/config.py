@@ -1,4 +1,5 @@
 from flask import Flask
+from flask import Flask
 from flask_login import LoginManager
 from flask_cors import CORS
 import time
@@ -9,7 +10,6 @@ from dotenv import load_dotenv
 # Carregar variáveis de ambiente
 load_dotenv()
 
-# Detectar ambiente
 # Detectar ambiente
 ENVIRONMENT = os.getenv('FLASK_ENV', 'development')
 IS_PRODUCTION = ENVIRONMENT == 'production'
@@ -22,32 +22,7 @@ if not os.getenv('FLASK_ENV'):
 # Configurar Flask com pasta static correta
 server = Flask(__name__, static_folder='static', static_url_path='')
 
-# Configuração de CORS para produção
-if IS_PRODUCTION:
-    # CORS restritivo para produção
-    allowed_origins = os.getenv('CORS_ORIGINS', 'https://1crypten.space,https://www.1crypten.space').split(',')
-    # Sempre permitir localhost para testes locais
-    localhost_origins = ['http://localhost:3000', 'http://localhost:5173']
-    allowed_origins.extend(localhost_origins)
-    
-    CORS(server, resources={
-        r"/*": {
-            "origins": allowed_origins,
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True
-        }
-    })
-else:
-    # CORS permissivo para desenvolvimento
-    CORS(server, resources={
-        r"/*": {
-            "origins": ["http://localhost:3000", "http://localhost:5173", "*"],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
-            "allow_headers": ["Content-Type", "Authorization"],
-            "supports_credentials": True
-        }
-    })
+
 
 # Configurações de segurança
 # Configurações de segurança
@@ -159,8 +134,3 @@ server.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 # Configurações de timeout para requests
 server.config['REQUESTS_TIMEOUT'] = 60
 server.config['BINANCE_TIMEOUT'] = 60
-CORS_ORIGINS = [
-    "https://1crypten.space",
-    "https://www.1crypten.space",
-    "http://localhost:3000"  # Para desenvolvimento local
-]

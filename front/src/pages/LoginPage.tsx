@@ -17,8 +17,7 @@ function LoginPage() {
     setLoading(true);
 
     try {
-      // CORRIGIDO: URL correta para o endpoint de login
-      // Alterar linha 21
+      // Usar proxy do nginx em vez de conectar diretamente na porta 5000
       const response = await fetch('/api/auth/login', { 
         method: 'POST',
         headers: {

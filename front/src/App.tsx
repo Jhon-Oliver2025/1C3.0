@@ -8,7 +8,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
-import DashboardPage from './pages/DashboardPage';
+import DashboardPage from './pages/DashboardPage/DashboardPage';
 import BtcSentimentPage from './pages/BtcSentimentPage';
 import MinhaContaPage from './pages/MinhaContaPage';
 import ConfiguracoesPage from './pages/ConfiguracoesPage';

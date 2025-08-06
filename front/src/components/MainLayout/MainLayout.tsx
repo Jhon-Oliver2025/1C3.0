@@ -25,7 +25,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   // Function to check backend status
   const checkBackendStatus = useCallback(async () => {
     try {
-      // Alterar linha 26
+      // Usar proxy do nginx em vez de conectar diretamente na porta 5000
       const response = await fetch('/api/status');
       setIsBackendOnline(response.ok);
     } catch (error) {

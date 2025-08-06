@@ -8,9 +8,9 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': {
-        target: 'https://1crypten.space',
+        target: 'http://localhost:5000',
         changeOrigin: true,
-        secure: true
+        secure: false
       }
     }
   },

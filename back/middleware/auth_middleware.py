@@ -1,11 +1,16 @@
 from flask import request, jsonify, g, current_app
 from functools import wraps
 from typing import Any
+from flask import request, jsonify, current_app, g
 
 def jwt_required(f):
     """Decorador para autenticação usando tokens do banco de dados"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Permitir que requisições OPTIONS passem sem autenticação
+        if request.method == 'OPTIONS':
+            return f(*args, **kwargs)
+
         # Adicionar logs para debug
         print("Headers recebidos:", request.headers)
         print("Authorization header:", request.headers.get('Authorization'))

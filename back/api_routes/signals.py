@@ -5,6 +5,7 @@ import threading
 import time
 from datetime import datetime
 
+from flask import Blueprint, jsonify, g, current_app
 from middleware.auth_middleware import jwt_required
 
 signals_bp = Blueprint('signals', __name__)
@@ -87,6 +88,10 @@ def get_signals_from_csv():
     except Exception as e:
         current_app.logger.error(f"Error reading CSV: {str(e)}", exc_info=True)
         return []
+
+@signals_bp.route('/', methods=['OPTIONS'])
+def handle_options():
+    return '', 200
 
 @signals_bp.route('/', methods=['GET'])
 @jwt_required

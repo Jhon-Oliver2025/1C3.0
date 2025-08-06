@@ -1,0 +1,448 @@
+.dashboardContainer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0A192F 0%, #000000 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Seção Motivacional Fixa */
+.motivationalSection {
+  position: fixed;
+  top: 60px; /* Ajustado para ficar abaixo do TopHeader */
+  left: 0;
+  right: 0;
+  height: 70px; /* Reduzido para mobile */
+  background: linear-gradient(135deg, #2d5a87, #1e3a5f);
+  border-bottom: 1px solid #64FFDA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 0 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.motivationalText {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  text-align: center;
+  line-height: 1.4;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  transition: opacity 0.8s ease-in-out;
+  max-width: 90%;
+  word-wrap: break-word;
+}
+
+/* Container dos Cards */
+.cardsContainer {
+  margin-top: 130px; /* 60px TopHeader + 70px motivacional */
+  padding: 0 10px;
+  height: calc(100vh - 130px);
+  overflow-y: auto;
+}
+
+.motivationalContent {
+  text-align: center;
+  max-width: 600px;
+}
+
+.motivationalTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 5px 0;
+  line-height: 1.2;
+}
+
+.motivationalSubtitle {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Cabeçalho dos Sinais - 2 Linhas */
+.signalsHeader {
+  background: #0f2a44;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  height: 70px; /* Altura ajustada para mobile */
+}
+
+/* Linha 1 - Horários e Cronômetros */
+.timeRow {
+  height: 35px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 5px 10px;
+  background: #1a365d;
+  align-items: center;
+}
+
+.timeItem {
+  background: #0f2a44;
+  border-radius: 4px;
+  padding: 4px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 25px;
+}
+
+.timeLabel {
+  font-size: 10px;
+  color: #A0AEC0;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.timeValue {
+  font-size: 11px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.marketOpen {
+  color: #4CAF50 !important;
+}
+
+.marketClosed {
+  color: #E53E3E !important;
+}
+
+.cryptoMarket {
+  color: #FFD700 !important;
+}
+
+/* Linha 2 - Estatísticas */
+.statsRow {
+  height: 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 5px 10px;
+  background: #1a365d;
+  align-items: center;
+}
+
+.currentDateTime {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.currentTime {
+  font-size: 1.6rem;
+  color: #64FFDA;
+  font-weight: 700;
+  text-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
+  letter-spacing: 1px;
+}
+
+.currentDate {
+  font-size: 0.8rem;
+  color: #A0AEC0;
+  margin-top: -2px;
+}
+
+.marketClocks {
+  display: flex;
+  gap: 20px;
+}
+
+.marketClock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.marketLabel {
+  font-size: 0.7rem;
+  color: #A0AEC0;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.marketTime {
+  font-size: 1rem;
+  color: #FFD700;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.statItem {
+  background: #0f2a44;
+  border-radius: 4px;
+  padding: 4px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 20px;
+}
+
+.statLabel {
+  font-size: 9px;
+  color: #A0AEC0;
+  display: block;
+  margin-bottom: 1px;
+}
+
+.statValue {
+  font-size: 11px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.buyCount {
+  color: #4CAF50 !important;
+}
+
+.sellCount {
+  color: #E53E3E !important;
+}
+
+.lastUpdate {
+  color: #64ffda !important;
+}
+
+/* Lista de Sinais */
+.signalsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Mensagens de Estado */
+.loadingMessage,
+.errorMessage,
+.noSignalsMessage {
+  text-align: center;
+  padding: 20px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.loadingMessage {
+  background: #1a365d;
+  color: #64ffda;
+  border: 1px solid #64ffda;
+}
+
+.errorMessage {
+  background: #2d1b1b;
+  color: #E53E3E;
+  border: 1px solid #E53E3E;
+}
+
+.noSignalsMessage {
+  background: #1a365d;
+  color: #A0AEC0;
+  border: 1px solid #A0AEC0;
+}
+
+.timeAndMarkets {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.currentTimeItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timeLabel {
+  font-size: 0.8rem;
+  color: #A0AEC0;
+  font-weight: 600;
+}
+
+.currentTimeValue {
+  font-size: 1.4rem;
+  color: #64FFDA;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+}
+
+.dateValue {
+  font-size: 0.7rem;
+  color: #A0AEC0;
+}
+
+.marketCountdowns {
+  display: flex;
+  gap: 20px;
+}
+
+.marketItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.signalsStats {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.headerTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.timeDisplay {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.refreshButton {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.refreshButton:hover {
+  background: #229954;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+}
+
+/* Container dos Cards */
+.cardsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 0;
+}
+
+/* Estados de Carregamento e Erro */
+.loadingMessage, .errorMessage, .noSignalsMessage {
+  text-align: center;
+  padding: 30px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  background: #1e3a5f;
+  border: 1px solid #64FFDA;
+  margin: 20px 0;
+}
+
+.loadingMessage {
+  color: #64FFDA;
+  border-color: #64FFDA;
+}
+
+.errorMessage {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+}
+
+.noSignalsMessage {
+  color: #ffd93d;
+  border-color: #ffd93d;
+}
+
+/* Ajustes para mobile */
+@media (max-width: 480px) {
+  .motivationalSection {
+    height: 70px;
+    top: 60px;
+    padding: 0 10px;
+  }
+
+  .motivationalText {
+    font-size: 13px;
+    line-height: 1.3;
+  }
+
+  .cardsContainer {
+    margin-top: 130px;
+    padding: 0 8px;
+    height: calc(100vh - 130px);
+    overflow-y: auto;
+  }
+
+  .signalsHeader {
+    height: 70px;
+    margin-bottom: 12px;
+  }
+
+  .timeRow {
+    height: 35px;
+    padding: 4px 8px;
+    gap: 6px;
+  }
+
+  .timeItem {
+    padding: 3px 6px;
+    min-height: 27px;
+  }
+
+  .timeLabel {
+    font-size: 9px;
+  }
+
+  .timeValue {
+    font-size: 10px;
+  }
+
+  .statsRow {
+    height: 35px;
+    padding: 4px 8px;
+    gap: 6px;
+  }
+
+  .statItem {
+    padding: 3px 6px;
+    min-height: 27px;
+  }
+
+  .statLabel {
+    font-size: 8px;
+  }
+
+  .statValue {
+    font-size: 10px;
+  }
+
+  .signalsList {
+    gap: 10px;
+  }
+}
+
+/* Removido - duplicação desnecessária */

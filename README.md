@@ -1,6 +1,56 @@
-# 🚀 Crypto Signals Platform
+# 1Crypten - Sistema de Sinais de Criptomoedas
 
-Plataforma completa para análise e distribuição de sinais de criptomoedas.
+Sistema completo de análise técnica e sinais de trading para criptomoedas, desenvolvido com React (frontend) e Flask (backend).
+
+## 🐳 Desenvolvimento via Docker (ÚNICO MODELO SUPORTADO)
+
+Este projeto foi otimizado para funcionar **EXCLUSIVAMENTE via Docker**. Todos os arquivos de desenvolvimento local foram removidos para manter o foco no modelo Docker.
+
+### Pré-requisitos
+- Docker Desktop instalado e rodando
+- Arquivo `.env` configurado (copie de `.env.example`)
+
+### Como Executar
+
+```bash
+# 1. Clone o repositório
+git clone <repo-url>
+cd 1C3.0
+
+# 2. Configure as variáveis de ambiente
+cp .env.example .env
+# Edite o arquivo .env com suas configurações
+
+# 3. Inicie o sistema completo
+docker-compose -f docker-compose.prod.yml up -d
+
+# 4. Verifique o status
+docker ps
+```
+
+### Acessos
+- **Frontend**: http://localhost/dashboard
+- **API**: http://localhost/api/status
+- **Nginx**: http://localhost
+
+### Comandos Úteis
+
+```bash
+# Parar o sistema
+docker-compose -f docker-compose.prod.yml down
+
+# Rebuild completo
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up -d --build
+
+# Ver logs
+docker logs crypto-frontend
+docker logs crypto-backend
+docker logs crypto-nginx
+
+# Reiniciar um serviço específico
+docker-compose -f docker-compose.prod.yml restart frontend
+```
 
 ## 🏗️ Arquitetura
 

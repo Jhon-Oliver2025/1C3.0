@@ -8,7 +8,7 @@ interface SignalCardProps {
   targetPrice: string;
   projectionPercentage: string;
   date: string;
-  signalClass: 'PREMIUM' | 'ELITE'; // Removido 'PADRÃO'
+  signalClass: 'PREMIUM' | 'ELITE' | 'PADRÃO';
 }
 
 const SignalCard: React.FC<SignalCardProps> = ({
@@ -47,40 +47,48 @@ const SignalCard: React.FC<SignalCardProps> = ({
   const formattedTargetPrice = formatPrice(targetPrice, entryPrice);
   const formattedProjection = formatProjection(projectionPercentage);
 
+  const isPositiveProjection = parseFloat(projectionPercentage) > 0;
+
   return (
-    <div className={styles.signalCard}>
-      <div className={styles.cardHeader}>
-        <span className={styles.symbol}>{symbol}</span>
-        <button className={`${styles.typeButton} ${type === 'COMPRA' ? styles.buy : styles.sell}`}>
+    <div className="mobile-signal-card">
+      {/* Header do Card */}
+      <div className="mobile-card-header">
+        <div className="mobile-card-symbol">
+          <span className="mobile-symbol-text">{symbol}</span>
+          <span className="mobile-symbol-class">{signalClass || 'CRYPTO'}</span>
+        </div>
+        <div className={`mobile-card-type ${type.toLowerCase()}`}>
           {type}
-        </button>
+        </div>
       </div>
       
-      <span className={
-        signalClass === 'ELITE' ? styles.eliteText :
-        styles.premiumText
-      }>
-        SINAIS {signalClass}
-      </span>
-      
-      <div className={styles.priceDetail}>
-        <span className={styles.label}>Entrada</span>
-        <span className={styles.entryPriceValue}>{entryPrice}</span>
+      {/* Conteúdo Principal */}
+      <div className="mobile-card-body">
+        {/* Linha de Preços */}
+        <div className="mobile-prices-row">
+          <div className="mobile-price-item">
+            <span className="mobile-price-label">Entrada</span>
+            <span className="mobile-price-value">{entryPrice}</span>
+          </div>
+          <div className="mobile-price-divider">→</div>
+          <div className="mobile-price-item">
+            <span className="mobile-price-label">Alvo</span>
+            <span className="mobile-price-value">{formattedTargetPrice}</span>
+          </div>
+        </div>
+        
+        {/* Footer do Card */}
+        <div className="mobile-card-footer">
+          <div className="mobile-card-date">
+            <span className="mobile-date-icon">📅</span>
+            <span className="mobile-date-text">{formattedDate}</span>
+          </div>
+          <div className="mobile-card-projection">
+            <span className="mobile-projection-text">Projeção</span>
+            <span className="mobile-projection-value">({formattedProjection}%)</span>
+          </div>
+        </div>
       </div>
-      
-      <div className={styles.priceDetail}>
-        <span className={styles.label}>Alvo</span>
-        <span className={styles.value}>{formattedTargetPrice}</span>
-      </div>
-      
-      <div className={styles.projectionDetail}>
-        <span className={styles.label}>Projeção</span>
-        <span className={styles.changePercentage}>
-          ({formattedProjection}%)
-        </span>
-      </div>
-      
-      <span className={styles.date}>{formattedDate}</span>
     </div>
   );
 };

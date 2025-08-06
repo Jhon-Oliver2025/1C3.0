@@ -162,20 +162,26 @@ if __name__ == '__main__':
     # Iniciar backend Node.js
     start_nodejs_backend()
 
-    # Iniciar monitoramento em thread separada
-    print("🚀 Iniciando monitoramento de mercado...")
-    monitor_thread = threading.Thread(target=bot.analyzer.start_monitoring, daemon=True)
-    monitor_thread.start()
-    
-    # Configurar agendador de limpeza automática
-    print("🕐 Configurando agendador de limpeza automática...")
-    scheduler = setup_market_scheduler(bot.db, bot.gerenciador_sinais)
-    
     # Usar a app configurada do api.py
     app = create_app()
     
     # Register API routes (APENAS UMA VEZ)
     register_api_routes(app, bot)
+    
+    # Iniciar monitoramento em thread separada APÓS o Flask estar pronto
+    def start_background_tasks():
+        time.sleep(2)  # Aguardar Flask inicializar
+        print("🚀 Iniciando monitoramento de mercado...")
+        monitor_thread = threading.Thread(target=bot.analyzer.start_monitoring, daemon=True)
+        monitor_thread.start()
+        
+        # Configurar agendador de limpeza automática
+        print("🕐 Configurando agendador de limpeza automática...")
+        scheduler = setup_market_scheduler(bot.db, bot.gerenciador_sinais)
+    
+    # Iniciar tarefas em background
+    background_thread = threading.Thread(target=start_background_tasks, daemon=True)
+    background_thread.start()
     
     print("🚀 Iniciando servidor Flask...")
     flask_port = int(os.getenv('FLASK_PORT', 5000))

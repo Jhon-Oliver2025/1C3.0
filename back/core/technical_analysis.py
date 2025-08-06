@@ -90,13 +90,8 @@ class TechnicalAnalysis:
         print("🚀 Iniciando monitoramento de mercado...")
         self.is_monitoring = True
         
-        # Inicializar pares na primeira execução
-        if not self.top_pairs:
-            print("🔄 Carregando pares iniciais...")
-            if not self._initialize_pairs():
-                print("❌ Falha ao carregar pares iniciais")
-                self.is_monitoring = False
-                return False
+        # Pular inicialização de pares para permitir Flask iniciar rapidamente
+        # Os pares serão carregados no primeiro ciclo do monitoring_loop
         
         # Iniciar thread de monitoramento
         self.monitoring_thread = threading.Thread(
@@ -293,6 +288,13 @@ class TechnicalAnalysis:
         """Executa varredura completa do mercado"""
         try:
             current_time = time.time()
+            
+            # Carregar pares se ainda não estiverem carregados (primeira execução)
+            if not self.top_pairs:
+                print("🔄 Carregando pares iniciais...")
+                if not self._initialize_pairs():
+                    print("❌ Falha ao carregar pares iniciais")
+                    return []
             
             if verbose:
                 print(f"🔍 Analisando {len(self.top_pairs)} pares...")
