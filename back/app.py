@@ -165,93 +165,104 @@ def wait_for_database():
     return False
 
 if __name__ == '__main__':
-    print("🚀 Iniciando aplicação...")
-    
-    # Aguardar PostgreSQL em produção
-    environment = os.getenv('FLASK_ENV', 'development')
-    if environment == 'production' and os.getenv('DATABASE_URL'):
-        print("🗄️ Aguardando PostgreSQL...")
-        if not wait_for_database():
-            print("❌ Falha ao conectar com PostgreSQL. Encerrando...")
+    try:
+        print("🚀 Iniciando aplicação...")
+        
+        # Aguardar PostgreSQL em produção
+        environment = os.getenv('FLASK_ENV', 'development')
+        if environment == 'production' and os.getenv('DATABASE_URL'):
+            print("🗄️ Aguardando PostgreSQL...")
+            if not wait_for_database():
+                print("❌ Falha ao conectar com PostgreSQL. Encerrando...")
+                sys.exit(1)
+        
+        # Inicializar o bot ANTES de usar
+        print("🤖 Inicializando KryptonBot...")
+        try:
+            bot = KryptonBot()
+            print("✅ KryptonBot inicializado com sucesso!")
+        except Exception as e:
+            print(f"❌ Erro ao inicializar KryptonBot: {e}")
+            traceback.print_exc()
             sys.exit(1)
-    
-    # Inicializar o bot ANTES de usar
-    print("🤖 Inicializando KryptonBot...")
-    try:
-        bot = KryptonBot()
-        print("✅ KryptonBot inicializado com sucesso!")
-    except Exception as e:
-        print(f"❌ Erro ao inicializar KryptonBot: {e}")
-        traceback.print_exc()
-        sys.exit(1)
-    
-    # Configurar logging
-    server.logger.setLevel(logging.DEBUG)
-    if not server.logger.handlers:
-        handler = logging.StreamHandler()
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        server.logger.addHandler(handler)
+        
+        # Configurar logging
+        server.logger.setLevel(logging.DEBUG)
+        if not server.logger.handlers:
+            handler = logging.StreamHandler()
+            handler.setLevel(logging.DEBUG)
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            handler.setFormatter(formatter)
+            server.logger.addHandler(handler)
 
-    # Verificar e atualizar credenciais do Telegram
-    with server.app_context():
-        db_instance = Database()
-        current_db_token = db_instance.get_config_value('telegram_token')
-        current_db_chat_id = db_instance.get_config_value('telegram_chat_id')
-        
-        config_token = cast(str, server.config.get('TELEGRAM_TOKEN', ''))
-        config_chat_id = cast(str, server.config.get('TELEGRAM_CHAT_ID', ''))
-        
-        if not current_db_token or not current_db_chat_id or \
-           current_db_token != config_token or current_db_chat_id != config_chat_id:
-            print("ℹ️ Credenciais do Telegram em config.py diferem do DB ou estão faltando. Tentando salvar/atualizar...")
-            if bot.notifier.setup_credentials(config_token, config_chat_id):
-                print("✅ Credenciais do Telegram salvas/atualizadas no DB com sucesso.")
+        # Verificar e atualizar credenciais do Telegram
+        with server.app_context():
+            db_instance = Database()
+            current_db_token = db_instance.get_config_value('telegram_token')
+            current_db_chat_id = db_instance.get_config_value('telegram_chat_id')
+            
+            config_token = cast(str, server.config.get('TELEGRAM_TOKEN', ''))
+            config_chat_id = cast(str, server.config.get('TELEGRAM_CHAT_ID', ''))
+            
+            if not current_db_token or not current_db_chat_id or \
+               current_db_token != config_token or current_db_chat_id != config_chat_id:
+                print("ℹ️ Credenciais do Telegram em config.py diferem do DB ou estão faltando. Tentando salvar/atualizar...")
+                if bot.notifier.setup_credentials(config_token, config_chat_id):
+                    print("✅ Credenciais do Telegram salvas/atualizadas no DB com sucesso.")
+                else:
+                    print("❌ Falha ao salvar/atualizar credenciais do Telegram no DB.")
             else:
-                print("❌ Falha ao salvar/atualizar credenciais do Telegram no DB.")
-        else:
-            print("✅ Credenciais do Telegram no DB estão atualizadas com config.py.")
+                print("✅ Credenciais do Telegram no DB estão atualizadas com config.py.")
 
-    # Iniciar backend Node.js
-    # start_nodejs_backend()
+        # Iniciar backend Node.js
+        # start_nodejs_backend()
 
-    # Usar a app configurada do api.py
-    try:
-        print("🌐 Usando aplicação Flask do api.py...")
-        from api import app
-        print("✅ Aplicação Flask obtida com sucesso!")
+        # Usar a app configurada do api.py
+        try:
+            print("🌐 Usando aplicação Flask do api.py...")
+            from api import app
+            print("✅ Aplicação Flask obtida com sucesso!")
+            
+            # Register API routes (APENAS UMA VEZ)
+            print("🔗 Registrando rotas da API...")
+            register_api_routes(app, bot)
+            print("✅ Rotas da API registradas com sucesso!")
+        except Exception as e:
+            print(f"❌ Erro ao configurar aplicação Flask: {e}")
+            traceback.print_exc()
+            sys.exit(1)
         
-        # Register API routes (APENAS UMA VEZ)
-        print("🔗 Registrando rotas da API...")
-        register_api_routes(app, bot)
-        print("✅ Rotas da API registradas com sucesso!")
-    except Exception as e:
-        print(f"❌ Erro ao configurar aplicação Flask: {e}")
-        traceback.print_exc()
-        sys.exit(1)
-    
-    # Iniciar monitoramento em thread separada APÓS o Flask estar pronto
-    def start_background_tasks():
-        time.sleep(2)  # Aguardar Flask inicializar
-        print("🚀 Iniciando monitoramento de mercado...")
-        monitor_thread = threading.Thread(target=bot.analyzer.start_monitoring, daemon=True)
-        monitor_thread.start()
+        # Iniciar monitoramento em thread separada APÓS o Flask estar pronto
+        def start_background_tasks():
+            time.sleep(2)  # Aguardar Flask inicializar
+            print("🚀 Iniciando monitoramento de mercado...")
+            monitor_thread = threading.Thread(target=bot.analyzer.start_monitoring, daemon=True)
+            monitor_thread.start()
+            
+            # Configurar agendador de limpeza automática
+            print("🕐 Configurando agendador de limpeza automática...")
+            scheduler = setup_market_scheduler(bot.db, bot.gerenciador_sinais)
         
-        # Configurar agendador de limpeza automática
-        print("🕐 Configurando agendador de limpeza automática...")
-        scheduler = setup_market_scheduler(bot.db, bot.gerenciador_sinais)
-    
-    # Iniciar tarefas em background
-    background_thread = threading.Thread(target=start_background_tasks, daemon=True)
-    background_thread.start()
-    
-    print("🚀 Iniciando servidor Flask...")
-    try:
-        flask_port = int(os.getenv('FLASK_PORT', 5000))
-        print(f"🌐 Servidor Flask iniciando na porta {flask_port}...")
-        app.run(debug=False, host='0.0.0.0', port=flask_port, use_reloader=False)
+        # Iniciar tarefas em background
+        background_thread = threading.Thread(target=start_background_tasks, daemon=True)
+        background_thread.start()
+        
+        print("🚀 Iniciando servidor Flask...")
+        try:
+            flask_port = int(os.getenv('FLASK_PORT', 5000))
+            print(f"🌐 Servidor Flask iniciando na porta {flask_port}...")
+            print(f"🔍 Ambiente: {os.getenv('FLASK_ENV', 'development')}")
+            print(f"🔍 Debug: {os.getenv('FLASK_DEBUG', 'False')}")
+            print("✅ Todas as configurações carregadas com sucesso!")
+            app.run(debug=False, host='0.0.0.0', port=flask_port, use_reloader=False)
+        except Exception as e:
+            print(f"❌ Erro ao iniciar servidor Flask: {e}")
+            traceback.print_exc()
+            sys.exit(1)
+    except KeyboardInterrupt:
+        print("\n🛑 Aplicação interrompida pelo usuário")
+        sys.exit(0)
     except Exception as e:
-        print(f"❌ Erro ao iniciar servidor Flask: {e}")
+        print(f"\n💥 ERRO CRÍTICO NA INICIALIZAÇÃO: {e}")
         traceback.print_exc()
         sys.exit(1)
