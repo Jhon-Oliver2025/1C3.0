@@ -218,16 +218,16 @@ if __name__ == '__main__':
 
     # Usar a app configurada do api.py
     try:
-        print("🌐 Criando aplicação Flask...")
-        app = create_app()
-        print("✅ Aplicação Flask criada com sucesso!")
+        print("🌐 Usando aplicação Flask do api.py...")
+        from api import app
+        print("✅ Aplicação Flask obtida com sucesso!")
         
         # Register API routes (APENAS UMA VEZ)
         print("🔗 Registrando rotas da API...")
         register_api_routes(app, bot)
         print("✅ Rotas da API registradas com sucesso!")
     except Exception as e:
-        print(f"❌ Erro ao criar aplicação Flask: {e}")
+        print(f"❌ Erro ao configurar aplicação Flask: {e}")
         traceback.print_exc()
         sys.exit(1)
     
