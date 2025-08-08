@@ -4,7 +4,6 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: postgres-1crypten
     environment:
       POSTGRES_DB: trading_signals
       POSTGRES_USER: postgres
@@ -26,7 +25,6 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: redis-1crypten
     # ports:
       # - "6379:6379"  # Removido para evitar conflito de porta em produção
     volumes:
@@ -45,11 +43,12 @@ services:
     build:
       context: ./back
       dockerfile: Dockerfile
-    container_name: backend-1crypten
     # ports:
       # - "5000:5000"  # Removido - acesso apenas via Nginx
     environment:
       - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - PYTHONUNBUFFERED=1
       - DATABASE_URL=postgresql://postgres:sD6*qY1@jV3^cK8#m10prasempre F5&g@postgres:5432/trading_signals
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=gZ4vNpWq8sB2kF6a10prasempre
@@ -86,7 +85,6 @@ services:
     build:
       context: ./front
       dockerfile: Dockerfile
-    container_name: frontend-1crypten
     environment:
       - NODE_ENV=production
       - REACT_APP_API_URL=https://1crypten.space
@@ -99,7 +97,6 @@ services:
   # Nginx Proxy
   nginx:
     image: nginx:alpine
-    container_name: nginx-1crypten
     ports:
       - "3000:80"
     command: |
