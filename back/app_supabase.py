@@ -87,10 +87,7 @@ class KryptonBotSupabase:
             
             # Inicializar gerenciador de sinais
             if self.is_supabase_configured and self.database_url:
-                self.gerenciador_sinais = GerenciadorSinais(
-                    database_url=self.database_url,
-                    use_supabase=True
-                )
+                self.gerenciador_sinais = GerenciadorSinais(self.db)
             else:
                 # Modo degradado sem banco
                 self.gerenciador_sinais = None
