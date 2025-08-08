@@ -44,9 +44,31 @@ const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
     }
   };
 
-  // Não mostrar se já está instalado ou não é instalável
-  if (isInstalled || !isInstallable) {
+  // Não mostrar se já está instalado
+  if (isInstalled) {
     return null;
+  }
+
+  // Se não é instalável, mostrar botão informativo
+  if (!isInstallable) {
+    return (
+      <button
+        className={`${styles.button} ${styles[variant]} ${styles[size]} ${className}`}
+        onClick={() => {
+          alert('Para instalar o 1Crypten como app:\n\n1. No Chrome: Menu > Instalar app\n2. No Safari: Compartilhar > Adicionar à Tela Inicial\n3. No Edge: Menu > Apps > Instalar este site como app');
+        }}
+        disabled={false}
+      >
+        {showIcon && (
+          <img 
+            src={logo2} 
+            alt="1Crypten" 
+            className={`${styles.logoIcon} ${styles[size]}`}
+          />
+        )}
+        <span>Instalar App</span>
+      </button>
+    );
   }
 
   const buttonClasses = [
