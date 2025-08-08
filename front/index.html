@@ -1,13 +1,150 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/jpeg" href="/logonav.jpg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>1Crypten-IA</title>
+    
+    <!-- Basic Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="description" content="Plataforma avançada de sinais de trading para criptomoedas com análise técnica em tempo real" />
+    <meta name="keywords" content="trading, criptomoedas, sinais, análise técnica, bitcoin, ethereum" />
+    <meta name="author" content="1Crypten" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#64FFDA" />
+    <meta name="background-color" content="#0A192F" />
+    <meta name="display" content="standalone" />
+    <meta name="orientation" content="portrait" />
+    
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="1Crypten" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    
+    <!-- Microsoft PWA Meta Tags -->
+    <meta name="msapplication-TileColor" content="#0A192F" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="msapplication-starturl" content="/" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="1Crypten - Trading Signals" />
+    <meta property="og:description" content="Plataforma avançada de sinais de trading para criptomoedas" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://1crypten.space" />
+    <meta property="og:image" content="/icons/icon-512x512.svg" />
+    <meta property="og:site_name" content="1Crypten" />
+    <meta property="og:locale" content="pt_BR" />
+    
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="1Crypten - Trading Signals" />
+    <meta name="twitter:description" content="Plataforma avançada de sinais de trading para criptomoedas" />
+    <meta name="twitter:image" content="/icons/icon-512x512.svg" />
+    
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/svg+xml" href="/icons/icon-72x72.svg" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.svg" />
+    <link rel="apple-touch-icon" sizes="72x72" href="/icons/icon-72x72.svg" />
+    <link rel="apple-touch-icon" sizes="144x144" href="/icons/icon-144x144.svg" />
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.svg" />
+    <link rel="apple-touch-icon" sizes="512x512" href="/icons/icon-512x512.svg" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/assets/terra.png" as="image" />
+    <link rel="preload" href="/assets/logo2.png" as="image" />
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    
+    <title>1Crypten - Trading Signals</title>
   </head>
   <body>
+    <!-- PWA Install Banner -->
+    <div id="pwa-install-banner" style="display: none; position: fixed; top: 0; left: 0; right: 0; background: #64FFDA; color: #0A192F; padding: 12px; text-align: center; z-index: 9999; font-weight: bold;">
+      📱 Instale o 1Crypten como aplicativo!
+      <button id="pwa-install-btn" style="margin-left: 10px; background: #0A192F; color: #64FFDA; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Instalar</button>
+      <button id="pwa-dismiss-btn" style="margin-left: 5px; background: transparent; color: #0A192F; border: 1px solid #0A192F; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Agora não</button>
+    </div>
+    
     <div id="root"></div>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      // Registrar Service Worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', async () => {
+          try {
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            console.log('✅ Service Worker registrado:', registration.scope);
+            
+            // Verificar atualizações
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  // Nova versão disponível
+                  if (confirm('Nova versão disponível! Recarregar página?')) {
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          } catch (error) {
+            console.error('❌ Erro ao registrar Service Worker:', error);
+          }
+        });
+      }
+      
+      // PWA Install Prompt
+      let deferredPrompt;
+      const installBanner = document.getElementById('pwa-install-banner');
+      const installBtn = document.getElementById('pwa-install-btn');
+      const dismissBtn = document.getElementById('pwa-dismiss-btn');
+      
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Mostrar banner apenas se não foi instalado
+        if (!window.matchMedia('(display-mode: standalone)').matches) {
+          installBanner.style.display = 'block';
+        }
+      });
+      
+      installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log('PWA install outcome:', outcome);
+          deferredPrompt = null;
+          installBanner.style.display = 'none';
+        }
+      });
+      
+      dismissBtn.addEventListener('click', () => {
+        installBanner.style.display = 'none';
+        localStorage.setItem('pwa-dismissed', Date.now());
+      });
+      
+      // Verificar se já foi dispensado recentemente
+      const dismissed = localStorage.getItem('pwa-dismissed');
+      if (dismissed && Date.now() - dismissed < 7 * 24 * 60 * 60 * 1000) {
+        installBanner.style.display = 'none';
+      }
+      
+      // Detectar se já está instalado
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('🎉 PWA já está instalado!');
+        document.body.classList.add('pwa-installed');
+      }
+    </script>
+    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

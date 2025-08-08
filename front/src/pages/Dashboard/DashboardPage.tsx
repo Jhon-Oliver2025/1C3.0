@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SignalCard from '../../components/SignalCard/SignalCard';
+import PWAInstallButton from '../../components/PWA/PWAInstallButton';
 import styles from './DashboardPage.module.css';
 import logo2 from '../../assets/logo2.png';
 
@@ -257,6 +258,12 @@ const DashboardPage: React.FC = () => {
                <Link to="/suporte" className="mobile-menu-item" onClick={toggleMobileMenu}>
                  Suporte
                </Link>
+               
+               {/* Botão de instalação PWA */}
+               <div style={{ padding: '8px 0' }}>
+                 <PWAInstallButton variant="secondary" size="medium" />
+               </div>
+               
                <button className="mobile-menu-item logout" onClick={handleLogout}>
                  Sair
                </button>

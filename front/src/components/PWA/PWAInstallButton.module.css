@@ -1,0 +1,166 @@
+/* Estilos para o botão de instalação PWA */
+
+.installButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.installButton:focus {
+  outline: 2px solid #64FFDA;
+  outline-offset: 2px;
+}
+
+.installButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Variantes de cor */
+.primary {
+  background: linear-gradient(135deg, #64FFDA, #4CAF50);
+  color: #0A192F;
+  box-shadow: 0 4px 12px rgba(100, 255, 218, 0.3);
+}
+
+.primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4CAF50, #64FFDA);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(100, 255, 218, 0.4);
+}
+
+.secondary {
+  background: transparent;
+  color: #64FFDA;
+  border: 2px solid #64FFDA;
+}
+
+.secondary:hover:not(:disabled) {
+  background: rgba(100, 255, 218, 0.1);
+  transform: translateY(-1px);
+}
+
+.minimal {
+  background: transparent;
+  color: #64FFDA;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.minimal:hover:not(:disabled) {
+  background: rgba(100, 255, 218, 0.05);
+  border-color: rgba(100, 255, 218, 0.5);
+}
+
+/* Tamanhos */
+.small {
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+.medium {
+  padding: 10px 16px;
+  font-size: 14px;
+}
+
+.large {
+  padding: 14px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+/* Ícone */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+}
+
+.text {
+  white-space: nowrap;
+}
+
+/* Estado de instalação */
+.installing {
+  pointer-events: none;
+}
+
+.installing .icon {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Animações */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .installButton {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .large {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  
+  .medium {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .small {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+/* Modo escuro específico */
+@media (prefers-color-scheme: dark) {
+  .secondary {
+    border-color: #64FFDA;
+  }
+  
+  .minimal {
+    border-color: rgba(100, 255, 218, 0.2);
+  }
+}
+
+/* Redução de movimento */
+@media (prefers-reduced-motion: reduce) {
+  .installButton {
+    transition: none;
+  }
+  
+  .installing .icon {
+    animation: none;
+  }
+  
+  .primary:hover:not(:disabled),
+  .secondary:hover:not(:disabled),
+  .minimal:hover:not(:disabled) {
+    transform: none;
+  }
+}

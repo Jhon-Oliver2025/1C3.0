@@ -1,0 +1,66 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="512" height="512" rx="64" fill="#0A192F"/>
+  
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="bgGradient512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a365d;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#2d5a87;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0A192F;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="iconGradient512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#64FFDA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4CAF50;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#64FFDA;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#64FFDA;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  
+  <rect width="512" height="512" rx="64" fill="url(#bgGradient512)"/>
+  
+  <!-- Glow Effect -->
+  <circle cx="256" cy="256" r="200" fill="url(#glowGradient)"/>
+  
+  <!-- Main Icon Container -->
+  <g transform="translate(128, 128)">
+    <!-- Outer Circle with Glow -->
+    <circle cx="128" cy="128" r="120" stroke="url(#iconGradient512)" stroke-width="8" fill="none" opacity="0.3"/>
+    <circle cx="128" cy="128" r="110" stroke="url(#iconGradient512)" stroke-width="6" fill="none"/>
+    
+    <!-- Inner Design - Enhanced "1C" -->
+    <g fill="url(#iconGradient512)">
+      <!-- Number "1" with enhanced design -->
+      <rect x="70" y="60" width="16" height="96" rx="8"/>
+      <rect x="54" y="60" width="32" height="16" rx="8"/>
+      <rect x="54" y="140" width="48" height="16" rx="8"/>
+      
+      <!-- Letter "C" with enhanced curves -->
+      <path d="M140 60 C170 60 190 80 190 128 C190 176 170 196 140 196 C128 196 118 192 112 186 L124 166 C128 170 134 172 140 172 C154 172 166 160 166 128 C166 96 154 84 140 84 C134 84 128 86 124 90 L112 70 C118 64 128 60 140 60 Z"/>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <g fill="#64FFDA">
+      <!-- Corner accents -->
+      <circle cx="40" cy="40" r="8" opacity="0.8"/>
+      <circle cx="216" cy="40" r="6" opacity="0.6"/>
+      <circle cx="40" cy="216" r="6" opacity="0.6"/>
+      <circle cx="216" cy="216" r="8" opacity="0.8"/>
+      
+      <!-- Side accents -->
+      <circle cx="20" cy="128" r="4" opacity="0.5"/>
+      <circle cx="236" cy="128" r="4" opacity="0.5"/>
+      <circle cx="128" cy="20" r="4" opacity="0.5"/>
+      <circle cx="128" cy="236" r="4" opacity="0.5"/>
+    </g>
+    
+    <!-- Inner glow -->
+    <circle cx="128" cy="128" r="80" fill="none" stroke="#64FFDA" stroke-width="2" opacity="0.2"/>
+  </g>
+  
+  <!-- Bottom Text -->
+  <text x="256" y="450" text-anchor="middle" fill="#64FFDA" font-family="Arial, sans-serif" font-size="36" font-weight="bold">1CRYPTEN</text>
+  <text x="256" y="480" text-anchor="middle" fill="#A0AEC0" font-family="Arial, sans-serif" font-size="18" font-weight="normal">TRADING SIGNALS</text>
+</svg>

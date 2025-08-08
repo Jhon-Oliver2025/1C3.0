@@ -20,6 +20,11 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import MainLayout from './components/MainLayout/MainLayout';
 
+// Importar componentes PWA
+import PWAProvider from './components/PWA/PWAProvider';
+import PWAUpdateNotification from './components/PWA/PWAUpdateNotification';
+import PWAInstallButton from './components/PWA/PWAInstallButton';
+
 /**
  * Componente para verificar autenticação
  * Redireciona para login se não autenticado
@@ -35,7 +40,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
  */
 function App() {
   return (
-    <Routes>
+    <PWAProvider>
+      {/* Notificação de atualização PWA */}
+      <PWAUpdateNotification position="top" />
+      
+      <Routes>
       {/* Rota pública - Landing Page */}
       <Route path="/" element={<LandingPage />} />
       
@@ -104,7 +113,8 @@ function App() {
       
       {/* Rota catch-all - redireciona para landing page */}
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
+    </PWAProvider>
   );
 }
 
