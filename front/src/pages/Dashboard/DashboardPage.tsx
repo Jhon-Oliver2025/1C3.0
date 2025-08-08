@@ -32,20 +32,20 @@ const DashboardPage: React.FC = () => {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Estado para horários dos mercados
-  const [marketTimes, setMarketTimes] = useState({
-    usa: { time: '--:--:--', status: 'CARREGANDO' },
-    asia: { time: '--:--:--', status: 'CARREGANDO' }
+  // Estado para status das limpezas
+  const [cleanupStatus, setCleanupStatus] = useState({
+    morning_cleanup: { time: '10:00', status: 'CARREGANDO', description: 'Limpeza matinal' },
+    evening_cleanup: { time: '21:00', status: 'CARREGANDO', description: 'Limpeza noturna' }
   });
   
   const navigate = useNavigate();
 
-  // Função para buscar status dos mercados da API
-  const fetchMarketStatus = async () => {
+  // Função para buscar status das limpezas da API
+  const fetchCleanupStatus = async () => {
     try {
       const token = localStorage.getItem('token');
       const apiUrl = import.meta.env.VITE_API_URL || 'https://1crypten.space';
-      const response = await fetch(`${apiUrl}/api/market-status`, {
+      const response = await fetch(`${apiUrl}/api/cleanup-status`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -56,60 +56,19 @@ const DashboardPage: React.FC = () => {
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
           const data = await response.json();
-          setMarketTimes(data);
+          setCleanupStatus(data);
         } else {
-          console.warn('API retornou HTML em vez de JSON, usando fallback');
-          // Fallback para cálculo local se a API não estiver disponível
-          const fallbackTimes = getLocalMarketTimes();
-          setMarketTimes(fallbackTimes);
+          console.warn('API retornou HTML em vez de JSON, usando status padrão');
         }
       } else {
-        console.warn('API market-status não disponível, usando fallback');
-        const fallbackTimes = getLocalMarketTimes();
-        setMarketTimes(fallbackTimes);
+        console.warn('API cleanup-status não disponível');
       }
     } catch (error) {
-      console.error('Erro ao buscar status dos mercados:', error);
-      // Fallback para cálculo local em caso de erro
-      const fallbackTimes = getLocalMarketTimes();
-      setMarketTimes(fallbackTimes);
+      console.error('Erro ao buscar status das limpezas:', error);
     }
   };
 
-  // Função de fallback para cálculo local dos horários
-  const getLocalMarketTimes = () => {
-    const now = new Date();
-    
-    // Mercado EUA (NYSE: 9:30-16:00 EST, Segunda a Sexta)
-    const usaTime = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}));
-    const usaHour = usaTime.getHours();
-    const usaMinutes = usaTime.getMinutes();
-    const usaDay = usaTime.getDay();
-    const usaIsWeekday = usaDay >= 1 && usaDay <= 5;
-    const usaIsOpen = usaIsWeekday && 
-      ((usaHour > 9) || (usaHour === 9 && usaMinutes >= 30)) && 
-      (usaHour < 16);
-    const usaStatus = usaIsOpen ? 'ABERTO' : 'FECHADO';
-    
-    // Mercado Ásia (Tokyo: 9:00-15:00 JST, Segunda a Sexta)
-    const asiaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
-    const asiaHour = asiaTime.getHours();
-    const asiaDay = asiaTime.getDay();
-    const asiaIsWeekday = asiaDay >= 1 && asiaDay <= 5;
-    const asiaIsOpen = asiaIsWeekday && (asiaHour >= 9 && asiaHour < 15);
-    const asiaStatus = asiaIsOpen ? 'ABERTO' : 'FECHADO';
-    
-    return {
-      usa: {
-        time: usaTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        status: usaStatus
-      },
-      asia: {
-        time: asiaTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        status: asiaStatus
-      }
-    };
-  };
+
 
   /**
    * Array de frases motivacionais
@@ -156,14 +115,14 @@ const DashboardPage: React.FC = () => {
    */
   useEffect(() => {
     fetchSignals();
-    fetchMarketStatus();
+    fetchCleanupStatus();
     
-    // Atualizar status dos mercados a cada 30 segundos
-    const marketTimer = setInterval(() => {
-      fetchMarketStatus();
-    }, 30000);
+    // Atualizar status das limpezas a cada 60 segundos
+    const cleanupTimer = setInterval(() => {
+      fetchCleanupStatus();
+    }, 60000);
     
-    return () => clearInterval(marketTimer);
+    return () => clearInterval(cleanupTimer);
   }, []);
 
   /**
@@ -355,20 +314,20 @@ const DashboardPage: React.FC = () => {
         <div className="mobile-signals-container">
           {/* Cabeçalho dos Sinais (150px) */}
           <div className="mobile-signals-header">
-            {/* Linha 1: Horários dos Mercados */}
+            {/* Linha 1: Status das Limpezas */}
             <div className="mobile-market-times">
               <div className="mobile-market-item">
-                <span className="mobile-market-label">EUA</span>
-                <span className="mobile-market-time">{marketTimes.usa.time}</span>
-                <span className={`mobile-market-status ${marketTimes.usa.status === 'ABERTO' ? 'open' : 'closed'}`}>
-                  {marketTimes.usa.status}
+                <span className="mobile-market-label">10:00</span>
+                <span className="mobile-market-time">MATINAL</span>
+                <span className={`mobile-market-status ${cleanupStatus.morning_cleanup.status === 'ATIVO' ? 'open' : 'closed'}`}>
+                  {cleanupStatus.morning_cleanup.status}
                 </span>
               </div>
               <div className="mobile-market-item">
-                <span className="mobile-market-label">ÁSIA</span>
-                <span className="mobile-market-time">{marketTimes.asia.time}</span>
-                <span className={`mobile-market-status ${marketTimes.asia.status === 'ABERTO' ? 'open' : 'closed'}`}>
-                  {marketTimes.asia.status}
+                <span className="mobile-market-label">21:00</span>
+                <span className="mobile-market-time">NOTURNA</span>
+                <span className={`mobile-market-status ${cleanupStatus.evening_cleanup.status === 'ATIVO' ? 'open' : 'closed'}`}>
+                  {cleanupStatus.evening_cleanup.status}
                 </span>
               </div>
               <div className="mobile-market-item">
