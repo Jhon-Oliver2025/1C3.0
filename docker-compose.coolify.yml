@@ -78,7 +78,7 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "8080:80"
+      - "3000:80"
     command: |
       sh -c '
       cat > /etc/nginx/nginx.conf << EOF
