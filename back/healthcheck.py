@@ -8,6 +8,33 @@ import time
 import urllib.request
 import urllib.error
 import json
+import subprocess
+
+def run_pre_checks():
+    """
+    Executa pré-verificações de serviços
+    
+    Returns:
+        bool: True se todas as pré-verificações passaram
+    """
+    try:
+        print("🔧 Executando pré-verificações...")
+        result = subprocess.run(["python", "pre_healthcheck.py"], 
+                              capture_output=True, text=True, timeout=60)
+        
+        if result.returncode == 0:
+            print("✅ Pré-verificações passaram")
+            return True
+        else:
+            print(f"❌ Pré-verificações falharam: {result.stderr}")
+            return False
+            
+    except subprocess.TimeoutExpired:
+        print("❌ Timeout nas pré-verificações")
+        return False
+    except Exception as e:
+        print(f"❌ Erro nas pré-verificações: {e}")
+        return False
 
 def check_health(max_retries=10, delay=5):
     """
@@ -50,9 +77,14 @@ def check_health(max_retries=10, delay=5):
     return False
 
 if __name__ == "__main__":
-    # Aguardar um pouco antes de começar
     print("🚀 Iniciando healthcheck...")
-    time.sleep(10)  # Aguardar 10s para a aplicação inicializar
+    time.sleep(30)  # Aguardar 30s para a aplicação inicializar completamente
     
-    success = check_health()
+    # Executar pré-verificações primeiro
+    if not run_pre_checks():
+        print("💥 Pré-verificações falharam, abortando healthcheck")
+        sys.exit(1)
+    
+    # Se pré-verificações passaram, testar endpoint HTTP
+    success = check_health(max_retries=15, delay=10)
     sys.exit(0 if success else 1)
