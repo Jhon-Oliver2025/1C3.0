@@ -1,35 +1,6 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: trading_signals
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: sD6qY1jV3cK8m10prasempreF5g
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./back/init.sql:/docker-entrypoint-initdb.d/init.sql
-    # ports:
-      # - "5432:5432"  # Removido para evitar conflito de porta em produção
-    restart: unless-stopped
-    networks:
-      - app-network
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 60s
-      timeout: 30s
-      retries: 5
-      start_period: 120s
-
   # Redis Cache
   redis:
     image: redis:7-alpine
@@ -53,7 +24,7 @@ services:
       retries: 5
       start_period: 60s
 
-  # Backend Flask API
+  # Backend Flask API com Supabase
   backend:
     build:
       context: ./back
@@ -64,15 +35,18 @@ services:
       - FLASK_ENV=production
       - FLASK_DEBUG=0
       - PYTHONUNBUFFERED=1
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=trading_signals
-      - POSTGRES_USER=postgres
-      - DATABASE_URL=postgresql://postgres:sD6qY1jV3cK8m10prasempreF5g@postgres:5432/trading_signals
+      # Configurações do Supabase
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_DATABASE_URL=${SUPABASE_DATABASE_URL}
+      # Redis (mantido)
       - REDIS_URL=redis://redis:6379/0
+      # Configurações da aplicação
       - SECRET_KEY=gZ4vNpWq8sB2kF6a10prasempre
       - JWT_SECRET=X9&eR3@cM7!zL10prasempre 1*kP5^f
       - FLASK_PORT=5000
+      # APIs externas
       - USE_BINANCE_API=true
       - BINANCE_API_KEY=aUApdM0jyXeyI1HPxHymi9hSD6QZ3TXFORTknlyc1jADrkCJ7SNSayoZ6oiPCYEj
       - BINANCE_SECRET_KEY=YGt2MXqsIhgjk6EsCwRCUjB3LpZ0L8xGAt9w4JYK6wyX2LveLHBFvRjoyBfIVcZM
@@ -81,15 +55,12 @@ services:
       - SENDPULSE_CLIENT_ID=7b28b045d31c3d6d51591d7f56a26c99
       - SENDPULSE_CLIENT_SECRET=26393054ce0cd24fc16a73382a3d5eef
       - SENDPULSE_SENDER_EMAIL=crypten@portaldigital10.com
-      - POSTGRES_PASSWORD=sD6qY1jV3cK8m10prasempreF5g
     volumes:
       - ./back/data:/app/data
     restart: unless-stopped
     networks:
       - app-network
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
@@ -236,7 +207,5 @@ networks:
     driver: bridge
 
 volumes:
-  postgres_data:
-    driver: local
   redis_data:
     driver: local

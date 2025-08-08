@@ -41,4 +41,4 @@ HEALTHCHECK --interval=90s --timeout=60s --start-period=300s --retries=3 \
     CMD python healthcheck.py || exit 1
 
 # Comando para iniciar a aplicação (versão minimal para debug)
-CMD ["python", "app_minimal.py"]
+CMD ["python", "app_supabase.py"]
