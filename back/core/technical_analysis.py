@@ -101,6 +101,8 @@ class TechnicalAnalysis:
         self.monitoring_thread.start()
         
         print("✅ Monitoramento iniciado com sucesso!")
+        print(f"🔍 Thread de monitoramento ativa: {self.monitoring_thread.is_alive()}")
+        print(f"🔍 Thread ID: {self.monitoring_thread.ident}")
         return True
     
     def stop_monitoring(self) -> None:
@@ -117,6 +119,8 @@ class TechnicalAnalysis:
         """Loop principal de monitoramento"""
         print("\n" + "="*70)
         print("🤖 INICIANDO MONITORAMENTO DE MERCADO")
+        print(f"🔍 Thread atual: {threading.current_thread().name}")
+        print(f"🔍 Thread ID: {threading.current_thread().ident}")
         print("="*70)
         
         while self.is_monitoring:
@@ -204,9 +208,12 @@ class TechnicalAnalysis:
     def _load_all_usdt_pairs(self) -> bool:
         """Carrega todos os pares USDT perpétuos"""
         try:
+            print("🔄 Obtendo informações da exchange...")
             exchange_info = self.binance.get_exchange_info()
             if not exchange_info:
+                print("❌ Falha ao obter informações da exchange")
                 return False
+            print(f"✅ Informações da exchange obtidas: {len(exchange_info.get('symbols', []))} símbolos")
             
             # Filtrar pares USDT perpétuos
             self.all_usdt_pairs = [
@@ -292,9 +299,11 @@ class TechnicalAnalysis:
             # Carregar pares se ainda não estiverem carregados (primeira execução)
             if not self.top_pairs:
                 print("🔄 Carregando pares iniciais...")
+                print(f"🔍 Estado atual: top_pairs={len(self.top_pairs)}, all_usdt_pairs={len(self.all_usdt_pairs)}")
                 if not self._initialize_pairs():
                     print("❌ Falha ao carregar pares iniciais")
                     return []
+                print(f"✅ Pares carregados: {len(self.top_pairs)} pares disponíveis")
             
             if verbose:
                 print(f"🔍 Analisando {len(self.top_pairs)} pares...")

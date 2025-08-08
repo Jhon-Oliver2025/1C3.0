@@ -275,6 +275,46 @@ def register_api_routes(app_instance, bot_instance):
         except Exception as e:
             return {"error": f"Erro ao obter estatísticas: {str(e)}"}, 500
     
+    # NOVO: Endpoint público para sinais (sem autenticação)
+    @app_instance.route('/api/signals/public', methods=['GET'])
+    def get_public_signals():
+        """Endpoint público para obter sinais sem autenticação"""
+        try:
+            import csv
+            import os
+            from flask import jsonify
+            
+            # Caminho para o arquivo CSV
+            signals_file = os.path.join(os.path.dirname(__file__), 'sinais_lista.csv')
+            
+            if not os.path.exists(signals_file):
+                return jsonify({
+                    'success': False,
+                    'error': 'Arquivo de sinais não encontrado'
+                }), 404
+            
+            # Ler o CSV usando o módulo csv nativo
+            signals = []
+            with open(signals_file, 'r', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    # Filtrar apenas sinais PREMIUM e ELITE
+                    if row.get('signal_class') in ['PREMIUM', 'ELITE']:
+                        signals.append(row)
+            
+            return jsonify({
+                'success': True,
+                'signals': signals,
+                'total': len(signals)
+            })
+        except Exception as e:
+            import traceback
+            return jsonify({
+                'success': False,
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }), 500
+    
     # Armazenar bot_instance para uso nos blueprints
     app_instance.bot_instance = bot_instance
 

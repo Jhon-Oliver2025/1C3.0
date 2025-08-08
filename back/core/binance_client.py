@@ -11,7 +11,10 @@ from logging import Logger
 class BinanceClient:
     def __init__(self):
         # Verificar se deve usar a API da Binance
-        self.use_binance_api = os.getenv('USE_BINANCE_API', 'true').lower() == 'true'
+        use_binance_env = os.getenv('USE_BINANCE_API', 'true')
+        self.use_binance_api = use_binance_env.lower() == 'true'
+        
+        print(f"🔍 USE_BINANCE_API env var: '{use_binance_env}' -> {self.use_binance_api}")
         
         if not self.use_binance_api:
             self.logger = self.setup_logging()
