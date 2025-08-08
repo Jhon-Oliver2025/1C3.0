@@ -49,6 +49,18 @@ services:
       - FLASK_ENV=production
       - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/trading_signals
       - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=gZ4vNpWq8sB2kF6a10prasempre
+      - JWT_SECRET=X9&eR3@cM7!zL10prasempre 1*kP5^f
+      - FLASK_PORT=5000
+      - USE_BINANCE_API=true
+      - BINANCE_API_KEY=aUApdM0jyXeyI1HPxHymi9hSD6QZ3TXFORTknlyc1jADrkCJ7SNSayoZ6oiPCYEj
+      - BINANCE_SECRET_KEY=YGt2MXqsIhgjk6EsCwRCUjB3LpZ0L8xGAt9w4JYK6wyX2LveLHBFvRjoyBfIVcZM
+      - TELEGRAM_BOT_TOKEN=7690455274:AAHB64l8csWoE5UpV1Pnn9c8chJzd5sZTXQ
+      - TELEGRAM_CHAT_ID=1249100206
+      - SENDPULSE_CLIENT_ID=7b28b045d31c3d6d51591d7f56a26c99
+      - SENDPULSE_CLIENT_SECRET=26393054ce0cd24fc16a73382a3d5eef
+      - SENDPULSE_SENDER_EMAIL=crypten@portaldigital10.com
+      - POSTGRES_PASSWORD=sD6*qY1@jV3^cK8#m10prasempre F5&g
     volumes:
       - ./back/data:/app/data
     restart: unless-stopped
@@ -67,7 +79,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
-      - REACT_APP_API_URL=http://backend:5000
+      - REACT_APP_API_URL=https://1crypten.space
     restart: unless-stopped
     networks:
       - app-network
