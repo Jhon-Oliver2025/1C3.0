@@ -2,7 +2,7 @@
 # Este arquivo ajuda o Coolify a entender como fazer o deploy da aplicação
 
 # Porta principal da aplicação
-PORT=80
+PORT=8080
 
 # Tipo de aplicação
 APP_TYPE=docker-compose
