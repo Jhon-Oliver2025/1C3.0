@@ -138,7 +138,7 @@ class KryptonBot:
             self.db_config = None
         
         self.analyzer = TechnicalAnalysis(self.db)
-        self.notifier = TelegramNotifier(self.db)
+        self.notifier = TelegramNotifier()
         self.gerenciador_sinais = GerenciadorSinais(self.db)
 
 def wait_for_database():
