@@ -63,7 +63,33 @@ def register_api_routes(app_instance, bot_instance):
     # NOVA: Adicionar rota /api/health
     @app_instance.route('/api/health', methods=['GET', 'HEAD'])
     def api_health():
-        return {"status": "healthy", "service": "crypto-signals-api"}, 200
+        health_status = {"status": "healthy", "service": "crypto-signals-api"}
+        
+        # Verificar conectividade com PostgreSQL
+        try:
+            from core.db_config import DatabaseConfig
+            db_config = DatabaseConfig()
+            with db_config.get_db_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT 1")
+                    health_status["database"] = "connected"
+        except Exception as e:
+            health_status["database"] = f"error: {str(e)}"
+            health_status["status"] = "degraded"
+        
+        # Verificar Redis
+        try:
+            from core.db_config import DatabaseConfig
+            db_config = DatabaseConfig()
+            if db_config.redis_client:
+                db_config.redis_client.ping()
+                health_status["redis"] = "connected"
+            else:
+                health_status["redis"] = "not_configured"
+        except Exception as e:
+            health_status["redis"] = f"error: {str(e)}"
+        
+        return health_status, 200
     
     # NOVA: Adicionar rota /api/scheduler-status
     @app_instance.route('/api/scheduler-status', methods=['GET'])

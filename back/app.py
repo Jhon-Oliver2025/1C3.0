@@ -24,6 +24,7 @@ from config import server
 
 # Core imports
 from core.database import Database
+from core.db_config import DatabaseConfig
 from core.binance_client import BinanceClient
 from core.technical_analysis import TechnicalAnalysis
 from core.gerenciar_sinais import GerenciadorSinais
@@ -124,7 +125,18 @@ def run_bot_scanning():
 
 class KryptonBot:
     def __init__(self):
-        self.db = Database()
+        # Usar PostgreSQL em produção, CSV em desenvolvimento
+        environment = os.getenv('FLASK_ENV', 'development')
+        if environment == 'production' and os.getenv('DATABASE_URL'):
+            print("🗄️ Usando PostgreSQL em produção")
+            self.db_config = DatabaseConfig()
+            # Para compatibilidade, ainda usar Database para métodos específicos
+            self.db = Database()
+        else:
+            print("🗄️ Usando CSV em desenvolvimento")
+            self.db = Database()
+            self.db_config = None
+        
         self.analyzer = TechnicalAnalysis(self.db)
         self.notifier = TelegramNotifier(self.db)
         self.gerenciador_sinais = GerenciadorSinais(self.db)
