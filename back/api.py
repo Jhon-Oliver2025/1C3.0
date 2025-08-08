@@ -85,9 +85,10 @@ def register_api_routes(app_instance, bot_instance):
                 db_config.redis_client.ping()
                 health_status["redis"] = "connected"
             else:
-                health_status["redis"] = "not_configured"
+                health_status["redis"] = "not_available"
         except Exception as e:
-            health_status["redis"] = f"error: {str(e)}"
+            health_status["redis"] = "not_available"
+            # Redis não é crítico para o funcionamento do sistema
         
         return health_status, 200
     

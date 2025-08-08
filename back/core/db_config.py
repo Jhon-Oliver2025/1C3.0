@@ -33,7 +33,8 @@ class DatabaseConfig:
             else:
                 self.logger.warning("⚠️ Redis URL não configurada, usando fallback")
         except Exception as e:
-            self.logger.error(f"❌ Erro ao conectar com Redis: {e}")
+            self.logger.warning(f"⚠️ Redis não disponível: {e}")
+            print(f"⚠️ Redis não disponível: {e} - Continuando sem cache...")
             self.redis_client = None
     
     @contextmanager
