@@ -37,12 +37,19 @@ class KryptonBotSupabase:
     
     def __init__(self):
         self.config = supabase_config
-        self.database_url = self.config.get_database_url()
+        self.is_supabase_configured = self.config.is_configured
+        
+        if self.is_supabase_configured:
+            self.database_url = self.config.get_database_url()
+            print("✅ Supabase configurado")
+        else:
+            self.database_url = None
+            print("⚠️ Supabase não configurado - modo degradado")
         
         # Inicializar componentes
         self._init_components()
         
-        print("✅ KryptonBot inicializado com Supabase")
+        print("✅ KryptonBot inicializado")
     
     def _init_components(self):
         """
@@ -60,11 +67,16 @@ class KryptonBotSupabase:
             self.telegram = TelegramNotifier()
             self.technical_analysis = TechnicalAnalysis()
             
-            # Inicializar gerenciador de sinais com Supabase
-            self.gerenciador_sinais = GerenciadorSinais(
-                database_url=self.database_url,
-                use_supabase=True
-            )
+            # Inicializar gerenciador de sinais
+            if self.is_supabase_configured and self.database_url:
+                self.gerenciador_sinais = GerenciadorSinais(
+                    database_url=self.database_url,
+                    use_supabase=True
+                )
+            else:
+                # Modo degradado sem banco
+                self.gerenciador_sinais = None
+                print("⚠️ Gerenciador de sinais desabilitado - Supabase não configurado")
             
             print("✅ Componentes inicializados com sucesso")
             
@@ -78,10 +90,13 @@ class KryptonBotSupabase:
         """
         status = {
             'bot': 'running',
-            'database': 'connected',
-            'supabase_url': self.config.SUPABASE_URL,
+            'database': 'connected' if self.is_supabase_configured else 'degraded',
+            'supabase_configured': self.is_supabase_configured,
             'timestamp': datetime.now().isoformat()
         }
+        
+        if self.is_supabase_configured:
+            status['supabase_url'] = self.config.SUPABASE_URL
         
         # Verificar componentes
         try:
@@ -89,8 +104,10 @@ class KryptonBotSupabase:
                 status['binance'] = 'connected'
             if hasattr(self, 'telegram'):
                 status['telegram'] = 'connected'
-            if hasattr(self, 'gerenciador_sinais'):
+            if hasattr(self, 'gerenciador_sinais') and self.gerenciador_sinais:
                 status['signals'] = 'connected'
+            else:
+                status['signals'] = 'degraded'
         except:
             pass
         
@@ -179,9 +196,9 @@ def main():
     try:
         supabase_config._validate_config()
     except ValueError as e:
-        print(f"❌ Erro de configuração: {e}")
-        print("💡 Certifique-se de que as variáveis SUPABASE_URL, SUPABASE_ANON_KEY e SUPABASE_DATABASE_URL estão definidas")
-        sys.exit(1)
+        print(f"⚠️ Aviso de configuração: {e}")
+        print("💡 Executando em modo degradado - configure as variáveis do Supabase para funcionalidade completa")
+        # Não sair, continuar em modo degradado
     
     # Criar aplicação
     app = create_app()

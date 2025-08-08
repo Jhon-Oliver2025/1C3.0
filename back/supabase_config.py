@@ -22,8 +22,8 @@ class SupabaseConfig:
         # URL de conexão direta com PostgreSQL do Supabase
         self.DATABASE_URL = os.getenv('SUPABASE_DATABASE_URL')
         
-        # Validar configurações obrigatórias
-        self._validate_config()
+        # Configurações opcionais - validação manual
+        self.is_configured = self._validate_config()
     
     def _validate_config(self):
         """
@@ -38,11 +38,14 @@ class SupabaseConfig:
         missing_vars = [var for var, value in required_vars.items() if not value]
         
         if missing_vars:
-            raise ValueError(f"❌ Variáveis de ambiente obrigatórias não definidas: {', '.join(missing_vars)}")
+            print(f"⚠️ Variáveis de ambiente não definidas: {', '.join(missing_vars)}")
+            print("🔧 Executando em modo degradado")
+            return False
         
         print("✅ Configuração do Supabase validada com sucesso")
         print(f"✅ Supabase URL: {self.SUPABASE_URL}")
         print(f"✅ Database URL configurada")
+        return True
     
     def get_database_url(self):
         """

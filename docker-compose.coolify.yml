@@ -65,10 +65,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "healthcheck.py"]
-      interval: 120s
-      timeout: 90s
-      retries: 5
-      start_period: 600s
+      interval: 90s
+      timeout: 60s
+      retries: 3
+      start_period: 300s
 
   # Frontend React App
   frontend:
@@ -96,10 +96,8 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      backend:
-        condition: service_healthy
-      frontend:
-        condition: service_healthy
+      - backend
+      - frontend
     command: |
       sh -c '
       cat > /etc/nginx/nginx.conf << EOF
