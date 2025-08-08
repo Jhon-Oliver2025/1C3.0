@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     libpq-dev \
-    curl \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar requirements primeiro (para cache do Docker)
@@ -38,7 +38,7 @@ EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:5000/api/status || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/health || exit 1
 
 # Comando para iniciar a aplicação
 CMD ["python", "app.py"]
