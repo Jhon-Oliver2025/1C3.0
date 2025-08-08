@@ -40,5 +40,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=90s --timeout=60s --start-period=300s --retries=3 \
     CMD python healthcheck.py || exit 1
 
-# Comando para iniciar a aplicação
-CMD ["python", "app.py"]
+# Comando para iniciar a aplicação (versão minimal para debug)
+CMD ["python", "app_minimal.py"]
