@@ -1,0 +1,17 @@
+# Coolify Configuration
+# Este arquivo ajuda o Coolify a entender como fazer o deploy da aplicação
+
+# Porta principal da aplicação
+PORT=80
+
+# Tipo de aplicação
+APP_TYPE=docker-compose
+
+# Arquivo Docker Compose para produção
+DOCKER_COMPOSE_FILE=docker-compose.coolify.yml
+
+# Health check endpoint
+HEALTH_CHECK_PATH=/api/health
+
+# Variáveis de ambiente necessárias
+REQUIRED_ENV_VARS=BINANCE_API_KEY,BINANCE_SECRET_KEY,TELEGRAM_BOT_TOKEN,TELEGRAM_CHAT_ID,JWT_SECRET_KEY,SENDPULSE_API_USER_ID,SENDPULSE_API_SECRET
