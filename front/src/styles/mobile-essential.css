@@ -315,20 +315,7 @@ body {
   background: transparent;
 }
 
-/* Borda animada com aurora boreal */
-.mobile-motivational::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(45deg, #ff0080, #ff8c00, #40e0d0, #ee82ee, #00ff7f, #ff1493, #00bfff, #ff69b4, #ff0080);
-  background-size: 400% 400%;
-  animation: auroraParallax 4s linear infinite;
-  border-radius: 14px;
-  z-index: 0;
-}
+/* Borda removida conforme solicitado pelo usuário */
 
 /* Imagem da Terra com overlay escuro */
 .mobile-motivational::after {
@@ -781,24 +768,7 @@ body {
 @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-/* Animação parallax da aurora boreal */
-@keyframes auroraParallax {
-  0% {
-    background-position: 0% 0%;
-  }
-  25% {
-    background-position: 100% 0%;
-  }
-  50% {
-    background-position: 100% 100%;
-  }
-  75% {
-    background-position: 0% 100%;
-  }
-  100% {
-    background-position: 0% 0%;
-  }
-}
+/* Animação aurora boreal removida conforme solicitado pelo usuário */
 
 @keyframes greenGlow {
   0%, 100% { box-shadow: 0 0 12px var(--buy-color), 0 0 24px rgba(34, 197, 94, 0.3); }
