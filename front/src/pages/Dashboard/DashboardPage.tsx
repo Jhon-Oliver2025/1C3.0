@@ -31,9 +31,37 @@ const DashboardPage: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Estado para horários dos mercados
+  const [marketTimes, setMarketTimes] = useState({
+    usa: { time: '--:--:--', status: 'CARREGANDO' },
+    asia: { time: '--:--:--', status: 'CARREGANDO' }
+  });
+  
   const navigate = useNavigate();
 
-  // Array de frases motivacionais
+  // Função para buscar status dos mercados da API
+  const fetchMarketStatus = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/market-status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setMarketTimes(data);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar status dos mercados:', error);
+    }
+  };
+
+  /**
+   * Array de frases motivacionais
   const motivationalPhrases = [
     "A nova fronteira do investimento está ao seu alcance.",
     "Desbrave o universo cripto com clareza e precisão, do seu jeito.",
@@ -76,6 +104,14 @@ const DashboardPage: React.FC = () => {
    */
   useEffect(() => {
     fetchSignals();
+    fetchMarketStatus();
+    
+    // Atualizar status dos mercados a cada 30 segundos
+    const marketTimer = setInterval(() => {
+      fetchMarketStatus();
+    }, 30000);
+    
+    return () => clearInterval(marketTimer);
   }, []);
 
   /**
@@ -100,44 +136,7 @@ const DashboardPage: React.FC = () => {
     });
   };
 
-  /**
-   * Calcula horários dos mercados internacionais
-   */
-  const getMarketTimes = () => {
-    const now = new Date();
-    
-    // Mercado EUA (NYSE: 9:30-16:00 EST, Segunda a Sexta)
-    const usaTime = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}));
-    const usaHour = usaTime.getHours();
-    const usaMinutes = usaTime.getMinutes();
-    const usaDay = usaTime.getDay(); // 0 = Domingo, 6 = Sábado
-    const usaIsWeekday = usaDay >= 1 && usaDay <= 5;
-    const usaIsOpen = usaIsWeekday && 
-      ((usaHour > 9) || (usaHour === 9 && usaMinutes >= 30)) && 
-      (usaHour < 16);
-    const usaStatus = usaIsOpen ? 'ABERTO' : 'FECHADO';
-    
-    // Mercado Ásia (Tokyo: 9:00-15:00 JST, Segunda a Sexta)
-    const asiaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
-    const asiaHour = asiaTime.getHours();
-    const asiaDay = asiaTime.getDay(); // 0 = Domingo, 6 = Sábado
-    const asiaIsWeekday = asiaDay >= 1 && asiaDay <= 5;
-    const asiaIsOpen = asiaIsWeekday && (asiaHour >= 9 && asiaHour < 15);
-    const asiaStatus = asiaIsOpen ? 'ABERTO' : 'FECHADO';
-    
-    return {
-      usa: {
-        time: usaTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        status: usaStatus
-      },
-      asia: {
-        time: asiaTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-        status: asiaStatus
-      }
-    };
-  };
 
-  const marketTimes = getMarketTimes();
 
   // Estado para verificar se o backend está online
   const [isBackendOnline, setIsBackendOnline] = useState(true);

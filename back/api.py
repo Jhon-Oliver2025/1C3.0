@@ -13,6 +13,7 @@ from api_routes.trading import trading_bp
 from api_routes.users import users_bp
 from api_routes.notifications import notifications_bp
 from api_routes.market_times import market_times_bp
+from api_routes.market_status import market_status_bp
 
 def create_app():
     """Factory function para criar a aplicação Flask"""
@@ -45,6 +46,7 @@ def register_api_routes(app_instance, bot_instance):
     app_instance.register_blueprint(users_bp, url_prefix='/api/users')
     app_instance.register_blueprint(notifications_bp, url_prefix='/api/notifications')
     app_instance.register_blueprint(market_times_bp, url_prefix='/api')
+    app_instance.register_blueprint(market_status_bp, url_prefix='/api')
     
     # Rota raiz
     @app_instance.route('/')
