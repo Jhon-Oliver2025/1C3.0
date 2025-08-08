@@ -141,10 +141,49 @@ class KryptonBot:
         self.notifier = TelegramNotifier(self.db)
         self.gerenciador_sinais = GerenciadorSinais(self.db)
 
+def wait_for_database():
+    """Aguarda o PostgreSQL estar disponível"""
+    import time
+    max_retries = 30
+    retry_count = 0
+    
+    while retry_count < max_retries:
+        try:
+            from core.db_config import DatabaseConfig
+            db_config = DatabaseConfig()
+            with db_config.get_db_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT 1")
+                    print("✅ PostgreSQL conectado com sucesso!")
+                    return True
+        except Exception as e:
+            retry_count += 1
+            print(f"⏳ Aguardando PostgreSQL... tentativa {retry_count}/{max_retries}: {e}")
+            time.sleep(2)
+    
+    print("❌ Falha ao conectar com PostgreSQL após 30 tentativas")
+    return False
+
 if __name__ == '__main__':
+    print("🚀 Iniciando aplicação...")
+    
+    # Aguardar PostgreSQL em produção
+    environment = os.getenv('FLASK_ENV', 'development')
+    if environment == 'production' and os.getenv('DATABASE_URL'):
+        print("🗄️ Aguardando PostgreSQL...")
+        if not wait_for_database():
+            print("❌ Falha ao conectar com PostgreSQL. Encerrando...")
+            sys.exit(1)
+    
     # Inicializar o bot ANTES de usar
     print("🤖 Inicializando KryptonBot...")
-    bot = KryptonBot()
+    try:
+        bot = KryptonBot()
+        print("✅ KryptonBot inicializado com sucesso!")
+    except Exception as e:
+        print(f"❌ Erro ao inicializar KryptonBot: {e}")
+        traceback.print_exc()
+        sys.exit(1)
     
     # Configurar logging
     server.logger.setLevel(logging.DEBUG)
@@ -178,10 +217,19 @@ if __name__ == '__main__':
     # start_nodejs_backend()
 
     # Usar a app configurada do api.py
-    app = create_app()
-    
-    # Register API routes (APENAS UMA VEZ)
-    register_api_routes(app, bot)
+    try:
+        print("🌐 Criando aplicação Flask...")
+        app = create_app()
+        print("✅ Aplicação Flask criada com sucesso!")
+        
+        # Register API routes (APENAS UMA VEZ)
+        print("🔗 Registrando rotas da API...")
+        register_api_routes(app, bot)
+        print("✅ Rotas da API registradas com sucesso!")
+    except Exception as e:
+        print(f"❌ Erro ao criar aplicação Flask: {e}")
+        traceback.print_exc()
+        sys.exit(1)
     
     # Iniciar monitoramento em thread separada APÓS o Flask estar pronto
     def start_background_tasks():
@@ -199,5 +247,11 @@ if __name__ == '__main__':
     background_thread.start()
     
     print("🚀 Iniciando servidor Flask...")
-    flask_port = int(os.getenv('FLASK_PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=flask_port, use_reloader=False)
+    try:
+        flask_port = int(os.getenv('FLASK_PORT', 5000))
+        print(f"🌐 Servidor Flask iniciando na porta {flask_port}...")
+        app.run(debug=False, host='0.0.0.0', port=flask_port, use_reloader=False)
+    except Exception as e:
+        print(f"❌ Erro ao iniciar servidor Flask: {e}")
+        traceback.print_exc()
+        sys.exit(1)
