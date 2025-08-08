@@ -9,8 +9,10 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/login', methods=['POST'])
 def login():
     """Endpoint para login de usuários"""
+    current_app.logger.info('Recebida requisição de login')
     try:
         data = request.get_json()
+        current_app.logger.info(f'Dados recebidos: {data}')
         if not data:
             return jsonify({'error': 'Dados não fornecidos'}), 400
             

@@ -9,6 +9,8 @@ interface SignalCardProps {
   projectionPercentage: string;
   date: string;
   signalClass: 'PREMIUM' | 'ELITE' | 'PADRÃO';
+  onToggleFavorite?: () => void;
+  isFavorite?: boolean;
 }
 
 const SignalCard: React.FC<SignalCardProps> = ({
@@ -19,6 +21,8 @@ const SignalCard: React.FC<SignalCardProps> = ({
   projectionPercentage,
   date,
   signalClass,
+  onToggleFavorite,
+  isFavorite,
 }) => {
   const dateObj = new Date(date);
   const formattedDate = date && !isNaN(dateObj.getTime()) ? dateObj.toLocaleString('pt-BR', {
@@ -50,42 +54,41 @@ const SignalCard: React.FC<SignalCardProps> = ({
   const isPositiveProjection = parseFloat(projectionPercentage) > 0;
 
   return (
-    <div className="mobile-signal-card">
-      {/* Header do Card */}
-      <div className="mobile-card-header">
-        <div className="mobile-card-symbol">
-          <span className="mobile-symbol-text">{symbol}</span>
-          <span className="mobile-symbol-class">{signalClass || 'CRYPTO'}</span>
+    <div className={`${styles.signalCard} ${styles[type.toLowerCase()]}`}>
+      {/* Header do Card - Símbolo e Tipo */}
+      <div className={styles.cardHeader}>
+        <div className={styles.symbolContainer}>
+          <span className={styles.symbol}>{symbol}</span>
         </div>
-        <div className={`mobile-card-type ${type.toLowerCase()}`}>
+        <div className={`${styles.typeButton} ${styles[type.toLowerCase()]}`}>
           {type}
         </div>
       </div>
       
       {/* Conteúdo Principal */}
-      <div className="mobile-card-body">
+      <div className={styles.cardContent}>
         {/* Linha de Preços */}
-        <div className="mobile-prices-row">
-          <div className="mobile-price-item">
-            <span className="mobile-price-label">Entrada</span>
-            <span className="mobile-price-value">{entryPrice}</span>
+        <div className={styles.priceRow}>
+          <div className={styles.priceItem}>
+            <span className={styles.label}>Entrada</span>
+            <span className={styles.priceValue}>{entryPrice}</span>
           </div>
-          <div className="mobile-price-divider">→</div>
-          <div className="mobile-price-item">
-            <span className="mobile-price-label">Alvo</span>
-            <span className="mobile-price-value">{formattedTargetPrice}</span>
+          <div className={styles.priceItem}>
+            <span className={styles.label}>Alvo</span>
+            <span className={`${styles.priceValue} ${styles.targetPrice}`}>{formattedTargetPrice}</span>
           </div>
         </div>
         
         {/* Footer do Card */}
-        <div className="mobile-card-footer">
-          <div className="mobile-card-date">
-            <span className="mobile-date-icon">📅</span>
-            <span className="mobile-date-text">{formattedDate}</span>
+        <div className={styles.bottomRow}>
+          <div className={styles.dateContainer}>
+            <span className={styles.date}>{formattedDate}</span>
           </div>
-          <div className="mobile-card-projection">
-            <span className="mobile-projection-text">Projeção</span>
-            <span className="mobile-projection-value">({formattedProjection}%)</span>
+          <div className={styles.projectionContainer}>
+            <span className={styles.projectionLabel}>Projeção </span>
+            <span className={`${styles.changePercentage} ${styles.positive}`}>
+              ({formattedProjection}%)
+            </span>
           </div>
         </div>
       </div>

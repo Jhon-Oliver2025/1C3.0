@@ -37,6 +37,9 @@ from api import create_app, register_api_routes
 # Import market scheduler
 from market_scheduler import setup_market_scheduler
 
+# Inicializar variável global para o processo Node.js
+node_process = None
+
 def start_nodejs_backend():
     """Inicia o servidor Node.js em segundo plano."""
     global node_process
@@ -160,7 +163,7 @@ if __name__ == '__main__':
             print("✅ Credenciais do Telegram no DB estão atualizadas com config.py.")
 
     # Iniciar backend Node.js
-    start_nodejs_backend()
+    # start_nodejs_backend()
 
     # Usar a app configurada do api.py
     app = create_app()

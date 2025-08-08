@@ -354,6 +354,30 @@ class Database:
             traceback.print_exc()
             return False
 
+    def create_user(self, username: str, email: str, password: str, is_admin: bool = False) -> bool:
+        """Cria um novo usuário com hash da senha."""
+        try:
+            import bcrypt
+            
+            # Gerar hash da senha
+            password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            
+            user_data = {
+                'id': str(uuid.uuid4()),
+                'username': username,
+                'email': email,
+                'password': password_hash,
+                'is_admin': is_admin,
+                'status': 'pending'  # Usuários criados ficam pendentes por padrão
+            }
+            
+            return self.add_user(user_data)
+            
+        except Exception as e:
+            print(f"❌ Erro ao criar usuário: {e}")
+            traceback.print_exc()
+            return False
+
     def update_user_password(self, user_id: str, new_password_hash: str) -> bool:
         """Atualiza a senha de um usuário pelo ID."""
         try:

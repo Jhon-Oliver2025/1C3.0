@@ -1,10 +1,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Outlet, useNavigate, useLocation, NavLink } from 'react-router-dom';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import TopHeader from '../Layout/TopHeader';
 import Navbar from '../Navbar/Navbar';
 import styles from '../Layout/Layout.module.css';
-import { FaHome, FaQuestionCircle, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaQuestionCircle, FaSignOutAlt, FaChartBar } from 'react-icons/fa';
 
 // Adicionar interface para props
 interface MainLayoutProps {
@@ -72,11 +72,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 onClick={toggleMenu}>
                 <FaChartBar /> Sentimento BTC
               </NavLink> */}
-              {/* REMOVIDO: <NavLink to="/minha-conta" className={({isActive}) => 
+              <NavLink to="/dashboard" className={({isActive}) => 
                 `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
                 onClick={toggleMenu}>
-                <FaUser /> Minha Conta
-              </NavLink> */}
+                <FaHome /> Dashboard
+              </NavLink>
+              <NavLink to="/estatisticas" className={({isActive}) => 
+                `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
+                onClick={toggleMenu}>
+                <FaChartBar /> Estatísticas
+              </NavLink>
               <NavLink to="/suporte" className={({isActive}) => 
                 `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
                 onClick={toggleMenu}>
@@ -120,7 +125,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <main className={styles.mainContent}>
-        {children || <Outlet />}
+        {children}
       </main>
     </div>
   );

@@ -1,0 +1,180 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import styles from './SuportePage.module.css';
+import logo2 from '../../assets/logo2.png';
+
+/**
+ * Componente da página de Suporte
+ * Exibe informações de contato e canais de suporte
+ */
+const SuportePage: React.FC = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isBackendOnline, setIsBackendOnline] = useState(true);
+  const navigate = useNavigate();
+
+  /**
+   * Verifica o status do backend
+   */
+  useEffect(() => {
+    const checkBackendStatus = async () => {
+      try {
+        const response = await fetch('/api/status');
+        setIsBackendOnline(response.ok);
+      } catch (error) {
+        setIsBackendOnline(false);
+      }
+    };
+
+    checkBackendStatus();
+    const interval = setInterval(checkBackendStatus, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  /**
+   * Alterna o estado do menu mobile
+   */
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  /**
+   * Função para realizar logout
+   */
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
+  return (
+    <div className={styles.suporteContainer}>
+      {/* HEADER FIXO */}
+      <header className="mobile-top-header">
+        <button className="mobile-menu-button" onClick={toggleMobileMenu} aria-label="Menu">
+          ☰
+        </button>
+        <div className="mobile-logo-container">
+           <img 
+             src={logo2} 
+             alt="Logo do Sistema" 
+             className={`mobile-system-logo ${isBackendOnline ? 'online' : 'offline'}`}
+             title={isBackendOnline ? 'Backend Online' : 'Backend Offline'}
+           />
+         </div>
+      </header>
+
+      {/* MENU MOBILE OVERLAY */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-overlay" onClick={toggleMobileMenu}>
+          <div className="mobile-menu-content" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-menu-header">
+              <h3>Menu</h3>
+              <button className="mobile-menu-close" onClick={toggleMobileMenu}>
+                ×
+              </button>
+            </div>
+            <div className="mobile-menu-items">
+              <Link to="/dashboard" className="mobile-menu-item" onClick={toggleMobileMenu}>
+                Dashboard
+              </Link>
+              <button className="mobile-menu-item logout" onClick={handleLogout}>
+                Sair
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONTEÚDO PRINCIPAL */}
+      <div className={styles.mainContent}>
+        <div className={styles.suporteHeader}>
+          <h1 className={styles.title}>Central de Suporte</h1>
+          <p className={styles.subtitle}>Estamos aqui para ajudar você</p>
+        </div>
+
+        <div className={styles.suporteCards}>
+          {/* Card Telegram */}
+          <div className={styles.suporteCard}>
+            <div className={styles.cardIcon}>💬</div>
+            <h3 className={styles.cardTitle}>Telegram</h3>
+            <p className={styles.cardDescription}>
+              Suporte rápido e direto através do nosso canal oficial
+            </p>
+            <a 
+              href="https://t.me/cryptosignals_suporte" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.cardButton}
+            >
+              Abrir Telegram
+            </a>
+          </div>
+
+          {/* Card Email */}
+          <div className={styles.suporteCard}>
+            <div className={styles.cardIcon}>📧</div>
+            <h3 className={styles.cardTitle}>Email</h3>
+            <p className={styles.cardDescription}>
+              Envie suas dúvidas detalhadas para nossa equipe
+            </p>
+            <a 
+              href="mailto:suporte@cryptosignals.com" 
+              className={styles.cardButton}
+            >
+              Enviar Email
+            </a>
+          </div>
+
+          {/* Card WhatsApp */}
+          <div className={styles.suporteCard}>
+            <div className={styles.cardIcon}>📱</div>
+            <h3 className={styles.cardTitle}>WhatsApp</h3>
+            <p className={styles.cardDescription}>
+              Atendimento personalizado via WhatsApp
+            </p>
+            <a 
+              href="https://wa.me/5511999999999" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.cardButton}
+            >
+              Abrir WhatsApp
+            </a>
+          </div>
+
+          {/* Card FAQ */}
+          <div className={styles.suporteCard}>
+            <div className={styles.cardIcon}>❓</div>
+            <h3 className={styles.cardTitle}>FAQ</h3>
+            <p className={styles.cardDescription}>
+              Perguntas frequentes e respostas rápidas
+            </p>
+            <button className={styles.cardButton}>
+              Ver FAQ
+            </button>
+          </div>
+        </div>
+
+        {/* Informações Adicionais */}
+        <div className={styles.infoSection}>
+          <h2 className={styles.infoTitle}>Horário de Atendimento</h2>
+          <div className={styles.infoGrid}>
+            <div className={styles.infoItem}>
+              <strong>Segunda a Sexta:</strong> 08:00 - 18:00
+            </div>
+            <div className={styles.infoItem}>
+              <strong>Sábado:</strong> 09:00 - 14:00
+            </div>
+            <div className={styles.infoItem}>
+              <strong>Domingo:</strong> Fechado
+            </div>
+            <div className={styles.infoItem}>
+              <strong>Telegram:</strong> 24/7 (resposta automática)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SuportePage;

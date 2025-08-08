@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import './styles/mobile-essential.css';
 
 // Importar componentes de páginas
 import LandingPage from './pages/LandingPage';
@@ -8,11 +9,12 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
-import DashboardPage from './pages/DashboardPage/DashboardPage';
+import DashboardPage from './pages/Dashboard/DashboardPage';
+import StatsPage from './pages/StatsPage/StatsPage';
 import BtcSentimentPage from './pages/BtcSentimentPage';
 import MinhaContaPage from './pages/MinhaContaPage';
 import ConfiguracoesPage from './pages/ConfiguracoesPage';
-import SuportePage from './pages/SuportePage';
+import SuportePage from './pages/Suporte/SuportePage';
 import SairPage from './pages/SairPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
@@ -23,7 +25,7 @@ import MainLayout from './components/MainLayout/MainLayout';
  * Redireciona para login se não autenticado
  */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = !!localStorage.getItem('authToken');
+  const isAuthenticated = !!localStorage.getItem('token');
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
@@ -56,6 +58,14 @@ function App() {
         </ProtectedRoute>
       } />
       
+      <Route path="/estatisticas" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <StatsPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+      
       <Route path="/btc-sentiment" element={
         <ProtectedRoute>
           <MainLayout>
@@ -82,9 +92,7 @@ function App() {
       
       <Route path="/suporte" element={
         <ProtectedRoute>
-          <MainLayout>
-            <SuportePage />
-          </MainLayout>
+          <SuportePage />
         </ProtectedRoute>
       } />
       

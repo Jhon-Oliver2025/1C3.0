@@ -1,24 +1,22 @@
 .dashboardContainer {
   min-height: 100vh;
   background: linear-gradient(135deg, #0A192F 0%, #000000 100%);
-  position: relative;
   overflow-x: hidden;
+  position: relative;
 }
 
 /* Seção Motivacional Fixa */
 .motivationalSection {
-  position: fixed;
-  top: 60px; /* Ajustado para ficar abaixo do TopHeader */
-  left: 0;
-  right: 0;
-  height: 70px; /* Reduzido para mobile */
+  /* position: fixed; REMOVIDO */
+  margin-top: 16px; /* Espaçamento do topo */
+  margin-bottom: 16px; /* Espaçamento inferior */
+  height: auto; /* Altura automática */
   background: linear-gradient(135deg, #2d5a87, #1e3a5f);
   border-bottom: 1px solid #64FFDA;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
-  padding: 0 15px;
+  padding: 15px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -34,12 +32,41 @@
   word-wrap: break-word;
 }
 
-/* Container dos Cards */
+/* CONTAINER 2 - CARDS DOS SINAIS (Scrollável) */
 .cardsContainer {
-  margin-top: 130px; /* 60px TopHeader + 70px motivacional */
-  padding: 0 10px;
-  height: calc(100vh - 130px);
+  flex: 1;
   overflow-y: auto;
+  padding: 0 16px 16px; /* Remove padding-top */
+  margin-top: 4px; /* Garante o espaçamento de 4px */
+  background: transparent;
+}
+
+/* Lista de Sinais */
+.signalsList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Barra de Rolagem Customizada */
+.cardsContainer::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cardsContainer::-webkit-scrollbar-track {
+  background: rgba(100, 255, 218, 0.1);
+  border-radius: 3px;
+}
+
+.cardsContainer::-webkit-scrollbar-thumb {
+  background: rgba(100, 255, 218, 0.5);
+  border-radius: 3px;
+}
+
+.cardsContainer::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 255, 218, 0.8);
 }
 
 .motivationalContent {
@@ -62,26 +89,9 @@
   line-height: 1.3;
 }
 
-/* Cabeçalho dos Sinais - 2 Linhas */
-.signalsHeader {
-  background: #0f2a44;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  overflow: hidden;
-  border: 1px solid rgba(100, 255, 218, 0.3);
-  height: 70px; /* Altura ajustada para mobile */
-}
+/* Removido - usando mobile-essential.css */
 
-/* Linha 1 - Horários e Cronômetros */
-.timeRow {
-  height: 35px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 8px;
-  padding: 5px 10px;
-  background: #1a365d;
-  align-items: center;
-}
+/* Removido - usando mobile-essential.css */
 
 .timeItem {
   background: #0f2a44;
@@ -119,16 +129,7 @@
   color: #FFD700 !important;
 }
 
-/* Linha 2 - Estatísticas */
-.statsRow {
-  height: 30px;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 8px;
-  padding: 5px 10px;
-  background: #1a365d;
-  align-items: center;
-}
+/* Removido - usando mobile-essential.css */
 
 .currentDateTime {
   display: flex;
@@ -209,6 +210,74 @@
 
 .lastUpdate {
   color: #64ffda !important;
+}
+
+/* Removido - usando mobile-essential.css */
+
+.mobile-signals-header-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mobile-signals-header-label {
+  font-size: 10px;
+  color: #A0AEC0;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.mobile-signals-header-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+/* Cabeçalho do Mercado Mobile */
+.mobile-market-header {
+  display: flex;
+  justify-content: space-around;
+  background: #1a365d;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(100, 255, 218, 0.2);
+}
+
+.mobile-market-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mobile-market-label {
+  font-size: 10px;
+  color: #A0AEC0;
+  text-transform: uppercase;
+}
+
+.mobile-market-time {
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.mobile-market-status {
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+
+.mobile-market-status.open {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.mobile-market-status.closed {
+  background-color: #E53E3E;
+  color: white;
 }
 
 /* Lista de Sinais */
@@ -341,14 +410,7 @@
   box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
 }
 
-/* Container dos Cards */
-.cardsContainer {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 0;
-}
+/* Container dos Cards - REMOVIDO: usando definição principal acima */
 
 /* Estados de Carregamento e Erro */
 .loadingMessage, .errorMessage, .noSignalsMessage {
@@ -377,72 +439,6 @@
   border-color: #ffd93d;
 }
 
-/* Ajustes para mobile */
-@media (max-width: 480px) {
-  .motivationalSection {
-    height: 70px;
-    top: 60px;
-    padding: 0 10px;
-  }
-
-  .motivationalText {
-    font-size: 13px;
-    line-height: 1.3;
-  }
-
-  .cardsContainer {
-    margin-top: 130px;
-    padding: 0 8px;
-    height: calc(100vh - 130px);
-    overflow-y: auto;
-  }
-
-  .signalsHeader {
-    height: 70px;
-    margin-bottom: 12px;
-  }
-
-  .timeRow {
-    height: 35px;
-    padding: 4px 8px;
-    gap: 6px;
-  }
-
-  .timeItem {
-    padding: 3px 6px;
-    min-height: 27px;
-  }
-
-  .timeLabel {
-    font-size: 9px;
-  }
-
-  .timeValue {
-    font-size: 10px;
-  }
-
-  .statsRow {
-    height: 35px;
-    padding: 4px 8px;
-    gap: 6px;
-  }
-
-  .statItem {
-    padding: 3px 6px;
-    min-height: 27px;
-  }
-
-  .statLabel {
-    font-size: 8px;
-  }
-
-  .statValue {
-    font-size: 10px;
-  }
-
-  .signalsList {
-    gap: 10px;
-  }
-}
+/* Removido - usando mobile-essential.css */
 
 /* Removido - duplicação desnecessária */

@@ -5,21 +5,30 @@ import { FaBars } from 'react-icons/fa';
 
 interface TopHeaderProps {
   isBackendOnline?: boolean;
-  onMenuToggle?: () => void; // Novo prop para controlar o menu
+  onMenuToggle?: () => void;
 }
 
+/**
+ * Componente do cabeçalho superior com logo do sistema e indicador de status
+ * @param isBackendOnline - Status de conexão com o backend
+ * @param onMenuToggle - Função para alternar o menu lateral
+ */
 const TopHeader: React.FC<TopHeaderProps> = ({ isBackendOnline, onMenuToggle }) => {
   return (
-    <header className={styles.topHeader}>
-      <button className={styles.menuButton} onClick={onMenuToggle}>
-        <FaBars size={20} />
+    <header className="mobile-top-header">
+      <button className="mobile-menu-button" onClick={onMenuToggle} aria-label="Menu">
+        ☰
       </button>
-      <div className={styles.logoContainer}>
-        <NavLink to="/" end>
-          <div className={`${styles.logoWrapper} ${isBackendOnline === true ? styles.online : (isBackendOnline === false ? styles.offline : '')}`}>
-            <img src={logo2} alt="CrypTen Logo" className={styles.logo} />
-          </div>
-        </NavLink>
+      <div className="mobile-logo-status">
+        <span>CRYPTO SIGNALS</span>
+      </div>
+      <div className="mobile-logo-container">
+        <img 
+          src={logo2} 
+          alt="Logo do Sistema" 
+          className={`mobile-system-logo ${isBackendOnline ? 'online' : 'offline'}`}
+          title={isBackendOnline ? 'Backend Online' : 'Backend Offline'}
+        />
       </div>
     </header>
   );

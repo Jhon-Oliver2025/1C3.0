@@ -17,6 +17,9 @@ function LoginPage() {
     setLoading(true);
 
     try {
+      console.log('Enviando requisição de login para:', '/api/auth/login');
+      console.log('Dados enviados:', { username: email, password: '***' });
+      
       // Usar proxy do nginx em vez de conectar diretamente na porta 5000
       const response = await fetch('/api/auth/login', { 
         method: 'POST',
@@ -27,11 +30,15 @@ function LoginPage() {
         body: JSON.stringify({ username: email, password }),
       });
 
+      console.log('Status da resposta:', response.status);
+      console.log('Headers da resposta:', response.headers);
+      console.log('Response OK:', response.ok);
+      
       const data = await response.json();
       console.log('Resposta do backend (data):', data);
 
       if (response.ok) {
-        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('token', data.token);
         navigate('/dashboard');
       } else {
         setError(data.message || 'Erro ao fazer login. Verifique suas credenciais.');
