@@ -191,6 +191,17 @@ body {
   width: 40px; /* Mesmo tamanho do botão menu para balanceamento */
 }
 
+.mobile-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-header-right .mobile-logo-container {
+  display: flex;
+  align-items: center;
+}
+
 /* ========================================
    📱 MENU LATERAL
 ======================================== */
