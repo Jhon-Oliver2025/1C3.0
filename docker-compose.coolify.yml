@@ -49,7 +49,11 @@ services:
       - FLASK_ENV=production
       - FLASK_DEBUG=0
       - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql://postgres:sD6%2AqY1%40jV3%5EcK8%23m10prasempre%20F5%26g@postgres:5432/trading_signals
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=trading_signals
+      - POSTGRES_USER=postgres
+      - DATABASE_URL=postgresql://postgres:sD6*qY1@jV3^cK8#m10prasempre F5&g@postgres:5432/trading_signals
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=gZ4vNpWq8sB2kF6a10prasempre
       - JWT_SECRET=X9&eR3@cM7!zL10prasempre 1*kP5^f
@@ -74,11 +78,11 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5000/api/health || exit 1"]
-      interval: 60s
-      timeout: 30s
-      retries: 10
-      start_period: 180s
+      test: ["CMD-SHELL", "python healthcheck.py"]
+      interval: 90s
+      timeout: 60s
+      retries: 3
+      start_period: 300s
 
   # Frontend React App
   frontend:

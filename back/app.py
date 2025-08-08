@@ -143,47 +143,73 @@ class KryptonBot:
 
 def wait_for_database(max_retries=30, delay=2):
     """
-    Aguarda o PostgreSQL ficar disponível
+    Aguarda a disponibilidade do banco de dados PostgreSQL.
     
     Args:
         max_retries (int): Número máximo de tentativas
         delay (int): Delay entre tentativas em segundos
     
     Returns:
-        bool: True se conectou, False caso contrário
+        bool: True se conectou com sucesso, False caso contrário
     """
+    import psycopg2
+    from urllib.parse import urlparse
+    
     database_url = os.getenv('DATABASE_URL')
+    
+    # Se DATABASE_URL não estiver disponível, construir a partir de variáveis separadas
     if not database_url:
-        print("❌ DATABASE_URL não definida")
-        return False
+        host = os.getenv('POSTGRES_HOST', 'postgres')
+        port = os.getenv('POSTGRES_PORT', '5432')
+        db = os.getenv('POSTGRES_DB', 'trading_signals')
+        user = os.getenv('POSTGRES_USER', 'postgres')
+        password = os.getenv('POSTGRES_PASSWORD', '')
+        
+        if not password:
+            print("❌ POSTGRES_PASSWORD não definida")
+            return False
+            
+        database_url = f"postgresql://{user}:{password}@{host}:{port}/{db}"
+        print(f"🔧 DATABASE_URL construída a partir de variáveis separadas")
     
     # Validar formato da URL
-    if not database_url.startswith(('postgresql://', 'postgres://')):
-        print(f"❌ DATABASE_URL inválida: {database_url[:30]}...")
+    try:
+        parsed = urlparse(database_url)
+        if not all([parsed.scheme, parsed.hostname, parsed.username]):
+            print(f"❌ DATABASE_URL inválida: formato incorreto")
+            return False
+        print(f"🔍 Conectando ao banco: {parsed.username}@{parsed.hostname}:{parsed.port or 5432}/{parsed.path[1:]}")
+    except Exception as e:
+        print(f"❌ Erro ao analisar DATABASE_URL: {e}")
         return False
     
-    for attempt in range(max_retries):
+    for attempt in range(1, max_retries + 1):
         try:
-            print(f"🔍 Tentativa {attempt + 1}/{max_retries} - Conectando ao PostgreSQL...")
-            print(f"🔍 URL: {database_url[:50]}...")
+            print(f"🔄 Tentativa {attempt}/{max_retries} de conexão com PostgreSQL...")
+            conn = psycopg2.connect(database_url)
             
-            from core.db_config import DatabaseConfig
-            db_config = DatabaseConfig()
-            with db_config.get_db_connection() as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute("SELECT version();")
-                    version = cursor.fetchone()
-                    print(f"✅ PostgreSQL conectado: {version[0][:50]}...")
-                    return True
-                    
+            # Testar a conexão
+            cursor = conn.cursor()
+            cursor.execute("SELECT version();")
+            version = cursor.fetchone()[0]
+            print(f"✅ PostgreSQL conectado com sucesso! Versão: {version}")
+            
+            cursor.close()
+            conn.close()
+            return True
+            
+        except psycopg2.OperationalError as e:
+            print(f"⚠️ Tentativa {attempt} falhou: {e}")
+            if attempt < max_retries:
+                print(f"⏳ Aguardando {delay}s antes da próxima tentativa...")
+                time.sleep(delay)
+            else:
+                print(f"❌ Falha após {max_retries} tentativas")
+                return False
         except Exception as e:
-            print(f"❌ Tentativa {attempt + 1} falhou: {e}")
-            
-        if attempt < max_retries - 1:
-            print(f"⏳ Aguardando {delay}s antes da próxima tentativa...")
-            time.sleep(delay)
+            print(f"❌ Erro inesperado na tentativa {attempt}: {e}")
+            return False
     
-    print(f"💥 Falha ao conectar ao PostgreSQL após {max_retries} tentativas")
     return False
 
 if __name__ == '__main__':
