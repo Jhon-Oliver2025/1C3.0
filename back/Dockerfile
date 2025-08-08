@@ -37,8 +37,8 @@ USER app
 EXPOSE 5000
 
 # Health check
-HEALTHCHECK --interval=60s --timeout=30s --start-period=180s --retries=5 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/health || exit 1
+HEALTHCHECK --interval=90s --timeout=60s --start-period=300s --retries=3 \
+    CMD python healthcheck.py || exit 1
 
 # Comando para iniciar a aplicação
 CMD ["python", "app.py"]

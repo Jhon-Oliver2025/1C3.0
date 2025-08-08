@@ -167,6 +167,16 @@ def wait_for_database():
 if __name__ == '__main__':
     try:
         print("🚀 Iniciando aplicação...")
+        print(f"🔍 Python version: {sys.version}")
+        print(f"🔍 Working directory: {os.getcwd()}")
+        print(f"🔍 Environment variables:")
+        for key in ['FLASK_ENV', 'FLASK_DEBUG', 'DATABASE_URL', 'REDIS_URL']:
+            value = os.getenv(key, 'NOT_SET')
+            if 'URL' in key and value != 'NOT_SET':
+                # Mascarar URLs sensíveis
+                print(f"🔍   {key}: {value[:20]}...")
+            else:
+                print(f"🔍   {key}: {value}")
         
         # Aguardar PostgreSQL em produção
         environment = os.getenv('FLASK_ENV', 'development')
@@ -179,8 +189,20 @@ if __name__ == '__main__':
         # Inicializar o bot ANTES de usar
         print("🤖 Inicializando KryptonBot...")
         try:
+            # Verificar importações críticas primeiro
+            print("🔍 Verificando importações críticas...")
+            from core.database import Database
+            from core.binance_client import BinanceClient
+            from core.technical_analysis import TechnicalAnalysis
+            from core.telegram_notifier import TelegramNotifier
+            print("✅ Todas as importações críticas OK")
+            
             bot = KryptonBot()
             print("✅ KryptonBot inicializado com sucesso!")
+        except ImportError as e:
+            print(f"❌ Erro de importação: {e}")
+            traceback.print_exc()
+            sys.exit(1)
         except Exception as e:
             print(f"❌ Erro ao inicializar KryptonBot: {e}")
             traceback.print_exc()
