@@ -93,12 +93,23 @@ services:
       - app-network
     depends_on:
       - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # Nginx Proxy
   nginx:
     image: nginx:alpine
     ports:
       - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
     command: |
       sh -c '
       cat > /etc/nginx/nginx.conf << EOF
