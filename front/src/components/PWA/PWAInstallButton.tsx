@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import { usePWAContext } from './PWAProvider';
 import styles from './PWAInstallButton.module.css';
+import logo2 from '../../assets/logo2.png';
 
 interface PWAInstallButtonProps {
   variant?: 'primary' | 'secondary' | 'minimal';
@@ -65,7 +66,15 @@ const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
     >
       {showIcon && (
         <span className={styles.icon}>
-          {isInstalling ? '⏳' : '📱'}
+          {isInstalling ? (
+            <span className={styles.loadingIcon}>⏳</span>
+          ) : (
+            <img 
+              src={logo2} 
+              alt="1Crypten Logo" 
+              className={styles.logoIcon}
+            />
+          )}
         </span>
       )}
       <span className={styles.text}>
