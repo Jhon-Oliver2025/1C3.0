@@ -77,7 +77,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - NODE_ENV=production
-      - REACT_APP_API_URL=http://localhost:3000
+      - REACT_APP_API_URL=https://1crypten.space
     restart: unless-stopped
     networks:
       - app-network
