@@ -7,9 +7,9 @@
 :root {
   /* Dimensões Estruturais */
   --mobile-header-height: 72px;
-  --mobile-motivational-height: 90px;
+  --mobile-motivational-height: 110px;
   --mobile-signals-header-height: 130px;
-  --mobile-content-top: 304px; /* 72px header + 90px motivação + 130px cabeçalho + 4px gap + 4px espaçamento final */
+  --mobile-content-top: 324px; /* 72px header + 110px motivação + 130px cabeçalho + 4px gap + 8px espaçamento final */
 
   /* Cores Primárias e de Fundo */
   --primary-bg: #1a1a2e;

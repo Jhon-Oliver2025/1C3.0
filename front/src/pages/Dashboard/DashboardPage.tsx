@@ -317,15 +317,15 @@ const DashboardPage: React.FC = () => {
             {/* Linha 1: Status das Limpezas */}
             <div className="mobile-market-times">
               <div className="mobile-market-item">
-                <span className="mobile-market-label">10:00</span>
-                <span className="mobile-market-time">MATINAL</span>
+                <span className="mobile-market-label">U.S.A</span>
+                <span className="mobile-market-time">10:00</span>
                 <span className={`mobile-market-status ${cleanupStatus.morning_cleanup.status === 'ATIVO' ? 'open' : 'closed'}`}>
                   {cleanupStatus.morning_cleanup.status}
                 </span>
               </div>
               <div className="mobile-market-item">
-                <span className="mobile-market-label">21:00</span>
-                <span className="mobile-market-time">NOTURNA</span>
+                <span className="mobile-market-label">ÁSIA</span>
+                <span className="mobile-market-time">21:00</span>
                 <span className={`mobile-market-status ${cleanupStatus.evening_cleanup.status === 'ATIVO' ? 'open' : 'closed'}`}>
                   {cleanupStatus.evening_cleanup.status}
                 </span>
