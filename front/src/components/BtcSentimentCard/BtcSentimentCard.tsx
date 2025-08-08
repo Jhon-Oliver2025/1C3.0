@@ -65,7 +65,7 @@ const BtcSentimentCard: React.FC = () => {
     setLoadingBtcSentiment(true);
     setErrorBtcSentiment(null);
     try {
-      const response = await fetch('http://localhost:8050/api/btc_sentiment'); // Ajuste a URL se necessário
+      const response = await fetch('/api/btc_sentiment'); // Usar proxy relativo
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
