@@ -141,27 +141,49 @@ class KryptonBot:
         self.notifier = TelegramNotifier()
         self.gerenciador_sinais = GerenciadorSinais(self.db)
 
-def wait_for_database():
-    """Aguarda o PostgreSQL estar disponível"""
-    import time
-    max_retries = 30
-    retry_count = 0
+def wait_for_database(max_retries=30, delay=2):
+    """
+    Aguarda o PostgreSQL ficar disponível
     
-    while retry_count < max_retries:
+    Args:
+        max_retries (int): Número máximo de tentativas
+        delay (int): Delay entre tentativas em segundos
+    
+    Returns:
+        bool: True se conectou, False caso contrário
+    """
+    database_url = os.getenv('DATABASE_URL')
+    if not database_url:
+        print("❌ DATABASE_URL não definida")
+        return False
+    
+    # Validar formato da URL
+    if not database_url.startswith(('postgresql://', 'postgres://')):
+        print(f"❌ DATABASE_URL inválida: {database_url[:30]}...")
+        return False
+    
+    for attempt in range(max_retries):
         try:
+            print(f"🔍 Tentativa {attempt + 1}/{max_retries} - Conectando ao PostgreSQL...")
+            print(f"🔍 URL: {database_url[:50]}...")
+            
             from core.db_config import DatabaseConfig
             db_config = DatabaseConfig()
             with db_config.get_db_connection() as conn:
                 with conn.cursor() as cursor:
-                    cursor.execute("SELECT 1")
-                    print("✅ PostgreSQL conectado com sucesso!")
+                    cursor.execute("SELECT version();")
+                    version = cursor.fetchone()
+                    print(f"✅ PostgreSQL conectado: {version[0][:50]}...")
                     return True
+                    
         except Exception as e:
-            retry_count += 1
-            print(f"⏳ Aguardando PostgreSQL... tentativa {retry_count}/{max_retries}: {e}")
-            time.sleep(2)
+            print(f"❌ Tentativa {attempt + 1} falhou: {e}")
+            
+        if attempt < max_retries - 1:
+            print(f"⏳ Aguardando {delay}s antes da próxima tentativa...")
+            time.sleep(delay)
     
-    print("❌ Falha ao conectar com PostgreSQL após 30 tentativas")
+    print(f"💥 Falha ao conectar ao PostgreSQL após {max_retries} tentativas")
     return False
 
 if __name__ == '__main__':
