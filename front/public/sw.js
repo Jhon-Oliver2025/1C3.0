@@ -13,12 +13,8 @@ const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  '/assets/terra.png',
-  '/assets/logo2.png'
+  '/icons/icon-192x192.svg',
+  '/icons/icon-512x512.svg'
 ];
 
 // URLs da API para cache

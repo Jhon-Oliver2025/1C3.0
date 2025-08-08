@@ -44,7 +44,8 @@ const DashboardPage: React.FC = () => {
   const fetchMarketStatus = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/market-status`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://1crypten.space';
+      const response = await fetch(`${apiUrl}/api/market-status`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -52,12 +53,62 @@ const DashboardPage: React.FC = () => {
       });
       
       if (response.ok) {
-        const data = await response.json();
-        setMarketTimes(data);
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setMarketTimes(data);
+        } else {
+          console.warn('API retornou HTML em vez de JSON, usando fallback');
+          // Fallback para cálculo local se a API não estiver disponível
+          const fallbackTimes = getLocalMarketTimes();
+          setMarketTimes(fallbackTimes);
+        }
+      } else {
+        console.warn('API market-status não disponível, usando fallback');
+        const fallbackTimes = getLocalMarketTimes();
+        setMarketTimes(fallbackTimes);
       }
     } catch (error) {
       console.error('Erro ao buscar status dos mercados:', error);
+      // Fallback para cálculo local em caso de erro
+      const fallbackTimes = getLocalMarketTimes();
+      setMarketTimes(fallbackTimes);
     }
+  };
+
+  // Função de fallback para cálculo local dos horários
+  const getLocalMarketTimes = () => {
+    const now = new Date();
+    
+    // Mercado EUA (NYSE: 9:30-16:00 EST, Segunda a Sexta)
+    const usaTime = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}));
+    const usaHour = usaTime.getHours();
+    const usaMinutes = usaTime.getMinutes();
+    const usaDay = usaTime.getDay();
+    const usaIsWeekday = usaDay >= 1 && usaDay <= 5;
+    const usaIsOpen = usaIsWeekday && 
+      ((usaHour > 9) || (usaHour === 9 && usaMinutes >= 30)) && 
+      (usaHour < 16);
+    const usaStatus = usaIsOpen ? 'ABERTO' : 'FECHADO';
+    
+    // Mercado Ásia (Tokyo: 9:00-15:00 JST, Segunda a Sexta)
+    const asiaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
+    const asiaHour = asiaTime.getHours();
+    const asiaDay = asiaTime.getDay();
+    const asiaIsWeekday = asiaDay >= 1 && asiaDay <= 5;
+    const asiaIsOpen = asiaIsWeekday && (asiaHour >= 9 && asiaHour < 15);
+    const asiaStatus = asiaIsOpen ? 'ABERTO' : 'FECHADO';
+    
+    return {
+      usa: {
+        time: usaTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        status: usaStatus
+      },
+      asia: {
+        time: asiaTime.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+        status: asiaStatus
+      }
+    };
   };
 
   /**
