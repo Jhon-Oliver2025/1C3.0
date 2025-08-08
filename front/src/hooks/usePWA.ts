@@ -118,18 +118,23 @@ export const usePWA = (): PWAState & PWAActions => {
     const defaultOptions: NotificationOptions = {
       icon: '/icons/icon-192x192.svg',
       badge: '/icons/icon-72x72.svg',
-      vibrate: [200, 100, 200],
       data: {
         url: '/dashboard'
       },
       ...options
     };
 
+    // Adicionar vibração se suportado (não está no tipo NotificationOptions)
+    const notificationOptions = {
+      ...defaultOptions,
+      ...(navigator.vibrate && { vibrate: [200, 100, 200] })
+    } as NotificationOptions;
+
     // Usar Service Worker se disponível, senão usar API direta
     if (registration) {
-      registration.showNotification(title, defaultOptions);
+      registration.showNotification(title, notificationOptions);
     } else {
-      new Notification(title, defaultOptions);
+      new Notification(title, notificationOptions);
     }
   };
 
