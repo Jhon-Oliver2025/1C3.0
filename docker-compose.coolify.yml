@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: trading_signals
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
+      POSTGRES_PASSWORD: sD6*qY1@jV3^cK8#m10prasempre F5&g
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./back/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -47,7 +47,7 @@ services:
       - "5000:5000"
     environment:
       - FLASK_ENV=production
-      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/trading_signals
+      - DATABASE_URL=postgresql://postgres:sD6*qY1@jV3^cK8#m10prasempre F5&g@postgres:5432/trading_signals
       - REDIS_URL=redis://redis:6379/0
       - SECRET_KEY=gZ4vNpWq8sB2kF6a10prasempre
       - JWT_SECRET=X9&eR3@cM7!zL10prasempre 1*kP5^f
