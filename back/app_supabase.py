@@ -21,6 +21,14 @@ load_dotenv()
 from config import server
 from supabase_config import supabase_config
 
+# Importar blueprints das rotas
+from api_routes.auth import auth_bp
+from api_routes.signals import signals_bp
+from api_routes.trading import trading_bp
+from api_routes.users import users_bp
+from api_routes.notifications import notifications_bp
+from api_routes.market_times import market_times_bp
+
 # Configurar CORS
 CORS(server, resources={
     r"/api/*": {
@@ -60,7 +68,7 @@ class KryptonBotSupabase:
             from core.binance_client import BinanceClient
             from core.telegram_notifier import TelegramNotifier
             from core.technical_analysis import TechnicalAnalysis
-            from core.gerenciador_sinais import GerenciadorSinais
+            from core.gerenciar_sinais import GerenciadorSinais
             
             # Inicializar clientes
             self.binance_client = BinanceClient()
@@ -137,6 +145,20 @@ def create_app():
                     'timestamp': datetime.now().isoformat()
                 }
         bot = MockBot()
+    
+    # Configurações adicionais
+    server.config['JWT_SECRET'] = os.getenv('JWT_SECRET', 'default-jwt-secret-key')
+    
+    # Adicionar instância do bot ao contexto da aplicação
+    server.bot_instance = bot
+    
+    # Registrar blueprints das rotas de API
+    server.register_blueprint(auth_bp, url_prefix='/api/auth')
+    server.register_blueprint(signals_bp, url_prefix='/api/signals')
+    server.register_blueprint(trading_bp, url_prefix='/api/trading')
+    server.register_blueprint(users_bp, url_prefix='/api/users')
+    server.register_blueprint(notifications_bp, url_prefix='/api/notifications')
+    server.register_blueprint(market_times_bp, url_prefix='/api')
     
     # Registrar rotas básicas
     @server.route('/api/health')
