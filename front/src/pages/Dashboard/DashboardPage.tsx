@@ -106,15 +106,24 @@ const DashboardPage: React.FC = () => {
   const getMarketTimes = () => {
     const now = new Date();
     
-    // Mercado EUA (NYSE: 9:30-16:00 EST)
+    // Mercado EUA (NYSE: 9:30-16:00 EST, Segunda a Sexta)
     const usaTime = new Date(now.toLocaleString("en-US", {timeZone: "America/New_York"}));
     const usaHour = usaTime.getHours();
-    const usaStatus = (usaHour >= 9 && usaHour < 16) ? 'ABERTO' : 'FECHADO';
+    const usaMinutes = usaTime.getMinutes();
+    const usaDay = usaTime.getDay(); // 0 = Domingo, 6 = Sábado
+    const usaIsWeekday = usaDay >= 1 && usaDay <= 5;
+    const usaIsOpen = usaIsWeekday && 
+      ((usaHour > 9) || (usaHour === 9 && usaMinutes >= 30)) && 
+      (usaHour < 16);
+    const usaStatus = usaIsOpen ? 'ABERTO' : 'FECHADO';
     
-    // Mercado Ásia (Tokyo: 9:00-15:00 JST)
+    // Mercado Ásia (Tokyo: 9:00-15:00 JST, Segunda a Sexta)
     const asiaTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Tokyo"}));
     const asiaHour = asiaTime.getHours();
-    const asiaStatus = (asiaHour >= 9 && asiaHour < 15) ? 'ABERTO' : 'FECHADO';
+    const asiaDay = asiaTime.getDay(); // 0 = Domingo, 6 = Sábado
+    const asiaIsWeekday = asiaDay >= 1 && asiaDay <= 5;
+    const asiaIsOpen = asiaIsWeekday && (asiaHour >= 9 && asiaHour < 15);
+    const asiaStatus = asiaIsOpen ? 'ABERTO' : 'FECHADO';
     
     return {
       usa: {
@@ -187,7 +196,14 @@ const DashboardPage: React.FC = () => {
         is_favorite: false
       }));
       
-      setSignals(mappedSignals);
+      // Ordenar sinais por data/hora mais recente primeiro
+      const sortedSignals = mappedSignals.sort((a, b) => {
+        const dateA = new Date(a.entry_time).getTime();
+        const dateB = new Date(b.entry_time).getTime();
+        return dateB - dateA; // Mais recente primeiro
+      });
+      
+      setSignals(sortedSignals);
     } catch (err) {
       console.error('❌ Erro ao carregar sinais:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar sinais');
