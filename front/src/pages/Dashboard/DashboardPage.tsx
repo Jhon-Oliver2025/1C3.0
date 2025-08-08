@@ -167,14 +167,20 @@ const DashboardPage: React.FC = () => {
       const data = await response.json();
       console.log('✅ Sinais carregados da API:', data);
       
+      // Verificar se a resposta tem a estrutura esperada
+      const signalsArray = data.signals || data;
+      if (!Array.isArray(signalsArray)) {
+        throw new Error('Formato de dados inválido da API');
+      }
+      
       // Mapear os dados da API para o formato esperado
-      const mappedSignals: Signal[] = data.map((signal: any) => ({
+      const mappedSignals: Signal[] = signalsArray.map((signal: any) => ({
         symbol: signal.symbol,
-        type: signal.type === 'LONG' ? 'COMPRA' : 'VENDA',
-        entry_price: signal.entry_price,
+        type: signal.type === 'LONG' || signal.type === 'COMPRA' ? 'COMPRA' : 'VENDA',
+        entry_price: parseFloat(signal.entry_price) || 0,
         entry_time: signal.entry_time,
-        target_price: signal.target_price,
-        projection_percentage: signal.projection_percentage,
+        target_price: parseFloat(signal.target_price) || 0,
+        projection_percentage: parseFloat(signal.projection_percentage) || 0,
         signal_class: signal.signal_class,
         status: signal.status,
         is_favorite: false
