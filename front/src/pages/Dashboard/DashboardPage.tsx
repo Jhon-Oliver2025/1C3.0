@@ -62,6 +62,7 @@ const DashboardPage: React.FC = () => {
 
   /**
    * Array de frases motivacionais
+   */
   const motivationalPhrases = [
     "A nova fronteira do investimento está ao seu alcance.",
     "Desbrave o universo cripto com clareza e precisão, do seu jeito.",
