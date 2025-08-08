@@ -11,8 +11,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./back/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "5432:5432"
+    # ports:
+      # - "5432:5432"  # Removido para evitar conflito de porta em produção
     restart: unless-stopped
     networks:
       - app-network
@@ -25,8 +25,8 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    # ports:
+      # - "6379:6379"  # Removido para evitar conflito de porta em produção
     volumes:
       - redis_data:/data
     restart: unless-stopped
@@ -43,8 +43,8 @@ services:
     build:
       context: ./back
       dockerfile: Dockerfile
-    ports:
-      - "5000:5000"
+    # ports:
+      # - "5000:5000"  # Removido - acesso apenas via Nginx
     environment:
       - FLASK_ENV=production
       - DATABASE_URL=postgresql://postgres:sD6*qY1@jV3^cK8#m10prasempre F5&g@postgres:5432/trading_signals
