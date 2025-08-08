@@ -211,11 +211,6 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-    depends_on:
-      frontend:
-        condition: service_started
-      backend:
-        condition: service_healthy
 
 networks:
   app-network:
