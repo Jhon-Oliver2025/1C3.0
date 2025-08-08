@@ -69,11 +69,21 @@ class KryptonBotSupabase:
             from core.telegram_notifier import TelegramNotifier
             from core.technical_analysis import TechnicalAnalysis
             from core.gerenciar_sinais import GerenciadorSinais
+            from core.database import Database
+            
+            # Inicializar instância do banco de dados
+            self.db = Database()
             
             # Inicializar clientes
             self.binance_client = BinanceClient()
             self.telegram = TelegramNotifier()
-            self.technical_analysis = TechnicalAnalysis()
+            
+            # Inicializar análise técnica com instância do banco
+            try:
+                self.technical_analysis = TechnicalAnalysis(self.db)
+            except TypeError:
+                # Fallback se TechnicalAnalysis não aceitar db_instance
+                self.technical_analysis = TechnicalAnalysis()
             
             # Inicializar gerenciador de sinais
             if self.is_supabase_configured and self.database_url:
@@ -91,6 +101,21 @@ class KryptonBotSupabase:
         except Exception as e:
             print(f"⚠️ Erro ao inicializar componentes: {e}")
             # Continuar mesmo com erros para permitir healthcheck
+            # Garantir que pelo menos a instância do banco existe
+            if not hasattr(self, 'db'):
+                try:
+                    from core.database import Database
+                    self.db = Database()
+                    print("✅ Instância do banco inicializada em modo de recuperação")
+                except Exception as db_error:
+                    print(f"⚠️ Erro ao inicializar banco em modo de recuperação: {db_error}")
+                    # Criar um mock do banco para evitar erros
+                    class MockDatabase:
+                        def get_user_by_username(self, username):
+                            return None
+                        def get_user_by_email(self, email):
+                            return None
+                    self.db = MockDatabase()
     
     def get_status(self):
         """
