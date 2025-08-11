@@ -12,12 +12,14 @@ from config import server
 import time
 import traceback
 import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from .database import Database
 from colorama import Fore, Style, init
 from .binance_client import BinanceClient
 from .gerenciar_sinais import GerenciadorSinais
 from .telegram_notifier import TelegramNotifier
 from .btc_correlation_analyzer import BTCCorrelationAnalyzer
+from .klines_cache import CacheManager
 
 # Initialize colorama
 init()
@@ -64,6 +66,9 @@ class TechnicalAnalysis:
         
         # Inicializar analisador de correlação BTC
         self.btc_analyzer = BTCCorrelationAnalyzer(self.binance)
+        
+        # Inicializar sistema de cache
+        self.cache_manager = CacheManager()
         
         print("✅ TechnicalAnalysis inicializado com sucesso!")
     
@@ -298,7 +303,7 @@ class TechnicalAnalysis:
             return False
     
     def scan_market(self, verbose: bool = False) -> List[Dict[str, Any]]:
-        """Executa varredura completa do mercado"""
+        """Executa varredura completa do mercado com processamento paralelo"""
         try:
             current_time = time.time()
             
@@ -312,42 +317,70 @@ class TechnicalAnalysis:
                 print(f"✅ Pares carregados: {len(self.top_pairs)} pares disponíveis")
             
             if verbose:
-                print(f"🔍 Analisando {len(self.top_pairs)} pares...")
+                print(f"🔍 Analisando {len(self.top_pairs)} pares em paralelo...")
             
             # Verificar se precisa atualizar lista de pares
             if current_time - self.pairs_last_update >= self.config['pairs_update_interval']:
                 print("🔄 Atualizando lista de pares...")
                 self._create_top_pairs()
             
-            # Analisar cada par
+            # Processamento paralelo com ThreadPoolExecutor
             signals = []
-            for i, symbol in enumerate(self.top_pairs, 1):
-                try:
-                    if verbose:
-                        print(f"\r📊 Analisando {symbol} ({i}/{len(self.top_pairs)})...", end="")
+            max_workers = min(10, len(self.top_pairs))  # Máximo 10 threads
+            
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                # Submeter todas as análises para execução paralela
+                future_to_symbol = {
+                    executor.submit(self._analyze_symbol_safe, symbol): symbol 
+                    for symbol in self.top_pairs
+                }
+                
+                # Processar resultados conforme completam
+                completed = 0
+                for future in as_completed(future_to_symbol):
+                    symbol = future_to_symbol[future]
+                    completed += 1
                     
-                    signal = self.analyze_symbol(symbol)
-                    if signal:
-                        # Salvar sinal no banco
-                        if self.gerenciador.save_signal(signal):
-                            signals.append(signal)
-                            if verbose:
-                                print(f"\n✅ Sinal salvo: {symbol} - {signal['type']}")
+                    try:
+                        signal = future.result()
+                        if signal:
+                            # Salvar sinal no banco
+                            if self.gerenciador.save_signal(signal):
+                                signals.append(signal)
+                                if verbose:
+                                    print(f"✅ Sinal salvo: {symbol} - {signal['type']} ({completed}/{len(self.top_pairs)})")
                         
-                except Exception as e:
-                    if verbose:
-                        print(f"\n❌ Erro ao analisar {symbol}: {e}")
-                    continue
+                        if verbose and completed % 10 == 0:
+                            print(f"📊 Progresso: {completed}/{len(self.top_pairs)} pares analisados")
+                            
+                    except Exception as e:
+                        if verbose:
+                            print(f"❌ Erro ao analisar {symbol}: {e}")
+                        continue
             
             if verbose:
-                print(f"\n✅ Varredura concluída: {len(signals)} sinais encontrados")
+                print(f"\n✅ Varredura paralela concluída: {len(signals)} sinais encontrados")
+                print(f"⚡ Performance: {max_workers} threads utilizadas")
+                
+                # Exibir estatísticas de cache
+                cache_stats = self.cache_manager.get_performance_stats()
+                print(f"🗄️ Cache Hit Rate: {cache_stats['cache_hit_rate']:.1f}%")
+                print(f"💾 API Calls Saved: {cache_stats['api_calls_saved']}")
             
             return signals
             
         except Exception as e:
-            print(f"❌ Erro na varredura: {e}")
+            print(f"❌ Erro na varredura paralela: {e}")
             traceback.print_exc()
             return []
+    
+    def _analyze_symbol_safe(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """Versão thread-safe do analyze_symbol para processamento paralelo"""
+        try:
+            return self.analyze_symbol(symbol)
+        except Exception as e:
+            print(f"❌ Erro thread-safe ao analisar {symbol}: {e}")
+            return None
     
     def analyze_symbol(self, symbol: str) -> Optional[Dict[str, Any]]:
         """Analisa um símbolo específico e retorna sinal se qualificado"""
@@ -680,9 +713,15 @@ class TechnicalAnalysis:
             }
 
     def get_klines(self, symbol: str, interval: str, limit: int = 100) -> Optional[pd.DataFrame]:
-        """Obtém dados de klines (candlesticks) para um símbolo"""
+        """Obtém dados de klines (candlesticks) com cache inteligente"""
         try:
-            # Usar o método do BinanceClient
+            # Tentar obter do cache primeiro
+            cached_data, is_cache_hit = self.cache_manager.get_klines(symbol, interval, limit)
+            
+            if is_cache_hit:
+                return cached_data
+            
+            # Cache miss - buscar da API
             klines_data = self.binance.get_klines(symbol, interval, limit)
             if not klines_data:
                 return None
@@ -703,6 +742,10 @@ class TechnicalAnalysis:
                 # Garantir que é sempre DataFrame
                 if isinstance(result, pd.Series):
                     result = result.to_frame().T
+                
+                # Armazenar no cache para próximas consultas
+                self.cache_manager.set_klines(symbol, interval, result, limit)
+                
                 return result
             else:
                 return None
