@@ -101,6 +101,14 @@ def get_cleanup_status():
 @jwt_required
 def force_cleanup():
     """Força uma limpeza manual dos sinais"""
+    return _execute_cleanup()
+
+@cleanup_status_bp.route('/public-cleanup', methods=['POST'])
+def public_cleanup():
+    """Limpeza pública temporária (sem autenticação)"""
+    return _execute_cleanup()
+
+def _execute_cleanup():
     try:
         from core.database import Database
         from core.gerenciar_sinais import GerenciadorSinais
