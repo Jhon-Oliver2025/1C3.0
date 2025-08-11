@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # PostgreSQL removido - usando Supabase em produção
+
+  redis:
+    image: redis:7-alpine
+    container_name: crypto-redis-dev
+    volumes:
+      - redis_dev_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - crypto-network-dev
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  backend:
+    build: 
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: crypto-backend-dev
+    environment:
+      - FLASK_ENV=development
+      # Supabase Configuration
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_DATABASE_URL=${SUPABASE_DATABASE_URL}
+      - DATABASE_URL=${SUPABASE_DATABASE_URL}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=dev_secret_key_123
+      - JWT_SECRET=dev_jwt_secret_456
+      - BINANCE_API_KEY=${BINANCE_API_KEY}
+      - BINANCE_SECRET_KEY=${BINANCE_SECRET_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - SENDPULSE_CLIENT_ID=${SENDPULSE_CLIENT_ID:-}
+      - SENDPULSE_CLIENT_SECRET=${SENDPULSE_CLIENT_SECRET:-}
+      - SENDPULSE_SENDER_EMAIL=${SENDPULSE_SENDER_EMAIL:-}
+      - SENDPULSE_API_URL=${SENDPULSE_API_URL:-}
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:8080,http://127.0.0.1:3000
+      - API_BASE_URL=http://localhost:5000
+      - USE_BINANCE_API=true
+      - USE_SUPABASE=true
+    volumes:
+      - ./back/data:/app/data
+      - ./back:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - crypto-network-dev
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/status')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  frontend:
+    build: 
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: crypto-frontend-dev
+    environment:
+      - VITE_API_URL=http://localhost:5000
+      - VITE_DOMAIN=http://localhost:3000
+      - NODE_ENV=production
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - crypto-network-dev
+
+  nginx:
+    image: nginx:alpine
+    container_name: crypto-nginx-dev
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    networks:
+      - crypto-network-dev
+
+volumes:
+  redis_dev_data:
+
+networks:
+  crypto-network-dev:
+    driver: bridge

@@ -28,6 +28,7 @@ from api_routes.trading import trading_bp
 from api_routes.users import users_bp
 from api_routes.notifications import notifications_bp
 from api_routes.market_times import market_times_bp
+from api_routes.cleanup_status import cleanup_status_bp
 
 # Configurar CORS
 CORS(server, resources={
@@ -181,6 +182,7 @@ def create_app():
     server.register_blueprint(users_bp, url_prefix='/api/users')
     server.register_blueprint(notifications_bp, url_prefix='/api/notifications')
     server.register_blueprint(market_times_bp, url_prefix='/api')
+    server.register_blueprint(cleanup_status_bp, url_prefix='/api')
     
     # Registrar rotas básicas
     @server.route('/api/health')
@@ -214,6 +216,66 @@ def create_app():
             return jsonify({
                 'error': str(e),
                 'timestamp': datetime.now().isoformat()
+            }), 500
+    
+    @server.route('/api/test-telegram')
+    def test_telegram():
+        """
+        Endpoint de teste para Telegram
+        """
+        try:
+            telegram_token = os.getenv('TELEGRAM_BOT_TOKEN')
+            telegram_chat_id = os.getenv('TELEGRAM_CHAT_ID')
+            
+            if not telegram_token or not telegram_chat_id:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Telegram não configurado',
+                    'configured': False
+                }), 400
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'Telegram configurado',
+                'configured': True,
+                'bot_token_configured': bool(telegram_token),
+                'chat_id_configured': bool(telegram_chat_id)
+            }), 200
+            
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': str(e)
+            }), 500
+    
+    @server.route('/api/test-binance')
+    def test_binance():
+        """
+        Endpoint de teste para Binance API
+        """
+        try:
+            binance_api_key = os.getenv('BINANCE_API_KEY')
+            binance_secret_key = os.getenv('BINANCE_SECRET_KEY')
+            
+            if not binance_api_key or not binance_secret_key:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Binance API não configurada',
+                    'configured': False
+                }), 400
+            
+            return jsonify({
+                'status': 'success',
+                'message': 'Binance API configurada',
+                'configured': True,
+                'api_key_configured': bool(binance_api_key),
+                'secret_key_configured': bool(binance_secret_key)
+            }), 200
+            
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': str(e)
             }), 500
     
     @server.route('/')
