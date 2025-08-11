@@ -28,6 +28,7 @@ from api_routes.trading import trading_bp
 from api_routes.users import users_bp
 from api_routes.notifications import notifications_bp
 from api_routes.market_times import market_times_bp
+from api_routes.market_status import market_status_bp
 from api_routes.cleanup_status import cleanup_status_bp
 
 # Configurar CORS
@@ -214,6 +215,7 @@ def create_app():
     server.register_blueprint(users_bp, url_prefix='/api/users')
     server.register_blueprint(notifications_bp, url_prefix='/api/notifications')
     server.register_blueprint(market_times_bp, url_prefix='/api')
+    server.register_blueprint(market_status_bp, url_prefix='/api')
     server.register_blueprint(cleanup_status_bp, url_prefix='/api')
     
     # Registrar rotas básicas
