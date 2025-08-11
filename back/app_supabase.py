@@ -378,20 +378,22 @@ def create_app():
         """Endpoint público para obter sinais sem autenticação diretamente do banco"""
         try:
             from datetime import datetime, timedelta
+            from supabase import create_client, Client
+            
+            # Inicializar cliente Supabase
+            supabase_url = os.getenv('SUPABASE_URL')
+            supabase_key = os.getenv('SUPABASE_ANON_KEY')
+            
+            if not supabase_url or not supabase_key:
+                return jsonify({
+                    'success': False,
+                    'error': 'Supabase não configurado',
+                    'message': 'Configuração do banco de dados não encontrada'
+                }), 500
+            
+            supabase: Client = create_client(supabase_url, supabase_key)
             
             # Buscar sinais diretamente do banco de dados
-            query = """
-                SELECT symbol, type, entry_price, created_at as entry_time, 
-                       target_price, projection_percentage, signal_class, status,
-                       quality_score, rsi, btc_correlation, btc_trend
-                FROM signals 
-                WHERE status = 'OPEN' 
-                  AND signal_class IN ('PREMIUM', 'ELITE', 'PREMIUM+', 'ELITE+')
-                  AND created_at >= NOW() - INTERVAL '24 hours'
-                ORDER BY created_at DESC
-                LIMIT 50
-            """
-            
             result = supabase.table('signals').select('*').eq('status', 'OPEN').in_('signal_class', ['PREMIUM', 'ELITE', 'PREMIUM+', 'ELITE+']).gte('created_at', (datetime.now() - timedelta(hours=24)).isoformat()).order('created_at', desc=True).limit(50).execute()
             
             signals = []
