@@ -104,6 +104,28 @@ class KryptonBotSupabase:
                 print(f"⚠️ Erro ao inicializar Market Scheduler: {scheduler_error}")
                 self.market_scheduler = None
             
+            # Inicializar monitoramento contínuo de mercado
+            try:
+                import threading
+                import time
+                
+                def start_monitoring():
+                    """Inicia o monitoramento contínuo após 5 segundos"""
+                    time.sleep(5)  # Aguardar Flask inicializar
+                    print("🔍 Iniciando monitoramento contínuo de mercado...")
+                    if hasattr(self, 'technical_analysis') and self.technical_analysis:
+                        self.technical_analysis.start_monitoring()
+                    else:
+                        print("⚠️ TechnicalAnalysis não disponível para monitoramento")
+                
+                # Iniciar thread de monitoramento
+                monitor_thread = threading.Thread(target=start_monitoring, daemon=True)
+                monitor_thread.start()
+                print("✅ Thread de monitoramento iniciada")
+                
+            except Exception as monitor_error:
+                print(f"⚠️ Erro ao inicializar monitoramento: {monitor_error}")
+            
             print("✅ Componentes inicializados com sucesso")
             
         except Exception as e:
@@ -283,6 +305,54 @@ def create_app():
             }), 200
             
         except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': str(e)
+            }), 500
+    
+    @server.route('/api/scan-market', methods=['POST'])
+    def scan_market_manual():
+        """
+        Endpoint para executar escaneamento manual do mercado
+        """
+        try:
+            from datetime import datetime
+            import pytz
+            
+            # Obter horário de São Paulo
+            tz = pytz.timezone('America/Sao_Paulo')
+            now = datetime.now(tz)
+            
+            print(f"\n🔍 ESCANEAMENTO MANUAL SOLICITADO - {now.strftime('%d/%m/%Y %H:%M:%S')}")
+            
+            if not hasattr(bot, 'technical_analysis') or not bot.technical_analysis:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'TechnicalAnalysis não inicializado'
+                }), 500
+            
+            # Executar escaneamento
+            signals = bot.technical_analysis.scan_market(verbose=True)
+            
+            result = {
+                'status': 'success',
+                'timestamp': now.strftime('%Y-%m-%d %H:%M:%S %Z'),
+                'signals_found': len(signals),
+                'signals': signals
+            }
+            
+            if signals:
+                print(f"\n🎯 ESCANEAMENTO MANUAL CONCLUÍDO:")
+                print(f"✨ {len(signals)} novos sinais encontrados!")
+                for signal in signals:
+                    print(f"   • {signal['symbol']}: {signal['type']} - {signal['signal_class']} (Score: {signal['quality_score']:.1f})")
+            else:
+                print(f"\n📊 Nenhum sinal de qualidade encontrado no escaneamento manual")
+            
+            return jsonify(result), 200
+            
+        except Exception as e:
+            print(f"❌ Erro no escaneamento manual: {e}")
             return jsonify({
                 'status': 'error',
                 'message': str(e)
