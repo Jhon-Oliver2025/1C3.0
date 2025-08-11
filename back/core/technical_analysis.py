@@ -17,6 +17,7 @@ from colorama import Fore, Style, init
 from .binance_client import BinanceClient
 from .gerenciar_sinais import GerenciadorSinais
 from .telegram_notifier import TelegramNotifier
+from .btc_correlation_analyzer import BTCCorrelationAnalyzer
 
 # Initialize colorama
 init()
@@ -60,6 +61,9 @@ class TechnicalAnalysis:
         
         # Configurar notificações (opcional)
         self.notifier = self._setup_telegram_notifier()
+        
+        # Inicializar analisador de correlação BTC
+        self.btc_analyzer = BTCCorrelationAnalyzer(self.binance)
         
         print("✅ TechnicalAnalysis inicializado com sucesso!")
     
@@ -173,6 +177,8 @@ class TechnicalAnalysis:
             print(f"   🎯 Alvo: {signal['target_price']:.8f}")
             print(f"   📈 Projeção: {signal.get('projection_percentage', 6.0):.1f}%")
             print(f"   ⭐ Qualidade: {signal['quality_score']:.1f} ({signal['signal_class']})")
+            print(f"   ₿ BTC Correlação: {signal.get('btc_correlation', 0):.2f} | Tendência: {signal.get('btc_trend', 'N/A')}")
+            print(f"   🔗 Score BTC: {signal.get('btc_correlation_score', 0):.1f}pts")
             
             # Enviar notificação se configurado
             if self.notifier:
@@ -366,32 +372,51 @@ class TechnicalAnalysis:
             signal_type = 'COMPRA' if trend_analysis['is_uptrend'] else 'VENDA'
             entry_price = float(entry_df['close'].iloc[-1])
             
-            # 4. Sistema de Pontuação (100 pontos)
+            # 4. Filtro BTC (verificar se deve rejeitar por correlação)
+            if self.btc_analyzer.should_filter_signal_by_btc(symbol, signal_type):
+                return None
+            
+            # 5. Sistema de Pontuação (130 pontos total)
             scores = self._calculate_signal_scores(
                 trend_analysis, entry_analysis, signal_type, entry_df
             )
             
+            # 6. Pontuação BTC (30 pontos adicionais)
+            btc_score = self.btc_analyzer.calculate_btc_correlation_score(symbol, signal_type)
+            scores['btc_correlation'] = btc_score
+            
             quality_score = sum(scores.values())
             
-            # 5. Filtro de qualidade
+            # 7. Filtro de qualidade (ajustado para nova escala)
             if quality_score < self.config['quality_score_minimum']:
                 return None
             
-            # 6. Classificação
-            signal_class = 'ELITE' if quality_score >= 90 else 'PREMIUM'  # PREMIUM agora para 70-89
+            # 8. Classificação (ajustada para nova escala)
+            if quality_score >= 110:
+                signal_class = 'ELITE+'
+            elif quality_score >= 95:
+                signal_class = 'ELITE'
+            elif quality_score >= 85:
+                signal_class = 'PREMIUM+'
+            else:
+                signal_class = 'PREMIUM'
             
-            # 7. Calcular alvo
+            # 9. Obter dados de correlação BTC
+            btc_correlation = self.btc_analyzer.calculate_symbol_btc_correlation(symbol)
+            btc_analysis = self.btc_analyzer.get_current_btc_analysis()
+            
+            # 10. Calcular alvo
             target_price = self.calculate_target_price(
                 entry_price, signal_type, trend_analysis, entry_analysis, quality_score
             )
             
-            # 8. Calcular projeção
+            # 11. Calcular projeção
             if signal_type == 'COMPRA':
                 projection = ((target_price - entry_price) / entry_price) * 100
             else:
                 projection = ((entry_price - target_price) / entry_price) * 100
             
-            # 9. Montar sinal final
+            # 12. Montar sinal final
             signal = {
                 'symbol': symbol,
                 'type': signal_type,
@@ -405,6 +430,10 @@ class TechnicalAnalysis:
                 'entry_score': scores['entry'],
                 'rsi_score': scores['rsi'],
                 'pattern_score': scores['pattern'],
+                'btc_correlation_score': scores['btc_correlation'],
+                'btc_correlation': btc_correlation,
+                'btc_trend': btc_analysis['trend'],
+                'btc_strength': btc_analysis['strength'],
                 'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
                 'trend_timeframe': self.config['trend_timeframe'],
                 'entry_timeframe': self.config['entry_timeframe']
