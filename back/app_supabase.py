@@ -375,28 +375,45 @@ def create_app():
     # NOVO: Endpoint público para sinais (sem autenticação)
     @server.route('/api/signals/public', methods=['GET'])
     def get_public_signals():
-        """Endpoint público para obter sinais sem autenticação"""
+        """Endpoint público para obter sinais sem autenticação diretamente do banco"""
         try:
-            import csv
-            import os
+            from datetime import datetime, timedelta
             
-            # Caminho para o arquivo CSV
-            signals_file = os.path.join(os.path.dirname(__file__), 'sinais_lista.csv')
+            # Buscar sinais diretamente do banco de dados
+            query = """
+                SELECT symbol, type, entry_price, created_at as entry_time, 
+                       target_price, projection_percentage, signal_class, status,
+                       quality_score, rsi, btc_correlation, btc_trend
+                FROM signals 
+                WHERE status = 'OPEN' 
+                  AND signal_class IN ('PREMIUM', 'ELITE', 'PREMIUM+', 'ELITE+')
+                  AND created_at >= NOW() - INTERVAL '24 hours'
+                ORDER BY created_at DESC
+                LIMIT 50
+            """
             
-            if not os.path.exists(signals_file):
-                return jsonify({
-                    'success': False,
-                    'error': 'Arquivo de sinais não encontrado'
-                }), 404
+            result = supabase.table('signals').select('*').eq('status', 'OPEN').in_('signal_class', ['PREMIUM', 'ELITE', 'PREMIUM+', 'ELITE+']).gte('created_at', (datetime.now() - timedelta(hours=24)).isoformat()).order('created_at', desc=True).limit(50).execute()
             
-            # Ler o CSV usando o módulo csv nativo
             signals = []
-            with open(signals_file, 'r', encoding='utf-8') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    # Filtrar apenas sinais PREMIUM e ELITE
-                    if row.get('signal_class') in ['PREMIUM', 'ELITE']:
-                        signals.append(row)
+            for signal in result.data:
+                # Formatar dados para o frontend
+                formatted_signal = {
+                    'symbol': signal.get('symbol', ''),
+                    'type': signal.get('type', ''),
+                    'entry_price': float(signal.get('entry_price', 0)),
+                    'entry_time': signal.get('created_at', ''),
+                    'target_price': float(signal.get('target_price', 0)),
+                    'projection_percentage': float(signal.get('projection_percentage', 0)),
+                    'signal_class': signal.get('signal_class', ''),
+                    'status': signal.get('status', ''),
+                    'quality_score': float(signal.get('quality_score', 0)),
+                    'rsi': float(signal.get('rsi', 50)),
+                    'btc_correlation': float(signal.get('btc_correlation', 0)),
+                    'btc_trend': signal.get('btc_trend', '')
+                }
+                signals.append(formatted_signal)
+            
+            print(f"📊 Retornando {len(signals)} sinais do banco de dados")
             
             return jsonify({
                 'success': True,
@@ -405,10 +422,12 @@ def create_app():
             })
         except Exception as e:
             import traceback
+            print(f"❌ Erro ao buscar sinais: {e}")
+            print(traceback.format_exc())
             return jsonify({
                 'success': False,
                 'error': str(e),
-                'traceback': traceback.format_exc()
+                'message': 'Erro ao buscar sinais do banco de dados'
             }), 500
     
     return server

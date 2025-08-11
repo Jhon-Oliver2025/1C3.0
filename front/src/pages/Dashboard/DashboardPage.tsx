@@ -32,6 +32,12 @@ const DashboardPage: React.FC = () => {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
+  // Estado para status dos mercados
+  const [marketStatus, setMarketStatus] = useState({
+    usa: { status: 'CARREGANDO', time: '00:00:00' },
+    asia: { status: 'CARREGANDO', time: '00:00:00' }
+  });
+  
   // Estado para status das limpezas
   const [cleanupStatus, setCleanupStatus] = useState({
     morning_cleanup: { time: '10:00', status: 'CARREGANDO', description: 'Limpeza matinal' },
@@ -39,6 +45,32 @@ const DashboardPage: React.FC = () => {
   });
   
   const navigate = useNavigate();
+
+  // Função para buscar status dos mercados da API
+  const fetchMarketStatus = async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://1crypten.space';
+      const response = await fetch(`${apiUrl}/api/market-status`, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          setMarketStatus(data);
+        } else {
+          console.warn('API market-status retornou HTML em vez de JSON');
+        }
+      } else {
+        console.warn('API market-status não disponível');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar status dos mercados:', error);
+    }
+  };
 
   // Função para buscar status das limpezas da API
   const fetchCleanupStatus = async () => {
@@ -115,14 +147,23 @@ const DashboardPage: React.FC = () => {
    */
   useEffect(() => {
     fetchSignals();
+    fetchMarketStatus();
     fetchCleanupStatus();
+    
+    // Atualizar status dos mercados a cada 30 segundos
+    const marketTimer = setInterval(() => {
+      fetchMarketStatus();
+    }, 30000);
     
     // Atualizar status das limpezas a cada 60 segundos
     const cleanupTimer = setInterval(() => {
       fetchCleanupStatus();
     }, 60000);
     
-    return () => clearInterval(cleanupTimer);
+    return () => {
+      clearInterval(marketTimer);
+      clearInterval(cleanupTimer);
+    };
   }, []);
 
   /**
@@ -314,26 +355,26 @@ const DashboardPage: React.FC = () => {
         <div className="mobile-signals-container">
           {/* Cabeçalho dos Sinais (150px) */}
           <div className="mobile-signals-header">
-            {/* Linha 1: Status das Limpezas */}
+            {/* Linha 1: Status dos Mercados */}
             <div className="mobile-market-times">
               <div className="mobile-market-item">
                 <span className="mobile-market-label">U.S.A</span>
-                <span className="mobile-market-time">10:00</span>
-                <span className={`mobile-market-status ${cleanupStatus.morning_cleanup.status === 'ATIVO' ? 'open' : 'closed'}`}>
-                  {cleanupStatus.morning_cleanup.status}
+                <span className="mobile-market-time">{marketStatus.usa.time}</span>
+                <span className={`mobile-market-status ${marketStatus.usa.status === 'ABERTO' ? 'open' : 'closed'}`}>
+                  {marketStatus.usa.status}
                 </span>
               </div>
               <div className="mobile-market-item">
                 <span className="mobile-market-label">ÁSIA</span>
-                <span className="mobile-market-time">21:00</span>
-                <span className={`mobile-market-status ${cleanupStatus.evening_cleanup.status === 'ATIVO' ? 'open' : 'closed'}`}>
-                  {cleanupStatus.evening_cleanup.status}
+                <span className="mobile-market-time">{marketStatus.asia.time}</span>
+                <span className={`mobile-market-status ${marketStatus.asia.status === 'ABERTO' ? 'open' : 'closed'}`}>
+                  {marketStatus.asia.status}
                 </span>
               </div>
               <div className="mobile-market-item">
-                <span className="mobile-market-label">RELÓGIO</span>
+                <span className="mobile-market-label">CRYPTO</span>
                 <span className="mobile-market-time">{formatTime(currentTime)}</span>
-                <span className="mobile-market-status crypto">24/7</span>
+                <span className="mobile-market-status crypto">ABERTO</span>
               </div>
             </div>
             
