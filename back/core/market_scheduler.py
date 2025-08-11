@@ -50,29 +50,46 @@ class MarketScheduler:
     def _daily_system_update(self):
         """Atualização geral do sistema às 10:00"""
         try:
-            print("\n" + "="*70)
-            print("🌅 INICIANDO ATUALIZAÇÃO DIÁRIA DO SISTEMA - 10:00")
-            print("="*70)
+            from datetime import datetime
+            import pytz
+            
+            # Obter horário de São Paulo
+            tz = pytz.timezone('America/Sao_Paulo')
+            now = datetime.now(tz)
+            
+            print("\n" + "="*80)
+            print(f"🌅 LIMPEZA MATINAL AUTOMÁTICA - {now.strftime('%d/%m/%Y %H:%M:%S')}")
+            print("🇺🇸 PREPARAÇÃO PARA ABERTURA DO MERCADO AMERICANO (10:30)")
+            print("="*80)
             
             # 1. Limpar sinais antigos (antes das 10:00)
-            print("🧹 Limpando sinais antigos...")
+            print("🧹 Executando limpeza de sinais antigos (antes das 10:00)...")
             self.gerenciador.limpar_sinais_antes_das_10h()
             
             # 2. Atualizar lista de pares top 100
-            print("📊 Atualizando lista de top 100 pares...")
-            self.technical_analysis._update_pairs_list()
+            print("📊 Atualizando lista de top 100 pares por volume...")
+            try:
+                self.technical_analysis._create_top_pairs()
+                print("✅ Lista de pares atualizada com sucesso")
+            except Exception as e:
+                print(f"⚠️ Erro ao atualizar lista de pares: {e}")
             
             # 3. Executar varredura completa
-            print("🔍 Executando varredura completa do mercado...")
+            print("🔍 Executando varredura completa do mercado pós-limpeza...")
             signals = self.technical_analysis.scan_market(verbose=True)
             
             if signals:
-                print(f"✨ {len(signals)} novos sinais encontrados na varredura matinal!")
+                print(f"\n🎯 RESULTADO DA VARREDURA MATINAL:")
+                print(f"✨ {len(signals)} novos sinais encontrados!")
+                for signal in signals:
+                    print(f"   • {signal['symbol']}: {signal['type']} - {signal['signal_class']} (Score: {signal['quality_score']:.1f})")
             else:
-                print("📊 Nenhum sinal encontrado na varredura matinal")
+                print("\n📊 Nenhum sinal de qualidade encontrado na varredura matinal")
             
-            print("✅ Atualização diária concluída com sucesso!")
-            print("="*70)
+            print(f"\n🇺🇸 Sistema preparado para abertura do mercado americano às 10:30")
+            print(f"⏰ Próxima limpeza automática: 21:00 (preparação mercado asiático)")
+            print("✅ Limpeza matinal concluída com sucesso!")
+            print("="*80)
             
         except Exception as e:
             self.logger.error(f"Erro na atualização diária: {e}")
@@ -81,25 +98,46 @@ class MarketScheduler:
     def _asian_market_preparation(self):
         """Preparação para abertura dos mercados asiáticos às 21:00"""
         try:
-            print("\n" + "="*70)
-            print("🌏 PREPARAÇÃO PARA MERCADOS ASIÁTICOS - 21:00")
-            print("="*70)
+            from datetime import datetime
+            import pytz
+            
+            # Obter horário de São Paulo
+            tz = pytz.timezone('America/Sao_Paulo')
+            now = datetime.now(tz)
+            
+            print("\n" + "="*80)
+            print(f"🌙 LIMPEZA NOTURNA AUTOMÁTICA - {now.strftime('%d/%m/%Y %H:%M:%S')}")
+            print("🌏 PREPARAÇÃO PARA ABERTURA DO MERCADO ASIÁTICO (21:00)")
+            print("="*80)
             
             # 1. Limpar sinais antigos (antes das 21:00)
-            print("🧹 Limpando sinais antigos...")
+            print("🧹 Executando limpeza de sinais antigos (antes das 21:00)...")
             self.gerenciador.limpar_sinais_antes_das_21h()
             
-            # 2. Executar varredura focada em pares asiáticos
-            print("🔍 Executando varredura para mercados asiáticos...")
+            # 2. Atualizar lista de pares para sessão asiática
+            print("📊 Atualizando lista de pares para sessão asiática...")
+            try:
+                self.technical_analysis._create_top_pairs()
+                print("✅ Lista de pares atualizada com sucesso")
+            except Exception as e:
+                print(f"⚠️ Erro ao atualizar lista de pares: {e}")
+            
+            # 3. Executar varredura focada em mercados asiáticos
+            print("🔍 Executando varredura completa para mercados asiáticos...")
             signals = self.technical_analysis.scan_market(verbose=True)
             
             if signals:
+                print(f"\n🎯 RESULTADO DA VARREDURA NOTURNA:")
                 print(f"✨ {len(signals)} sinais encontrados para sessão asiática!")
+                for signal in signals:
+                    print(f"   • {signal['symbol']}: {signal['type']} - {signal['signal_class']} (Score: {signal['quality_score']:.1f})")
             else:
-                print("📊 Nenhum sinal encontrado para sessão asiática")
+                print("\n📊 Nenhum sinal de qualidade encontrado para sessão asiática")
             
+            print(f"\n🌏 Sistema preparado para mercados asiáticos (Japão, Coreia, China)")
+            print(f"⏰ Próxima limpeza automática: 10:00 (preparação mercado americano)")
             print("✅ Preparação para mercados asiáticos concluída!")
-            print("="*70)
+            print("="*80)
             
         except Exception as e:
             self.logger.error(f"Erro na preparação asiática: {e}")

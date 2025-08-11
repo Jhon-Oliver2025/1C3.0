@@ -71,6 +71,7 @@ class KryptonBotSupabase:
             from core.technical_analysis import TechnicalAnalysis
             from core.gerenciar_sinais import GerenciadorSinais
             from core.database import Database
+            from core.market_scheduler import MarketScheduler
             
             # Inicializar instância do banco de dados
             self.db = Database()
@@ -93,6 +94,15 @@ class KryptonBotSupabase:
                 # Modo degradado sem banco
                 self.gerenciador_sinais = None
                 print("⚠️ Gerenciador de sinais desabilitado - Supabase não configurado")
+            
+            # Inicializar scheduler de mercado
+            try:
+                self.market_scheduler = MarketScheduler(self.db, self.technical_analysis)
+                self.market_scheduler.start()
+                print("✅ Market Scheduler inicializado e ativo")
+            except Exception as scheduler_error:
+                print(f"⚠️ Erro ao inicializar Market Scheduler: {scheduler_error}")
+                self.market_scheduler = None
             
             print("✅ Componentes inicializados com sucesso")
             

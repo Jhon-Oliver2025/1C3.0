@@ -305,7 +305,12 @@ class TechnicalAnalysis:
     def scan_market(self, verbose: bool = False) -> List[Dict[str, Any]]:
         """Executa varredura completa do mercado com processamento paralelo"""
         try:
-            current_time = time.time()
+            scan_start_time = time.time()
+            current_time = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            
+            print(f"\n{'='*80}")
+            print(f"🔍 INICIANDO ESCANEAMENTO DE MERCADO - {current_time}")
+            print(f"{'='*80}")
             
             # Carregar pares se ainda não estiverem carregados (primeira execução)
             if not self.top_pairs:
@@ -316,16 +321,18 @@ class TechnicalAnalysis:
                     return []
                 print(f"✅ Pares carregados: {len(self.top_pairs)} pares disponíveis")
             
-            if verbose:
-                print(f"🔍 Analisando {len(self.top_pairs)} pares em paralelo...")
+            print(f"📊 Analisando {len(self.top_pairs)} pares de criptomoedas...")
+            print(f"⚡ Processamento paralelo: Máximo 10 threads")
             
             # Verificar se precisa atualizar lista de pares
-            if current_time - self.pairs_last_update >= self.config['pairs_update_interval']:
-                print("🔄 Atualizando lista de pares...")
+            if time.time() - self.pairs_last_update >= self.config['pairs_update_interval']:
+                print("🔄 Atualizando lista de pares top 100...")
                 self._create_top_pairs()
             
             # Processamento paralelo com ThreadPoolExecutor
             signals = []
+            analyzed_pairs = []
+            rejected_pairs = []
             max_workers = min(10, len(self.top_pairs))  # Máximo 10 threads
             
             with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -343,29 +350,49 @@ class TechnicalAnalysis:
                     
                     try:
                         signal = future.result()
+                        analyzed_pairs.append(symbol)
+                        
                         if signal:
                             # Salvar sinal no banco
                             if self.gerenciador.save_signal(signal):
                                 signals.append(signal)
-                                if verbose:
-                                    print(f"✅ Sinal salvo: {symbol} - {signal['type']} ({completed}/{len(self.top_pairs)})")
+                                print(f"✨ SINAL ENCONTRADO: {symbol} - {signal['type']} - Score: {signal['quality_score']:.1f} - Classe: {signal['signal_class']}")
+                        else:
+                            rejected_pairs.append(symbol)
                         
-                        if verbose and completed % 10 == 0:
-                            print(f"📊 Progresso: {completed}/{len(self.top_pairs)} pares analisados")
+                        # Mostrar progresso a cada 25 pares
+                        if completed % 25 == 0:
+                            print(f"📈 Progresso: {completed}/{len(self.top_pairs)} pares analisados ({(completed/len(self.top_pairs)*100):.1f}%)")
                             
                     except Exception as e:
-                        if verbose:
-                            print(f"❌ Erro ao analisar {symbol}: {e}")
+                        print(f"❌ Erro ao analisar {symbol}: {e}")
+                        rejected_pairs.append(symbol)
                         continue
             
-            if verbose:
-                print(f"\n✅ Varredura paralela concluída: {len(signals)} sinais encontrados")
-                print(f"⚡ Performance: {max_workers} threads utilizadas")
-                
-                # Exibir estatísticas de cache
-                cache_stats = self.cache_manager.get_performance_stats()
-                print(f"🗄️ Cache Hit Rate: {cache_stats['cache_hit_rate']:.1f}%")
-                print(f"💾 API Calls Saved: {cache_stats['api_calls_saved']}")
+            # Estatísticas finais
+            scan_duration = time.time() - scan_start_time
+            cache_stats = self.cache_manager.get_performance_stats()
+            
+            print(f"\n{'='*80}")
+            print(f"📊 RESULTADO DO ESCANEAMENTO")
+            print(f"{'='*80}")
+            print(f"⏱️ Tempo total: {scan_duration:.2f}s")
+            print(f"📊 Pares analisados: {len(analyzed_pairs)}/{len(self.top_pairs)}")
+            print(f"✨ Sinais encontrados: {len(signals)}")
+            print(f"❌ Pares rejeitados: {len(rejected_pairs)}")
+            print(f"⚡ Threads utilizadas: {max_workers}")
+            print(f"🗄️ Cache Hit Rate: {cache_stats['cache_hit_rate']:.1f}%")
+            print(f"💾 API Calls Saved: {cache_stats['api_calls_saved']}")
+            print(f"🚀 Performance: {len(self.top_pairs)/scan_duration:.1f} pares/segundo")
+            
+            if signals:
+                print(f"\n🎯 SINAIS DETECTADOS:")
+                for signal in signals:
+                    print(f"   • {signal['symbol']}: {signal['type']} - {signal['signal_class']} (Score: {signal['quality_score']:.1f})")
+            else:
+                print(f"\n📭 Nenhum sinal de qualidade encontrado neste ciclo")
+            
+            print(f"{'='*80}\n")
             
             return signals
             
