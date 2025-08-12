@@ -398,9 +398,9 @@ def create_app():
             
             signals = []
             for signal in result.data:
-                # Filtrar apenas sinais de alta qualidade (85+ pontos)
+                # Filtrar apenas sinais de alta qualidade (75+ pontos)
                 quality_score = float(signal.get('quality_score') or 0)
-                if quality_score < 85.0:
+                if quality_score < 75.0:
                     continue  # Pular sinais de baixa qualidade
                 
                 # Formatar dados para o frontend

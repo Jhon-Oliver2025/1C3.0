@@ -47,7 +47,7 @@ class TechnicalAnalysis:
         self.config = {
             'trend_timeframe': '4h',
             'entry_timeframe': '1h',
-            'quality_score_minimum': 75.0,  # Temporariamente reduzido para debug
+            'quality_score_minimum': 80.0,  # Ajustado baseado nos dados reais
             'scan_interval': 60,  # 60 segundos
             'pairs_update_interval': 1200,  # 20 minutos
             'target_percentage_min': 6.0,
@@ -453,10 +453,6 @@ class TechnicalAnalysis:
             scores['btc_correlation'] = btc_score
             
             quality_score = sum(scores.values())
-            
-            # Debug: Mostrar breakdown da pontuação para sinais próximos do limite
-            if quality_score >= 75:  # Mostrar sinais que estão próximos
-                print(f"🔍 DEBUG {symbol}: Score={quality_score:.1f} | Trend={scores['trend']:.1f} | Entry={scores['entry']:.1f} | RSI={scores['rsi']:.1f} | Pattern={scores['pattern']:.1f} | BTC={scores['btc_correlation']:.1f}")
             
             # 7. Filtro de qualidade (ajustado para nova escala)
             if quality_score < self.config['quality_score_minimum']:
