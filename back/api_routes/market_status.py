@@ -6,7 +6,7 @@ market_status_bp = Blueprint('market_status', __name__)
 
 def get_market_status():
     """
-    Determina o status (aberto/fechado) dos mercados de New York e da Ásia.
+    Determina o status (aberto/fechado) dos mercados de New York e de Tóquio.
     Sistema de limpeza baseado em horário de São Paulo: 10:00 e 21:00.
     """
     now_utc = datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -20,7 +20,7 @@ def get_market_status():
     ny_is_open = ny_is_weekday and ny_open_time <= now_ny.time() < ny_close_time
     ny_status = 'ABERTO' if ny_is_open else 'FECHADO'
 
-    # Mercado Ásia (Tóquio) - 09:00 às 15:00, Seg-Sex (horário real)
+    # Mercado Tóquio - 09:00 às 15:00, Seg-Sex (horário real)
     tz_tokyo = pytz.timezone('Asia/Tokyo')
     now_tokyo = now_utc.astimezone(tz_tokyo)
     asia_open_time = now_tokyo.replace(hour=9, minute=0, second=0, microsecond=0).time()

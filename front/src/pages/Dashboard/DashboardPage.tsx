@@ -155,6 +155,11 @@ const DashboardPage: React.FC = () => {
     fetchMarketStatus();
     fetchCleanupStatus();
     
+    // Atualizar sinais a cada 30 segundos (refresh sutil)
+    const signalsTimer = setInterval(() => {
+      fetchSignals();
+    }, 30000);
+    
     // Atualizar status dos mercados a cada 30 segundos
     const marketTimer = setInterval(() => {
       fetchMarketStatus();
@@ -166,6 +171,7 @@ const DashboardPage: React.FC = () => {
     }, 60000);
     
     return () => {
+      clearInterval(signalsTimer);
       clearInterval(marketTimer);
       clearInterval(cleanupTimer);
     };
@@ -370,7 +376,7 @@ const DashboardPage: React.FC = () => {
                 </span>
               </div>
               <div className="mobile-market-item">
-                <span className="mobile-market-label">ÁSIA</span>
+                <span className="mobile-market-label">Tóquio</span>
                 <span className="mobile-market-time">{marketStatus.asia?.time || '00:00:00'}</span>
                 <span className={`mobile-market-status ${marketStatus.asia?.status === 'ABERTO' ? 'open' : 'closed'}`}>
                   {marketStatus.asia?.status || 'CARREGANDO'}
