@@ -34,7 +34,7 @@ const DashboardPage: React.FC = () => {
   
   // Estado para status dos mercados
   const [marketStatus, setMarketStatus] = useState({
-    usa: { status: 'CARREGANDO', time: '00:00:00' },
+    new_york: { status: 'CARREGANDO', time: '00:00:00' },
     asia: { status: 'CARREGANDO', time: '00:00:00' }
   });
   
@@ -60,12 +60,17 @@ const DashboardPage: React.FC = () => {
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
           const data = await response.json();
-          setMarketStatus(data);
+          // Verificar se os dados têm a estrutura esperada
+          if (data && data.new_york && data.asia) {
+            setMarketStatus(data);
+          } else {
+            console.warn('API market-status retornou dados com estrutura inválida:', data);
+          }
         } else {
           console.warn('API market-status retornou HTML em vez de JSON');
         }
       } else {
-        console.warn('API market-status não disponível');
+        console.warn(`API market-status não disponível: ${response.status}`);
       }
     } catch (error) {
       console.error('Erro ao buscar status dos mercados:', error);
@@ -358,17 +363,17 @@ const DashboardPage: React.FC = () => {
             {/* Linha 1: Status dos Mercados */}
             <div className="mobile-market-times">
               <div className="mobile-market-item">
-                <span className="mobile-market-label">U.S.A</span>
-                <span className="mobile-market-time">{marketStatus.usa.time}</span>
-                <span className={`mobile-market-status ${marketStatus.usa.status === 'ABERTO' ? 'open' : 'closed'}`}>
-                  {marketStatus.usa.status}
+                <span className="mobile-market-label">New York</span>
+                <span className="mobile-market-time">{marketStatus.new_york?.time || '00:00:00'}</span>
+                <span className={`mobile-market-status ${marketStatus.new_york?.status === 'ABERTO' ? 'open' : 'closed'}`}>
+                  {marketStatus.new_york?.status || 'CARREGANDO'}
                 </span>
               </div>
               <div className="mobile-market-item">
                 <span className="mobile-market-label">ÁSIA</span>
-                <span className="mobile-market-time">{marketStatus.asia.time}</span>
-                <span className={`mobile-market-status ${marketStatus.asia.status === 'ABERTO' ? 'open' : 'closed'}`}>
-                  {marketStatus.asia.status}
+                <span className="mobile-market-time">{marketStatus.asia?.time || '00:00:00'}</span>
+                <span className={`mobile-market-status ${marketStatus.asia?.status === 'ABERTO' ? 'open' : 'closed'}`}>
+                  {marketStatus.asia?.status || 'CARREGANDO'}
                 </span>
               </div>
               <div className="mobile-market-item">
