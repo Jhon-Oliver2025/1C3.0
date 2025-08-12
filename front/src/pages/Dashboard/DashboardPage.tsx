@@ -15,7 +15,7 @@ interface Signal {
   entry_time: string;
   target_price: number;
   projection_percentage: number;
-  signal_class: 'PREMIUM' | 'ELITE' | 'PADRÃO';
+  signal_class: 'PREMIUM' | 'PREMIUM+' | 'ELITE' | 'ELITE+' | 'PADRÃO';
   status: string;
   is_favorite?: boolean;
 }
