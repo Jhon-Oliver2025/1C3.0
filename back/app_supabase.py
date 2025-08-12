@@ -393,8 +393,10 @@ def create_app():
             
             supabase: Client = create_client(supabase_url, supabase_key)
             
-            # Buscar sinais diretamente do banco de dados
-            result = supabase.table('signals').select('*').eq('status', 'OPEN').gte('created_at', (datetime.now() - timedelta(hours=24)).isoformat()).order('created_at', desc=True).limit(50).execute()
+            # Buscar sinais diretamente do banco de dados (sem filtro de tempo para debug)
+            result = supabase.table('signals').select('*').eq('status', 'OPEN').order('created_at', desc=True).limit(50).execute()
+            
+            print(f"🔍 DEBUG: Encontrados {len(result.data)} sinais OPEN no Supabase")
             
             signals = []
             for signal in result.data:
