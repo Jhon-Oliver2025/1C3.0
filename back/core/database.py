@@ -189,7 +189,7 @@ class Database:
             # Criar cliente Supabase
             supabase: Client = create_client(supabase_url, supabase_key)
             
-            # Preparar dados para o Supabase
+            # Preparar dados para o Supabase (apenas campos básicos que existem na tabela)
             supabase_data = {
                 'symbol': signal_data.get('symbol'),
                 'type': signal_data.get('type'),
@@ -198,17 +198,6 @@ class Database:
                 'projection_percentage': float(signal_data.get('projection_percentage', 0)),
                 'signal_class': signal_data.get('signal_class'),
                 'status': signal_data.get('status', 'OPEN'),
-                'quality_score': float(signal_data.get('quality_score', 0)),
-                'rsi': float(signal_data.get('rsi', 50)),
-                'trend_score': float(signal_data.get('trend_score', 0)),
-                'entry_score': float(signal_data.get('entry_score', 0)),
-                'pattern_score': float(signal_data.get('pattern_score', 0)),
-                'btc_correlation_score': float(signal_data.get('btc_correlation_score', 0)),
-                'btc_correlation': float(signal_data.get('btc_correlation', 0)),
-                'btc_trend': signal_data.get('btc_trend', ''),
-                'btc_strength': signal_data.get('btc_strength', ''),
-                'trend_timeframe': signal_data.get('trend_timeframe', '4h'),
-                'entry_timeframe': signal_data.get('entry_timeframe', '1h'),
                 'created_at': signal_data.get('entry_time')
             }
             
