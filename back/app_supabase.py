@@ -401,6 +401,16 @@ def create_app():
             result = supabase.table('signals').select('*').eq('status', 'OPEN').gte('created_at', (datetime.now() - timedelta(hours=24)).isoformat()).order('created_at', desc=True).execute()
             print(f"🔍 DEBUG: Sinais OPEN das últimas 24h: {len(result.data)}")
             
+            # Debug: Mostrar alguns sinais para análise
+            if result.data:
+                for i, signal in enumerate(result.data[:3]):
+                    score = signal.get('quality_score', 0)
+                    symbol = signal.get('symbol', 'N/A')
+                    created = signal.get('created_at', 'N/A')
+                    print(f"🔍 DEBUG Sinal {i+1}: {symbol} - Score: {score} - Criado: {created}")
+            else:
+                print("🔍 DEBUG: Nenhum sinal encontrado na consulta de 24h")
+            
             signals = []
             for signal in result.data:
                 # Filtrar apenas sinais de alta qualidade (80+ pontos)
