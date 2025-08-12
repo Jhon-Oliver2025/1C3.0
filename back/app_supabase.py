@@ -398,6 +398,11 @@ def create_app():
             
             signals = []
             for signal in result.data:
+                # Filtrar apenas sinais de alta qualidade (85+ pontos)
+                quality_score = float(signal.get('quality_score') or 0)
+                if quality_score < 85.0:
+                    continue  # Pular sinais de baixa qualidade
+                
                 # Formatar dados para o frontend
                 formatted_signal = {
                     'symbol': signal.get('symbol', ''),
@@ -408,7 +413,7 @@ def create_app():
                     'projection_percentage': float(signal.get('projection_percentage') or 0),
                     'signal_class': signal.get('signal_class', ''),
                     'status': signal.get('status', ''),
-                    'quality_score': float(signal.get('quality_score') or 0),
+                    'quality_score': quality_score,
                     'rsi': float(signal.get('rsi') or 50),
                     'btc_correlation': float(signal.get('btc_correlation') or 0),
                     'btc_trend': signal.get('btc_trend', '')
