@@ -190,6 +190,29 @@ class Database:
             supabase: Client = create_client(supabase_url, supabase_key)
             
             # Preparar dados para o Supabase (apenas campos que existem na tabela)
+            from datetime import timezone
+            import pytz
+            
+            # Garantir timestamp UTC para created_at
+            entry_time_str = signal_data.get('entry_time')
+            if entry_time_str:
+                try:
+                    # Converter entry_time para UTC se necessário
+                    if isinstance(entry_time_str, str):
+                        # Assumir que entry_time está em horário de São Paulo
+                        sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
+                        entry_dt = datetime.strptime(entry_time_str, '%Y-%m-%d %H:%M:%S')
+                        entry_dt_sp = sao_paulo_tz.localize(entry_dt)
+                        entry_dt_utc = entry_dt_sp.astimezone(timezone.utc)
+                        created_at_utc = entry_dt_utc.isoformat()
+                    else:
+                        created_at_utc = datetime.now(timezone.utc).isoformat()
+                except Exception as e:
+                    print(f"⚠️ Erro ao converter entry_time: {e}")
+                    created_at_utc = datetime.now(timezone.utc).isoformat()
+            else:
+                created_at_utc = datetime.now(timezone.utc).isoformat()
+            
             supabase_data = {
                 'symbol': signal_data.get('symbol'),
                 'type': signal_data.get('type'),
@@ -197,6 +220,7 @@ class Database:
                 'target_price': float(signal_data.get('target_price', 0)),
                 'status': signal_data.get('status', 'OPEN'),
                 'entry_time': signal_data.get('entry_time'),
+                'created_at': created_at_utc,  # Garantir created_at em UTC
                 'quality_score': float(signal_data.get('quality_score', 0))
             }
             

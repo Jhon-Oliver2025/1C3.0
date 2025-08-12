@@ -73,6 +73,7 @@ class KryptonBotSupabase:
             from core.gerenciar_sinais import GerenciadorSinais
             from core.database import Database
             from core.market_scheduler import MarketScheduler
+            from core.signal_cleanup import cleanup_system
             
             # Inicializar instância do banco de dados
             self.db = Database()
@@ -104,6 +105,13 @@ class KryptonBotSupabase:
             except Exception as scheduler_error:
                 print(f"⚠️ Erro ao inicializar Market Scheduler: {scheduler_error}")
                 self.market_scheduler = None
+            
+            # Inicializar sistema de limpeza automática
+            try:
+                cleanup_system.start_scheduler()
+                print(f"🧹 Sistema de limpeza ativo - Próxima limpeza: {cleanup_system.get_next_cleanup_time()}")
+            except Exception as cleanup_error:
+                print(f"⚠️ Erro ao inicializar sistema de limpeza: {cleanup_error}")
             
             # Inicializar monitoramento contínuo de mercado
             try:
@@ -393,11 +401,36 @@ def create_app():
             
             supabase: Client = create_client(supabase_url, supabase_key)
             
-            # Buscar sinais diretamente do banco de dados (com filtro de 24h restaurado)
+            # Buscar sinais diretamente do banco de dados (baseado no horário de São Paulo)
             try:
+                import pytz
                 from datetime import timezone
-                utc_24h_ago = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
-                result = supabase.table('signals').select('*').eq('status', 'OPEN').gte('created_at', utc_24h_ago).order('created_at', desc=True).limit(20).execute()
+                
+                # Timezone de São Paulo
+                sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
+                now_sp = datetime.now(sao_paulo_tz)
+                
+                # Determinar último horário de limpeza (10:00 ou 21:00)
+                cleanup_10 = now_sp.replace(hour=10, minute=0, second=0, microsecond=0)
+                cleanup_21 = now_sp.replace(hour=21, minute=0, second=0, microsecond=0)
+                
+                if now_sp.hour >= 21:
+                    # Após 21:00 - buscar sinais desde 21:00 de hoje
+                    last_cleanup = cleanup_21
+                elif now_sp.hour >= 10:
+                    # Entre 10:00 e 21:00 - buscar sinais desde 10:00 de hoje
+                    last_cleanup = cleanup_10
+                else:
+                    # Antes das 10:00 - buscar sinais desde 21:00 de ontem
+                    yesterday = now_sp - timedelta(days=1)
+                    last_cleanup = yesterday.replace(hour=21, minute=0, second=0, microsecond=0)
+                
+                # Converter para UTC para consulta no Supabase
+                last_cleanup_utc = last_cleanup.astimezone(timezone.utc).isoformat()
+                
+                print(f"🔍 Buscando sinais desde: {last_cleanup.strftime('%d/%m/%Y %H:%M')} (SP) / {last_cleanup_utc} (UTC)")
+                
+                result = supabase.table('signals').select('*').eq('status', 'OPEN').gte('created_at', last_cleanup_utc).order('created_at', desc=True).limit(20).execute()
             except Exception as e:
                 print(f"⚠️ Erro na consulta Supabase: {e}")
                 return jsonify({
