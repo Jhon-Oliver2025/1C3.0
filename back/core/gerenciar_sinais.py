@@ -27,9 +27,13 @@ class GerenciadorSinais:
 
     def _get_signal_class(self, quality_score: float) -> Optional[str]:
         """Retorna a classificação do sinal baseado no quality_score"""
-        if quality_score >= 90:
+        if quality_score >= 110:
+            return "ELITE+"
+        elif quality_score >= 95:
             return "ELITE"
-        elif quality_score >= 70:  # Alterado de 75 para 70
+        elif quality_score >= 85:
+            return "PREMIUM+"
+        elif quality_score >= 80:
             return "PREMIUM"
         else:
             return None  # Não retorna classificação para scores baixos

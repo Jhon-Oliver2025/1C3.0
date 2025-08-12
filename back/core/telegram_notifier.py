@@ -81,14 +81,16 @@ class TelegramNotifier:
                 return False # Não envia sinal com score inválido
     
             # Define a classificação baseada no quality_score
-            if quality_score >= 90:
-                signal_class_text = "💎 ELITE ⭐⭐⭐"
+            if quality_score >= 110:
+                signal_class_text = "💎 ELITE+ ⭐⭐⭐"
+            elif quality_score >= 95:
+                signal_class_text = "💎 ELITE ⭐⭐"
+            elif quality_score >= 85:
+                signal_class_text = "💎 PREMIUM+ ⭐⭐"
             elif quality_score >= 80:
-                signal_class_text = "💎 PREMIUM ⭐⭐"
-            elif quality_score >= 70:
                 signal_class_text = "💎 PREMIUM ⭐"
             else:
-                print(f"❌ Sinal para {symbol} com score {quality_score} abaixo do mínimo para Telegram (70)")
+                print(f"❌ Sinal para {symbol} com score {quality_score} abaixo do mínimo para Telegram (80)")
                 return False
     
             # Formatação para o Telegram - Corrigido para usar o valor exato de signal_type

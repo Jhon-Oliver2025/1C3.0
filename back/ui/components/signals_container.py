@@ -56,21 +56,50 @@ def create_signal_card(signal):
         # is_scalping = signal.get('is_scalping', False) # Manter ou remover conforme necessidade
 
         # --- Início da Edição ---
-        # Definir classificação baseada no quality_score (agora apenas Premium para >= 90)
-        if quality_score >= 90:
-            classification_display = "Sinais Premium"
-            signal_class_css = 'signal-class-premium' # Usar a nova classe CSS
-            classification_style = { # Estilo inline para o texto, se necessário (pode ser substituído pelo CSS)
-                'color': 'gold',
+        # Definir classificação baseada no quality_score (apenas para sinais 80+)
+        if quality_score >= 110:
+            classification_display = "Sinais ELITE+"
+            signal_class_css = 'signal-class-elite-plus'
+            classification_style = {
+                'color': '#FFD700',
                 'fontSize': '14px',
                 'fontWeight': 'bold',
                 'textAlign': 'left',
-                'textShadow': '0 0 5px gold, 0 0 10px gold, 0 0 15px gold, 0 0 20px rgba(255, 215, 0, 0.5)'
+                'textShadow': '0 0 5px #FFD700, 0 0 10px #FFD700, 0 0 15px #FFD700'
+            }
+        elif quality_score >= 95:
+            classification_display = "Sinais ELITE"
+            signal_class_css = 'signal-class-elite'
+            classification_style = {
+                'color': '#FFD700',
+                'fontSize': '14px',
+                'fontWeight': 'bold',
+                'textAlign': 'left',
+                'textShadow': '0 0 5px #FFD700, 0 0 10px #FFD700'
+            }
+        elif quality_score >= 85:
+            classification_display = "Sinais PREMIUM+"
+            signal_class_css = 'signal-class-premium-plus'
+            classification_style = {
+                'color': '#C0C0C0',
+                'fontSize': '14px',
+                'fontWeight': 'bold',
+                'textAlign': 'left',
+                'textShadow': '0 0 5px #C0C0C0'
+            }
+        elif quality_score >= 80:
+            classification_display = "Sinais PREMIUM"
+            signal_class_css = 'signal-class-premium'
+            classification_style = {
+                'color': '#C0C0C0',
+                'fontSize': '14px',
+                'fontWeight': 'bold',
+                'textAlign': 'left',
+                'textShadow': '0 0 5px #C0C0C0'
             }
         else:
-             # Se o score for menor que 90, não deve gerar card com o filtro atual,
-             # mas mantemos uma lógica fallback caso o filtro mude ou dados antigos apareçam.
-             # Você pode ajustar isso se quiser exibir algo diferente para scores mais baixos.
+             # Se o score for menor que 80, não deve gerar card com o filtro atual
+             # Mantemos fallback para dados antigos
             classification_display = "❌ Score Insuficiente"
             signal_class_css = 'signal-class-low' # Opcional: definir uma classe para scores baixos
             classification_style = {
