@@ -47,7 +47,7 @@ class TechnicalAnalysis:
         self.config = {
             'trend_timeframe': '4h',
             'entry_timeframe': '1h',
-            'quality_score_minimum': 85.0,  # Apenas PREMIUM+ ou superior
+            'quality_score_minimum': 75.0,  # Temporariamente reduzido para debug
             'scan_interval': 60,  # 60 segundos
             'pairs_update_interval': 1200,  # 20 minutos
             'target_percentage_min': 6.0,
@@ -442,10 +442,21 @@ class TechnicalAnalysis:
             )
             
             # 6. Pontuação BTC (30 pontos adicionais)
-            btc_score = self.btc_analyzer.calculate_btc_correlation_score(symbol, signal_type)
+            try:
+                btc_score = self.btc_analyzer.calculate_btc_correlation_score(symbol, signal_type)
+                if btc_score is None or btc_score < 0:
+                    btc_score = 15.0  # Score neutro se BTC analyzer falhar
+            except Exception as e:
+                print(f"⚠️ Erro no BTC analyzer para {symbol}: {e}")
+                btc_score = 15.0  # Score neutro em caso de erro
+            
             scores['btc_correlation'] = btc_score
             
             quality_score = sum(scores.values())
+            
+            # Debug: Mostrar breakdown da pontuação para sinais próximos do limite
+            if quality_score >= 75:  # Mostrar sinais que estão próximos
+                print(f"🔍 DEBUG {symbol}: Score={quality_score:.1f} | Trend={scores['trend']:.1f} | Entry={scores['entry']:.1f} | RSI={scores['rsi']:.1f} | Pattern={scores['pattern']:.1f} | BTC={scores['btc_correlation']:.1f}")
             
             # 7. Filtro de qualidade (ajustado para nova escala)
             if quality_score < self.config['quality_score_minimum']:
