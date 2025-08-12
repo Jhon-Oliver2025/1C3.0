@@ -189,16 +189,13 @@ class Database:
             # Criar cliente Supabase
             supabase: Client = create_client(supabase_url, supabase_key)
             
-            # Preparar dados para o Supabase (apenas campos básicos que existem na tabela)
+            # Preparar dados para o Supabase (apenas campos essenciais)
             supabase_data = {
                 'symbol': signal_data.get('symbol'),
                 'type': signal_data.get('type'),
                 'entry_price': float(signal_data.get('entry_price', 0)),
                 'target_price': float(signal_data.get('target_price', 0)),
-                'projection_percentage': float(signal_data.get('projection_percentage', 0)),
-                'signal_class': signal_data.get('signal_class'),
-                'status': signal_data.get('status', 'OPEN'),
-                'created_at': signal_data.get('entry_time')
+                'status': signal_data.get('status', 'OPEN')
             }
             
             # Inserir no Supabase
