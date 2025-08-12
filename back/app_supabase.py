@@ -393,23 +393,8 @@ def create_app():
             
             supabase: Client = create_client(supabase_url, supabase_key)
             
-            # Debug: Buscar TODOS os sinais OPEN primeiro
-            debug_result = supabase.table('signals').select('*').eq('status', 'OPEN').order('created_at', desc=True).execute()
-            print(f"🔍 DEBUG: Total de sinais OPEN no Supabase: {len(debug_result.data)}")
-            
             # Buscar sinais diretamente do banco de dados (sem limite de quantidade)
             result = supabase.table('signals').select('*').eq('status', 'OPEN').gte('created_at', (datetime.now() - timedelta(hours=24)).isoformat()).order('created_at', desc=True).execute()
-            print(f"🔍 DEBUG: Sinais OPEN das últimas 24h: {len(result.data)}")
-            
-            # Debug: Mostrar alguns sinais para análise
-            if result.data:
-                for i, signal in enumerate(result.data[:3]):
-                    score = signal.get('quality_score', 0)
-                    symbol = signal.get('symbol', 'N/A')
-                    created = signal.get('created_at', 'N/A')
-                    print(f"🔍 DEBUG Sinal {i+1}: {symbol} - Score: {score} - Criado: {created}")
-            else:
-                print("🔍 DEBUG: Nenhum sinal encontrado na consulta de 24h")
             
             signals = []
             for signal in result.data:
