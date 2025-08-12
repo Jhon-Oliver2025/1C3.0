@@ -3,10 +3,10 @@
  * Implementa cache strategies e funcionalidade offline
  */
 
-const CACHE_NAME = '1crypten-v1.0.0';
-const STATIC_CACHE = '1crypten-static-v1.0.0';
-const DYNAMIC_CACHE = '1crypten-dynamic-v1.0.0';
-const API_CACHE = '1crypten-api-v1.0.0';
+const CACHE_NAME = '1crypten-v1.1.0';
+const STATIC_CACHE = '1crypten-static-v1.1.0';
+const DYNAMIC_CACHE = '1crypten-dynamic-v1.1.0';
+const API_CACHE = '1crypten-api-v1.1.0';
 
 // Recursos estáticos para cache
 const STATIC_ASSETS = [
@@ -27,7 +27,9 @@ const API_URLS = [
 const NETWORK_FIRST_URLS = [
   '/api/signals',
   '/api/auth',
-  '/api/trading'
+  '/api/trading',
+  '/api/market-status',
+  '/api/cleanup-status'
 ];
 
 /**
