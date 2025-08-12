@@ -108,7 +108,7 @@ class Database:
             traceback.print_exc()
 
     def add_signal(self, signal_data: Dict[str, Any]) -> bool: # Adicionado tipo de retorno bool
-        """Adiciona um novo sinal ao arquivo sinais_lista.csv, verificando duplicatas por dia."""
+        """Adiciona um novo sinal ao arquivo sinais_lista.csv e ao Supabase, verificando duplicatas por dia."""
         try:
             # Padronizar tipos de sinal
             signal_type = signal_data.get('type', '').upper()
@@ -116,6 +116,11 @@ class Database:
                 signal_data['type'] = 'COMPRA'
             elif signal_type in ['SHORT', 'SELL']:
                 signal_data['type'] = 'VENDA'
+            
+            # Tentar salvar no Supabase primeiro
+            supabase_success = self._save_to_supabase(signal_data)
+            if supabase_success:
+                print(f"✅ Sinal salvo no Supabase: {signal_data.get('symbol')}")
             
             # Cria um DataFrame com o novo sinal
             new_signal_df = pd.DataFrame([signal_data])
@@ -160,6 +165,64 @@ class Database:
 
         except Exception as e:
             print(f"❌ Erro ao adicionar sinal: {e}")
+            traceback.print_exc()
+            return False
+    
+    def _save_to_supabase(self, signal_data: Dict[str, Any]) -> bool:
+        """Salva o sinal no banco de dados Supabase"""
+        try:
+            # Verificar se as variáveis de ambiente do Supabase estão configuradas
+            supabase_url = os.getenv('SUPABASE_URL')
+            supabase_key = os.getenv('SUPABASE_ANON_KEY')
+            
+            if not supabase_url or not supabase_key:
+                print("⚠️ Supabase não configurado, salvando apenas em CSV")
+                return False
+            
+            # Importar Supabase apenas quando necessário
+            try:
+                from supabase import create_client, Client
+            except ImportError:
+                print("⚠️ Biblioteca Supabase não instalada, salvando apenas em CSV")
+                return False
+            
+            # Criar cliente Supabase
+            supabase: Client = create_client(supabase_url, supabase_key)
+            
+            # Preparar dados para o Supabase
+            supabase_data = {
+                'symbol': signal_data.get('symbol'),
+                'type': signal_data.get('type'),
+                'entry_price': float(signal_data.get('entry_price', 0)),
+                'target_price': float(signal_data.get('target_price', 0)),
+                'projection_percentage': float(signal_data.get('projection_percentage', 0)),
+                'signal_class': signal_data.get('signal_class'),
+                'status': signal_data.get('status', 'OPEN'),
+                'quality_score': float(signal_data.get('quality_score', 0)),
+                'rsi': float(signal_data.get('rsi', 50)),
+                'trend_score': float(signal_data.get('trend_score', 0)),
+                'entry_score': float(signal_data.get('entry_score', 0)),
+                'pattern_score': float(signal_data.get('pattern_score', 0)),
+                'btc_correlation_score': float(signal_data.get('btc_correlation_score', 0)),
+                'btc_correlation': float(signal_data.get('btc_correlation', 0)),
+                'btc_trend': signal_data.get('btc_trend', ''),
+                'btc_strength': signal_data.get('btc_strength', ''),
+                'trend_timeframe': signal_data.get('trend_timeframe', '4h'),
+                'entry_timeframe': signal_data.get('entry_timeframe', '1h'),
+                'created_at': signal_data.get('entry_time')
+            }
+            
+            # Inserir no Supabase
+            result = supabase.table('signals').insert(supabase_data).execute()
+            
+            if result.data:
+                return True
+            else:
+                print(f"⚠️ Falha ao salvar no Supabase: {result}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Erro ao salvar no Supabase: {e}")
             traceback.print_exc()
             return False
 
