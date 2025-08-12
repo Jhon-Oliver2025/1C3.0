@@ -402,15 +402,15 @@ def create_app():
                 formatted_signal = {
                     'symbol': signal.get('symbol', ''),
                     'type': signal.get('type', ''),
-                    'entry_price': float(signal.get('entry_price', 0)),
+                    'entry_price': float(signal.get('entry_price') or 0),
                     'entry_time': signal.get('created_at', ''),
-                    'target_price': float(signal.get('target_price', 0)),
-                    'projection_percentage': float(signal.get('projection_percentage', 0)),
+                    'target_price': float(signal.get('target_price') or 0),
+                    'projection_percentage': float(signal.get('projection_percentage') or 0),
                     'signal_class': signal.get('signal_class', ''),
                     'status': signal.get('status', ''),
-                    'quality_score': float(signal.get('quality_score', 0)),
-                    'rsi': float(signal.get('rsi', 50)),
-                    'btc_correlation': float(signal.get('btc_correlation', 0)),
+                    'quality_score': float(signal.get('quality_score') or 0),
+                    'rsi': float(signal.get('rsi') or 50),
+                    'btc_correlation': float(signal.get('btc_correlation') or 0),
                     'btc_trend': signal.get('btc_trend', '')
                 }
                 signals.append(formatted_signal)
