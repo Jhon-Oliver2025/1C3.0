@@ -3,10 +3,12 @@
  * Implementa cache strategies e funcionalidade offline
  */
 
-const CACHE_NAME = '1crypten-v1.1.0';
-const STATIC_CACHE = '1crypten-static-v1.1.0';
-const DYNAMIC_CACHE = '1crypten-dynamic-v1.1.0';
-const API_CACHE = '1crypten-api-v1.1.0';
+const CACHE_VERSION = '1.2.0';
+const CACHE_TIMESTAMP = Date.now();
+const CACHE_NAME = `1crypten-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
+const STATIC_CACHE = `1crypten-static-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
+const DYNAMIC_CACHE = `1crypten-dynamic-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
+const API_CACHE = `1crypten-api-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
 
 // Recursos estáticos para cache
 const STATIC_ASSETS = [
@@ -100,6 +102,13 @@ self.addEventListener('fetch', (event) => {
   // Estratégia para recursos estáticos (Cache First)
   if (isStaticAsset(request.url)) {
     event.respondWith(cacheFirst(request, STATIC_CACHE));
+    return;
+  }
+  
+  // Forçar Network First para APIs de status (sempre buscar dados atualizados)
+  if (request.url.includes('/api/market-status') || request.url.includes('/api/cleanup-status')) {
+    console.log('🔄 Forçando Network First para API de status:', request.url);
+    event.respondWith(fetch(request).catch(() => getOfflineFallback(request)));
     return;
   }
   
