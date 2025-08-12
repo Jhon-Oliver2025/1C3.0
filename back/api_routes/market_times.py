@@ -12,23 +12,23 @@ def get_market_countdown():
     try:
         now = datetime.now(pytz.timezone('America/Sao_Paulo'))
         
-        # Próximo horário USA (10:30)
-        usa_time = now.replace(hour=10, minute=30, second=0, microsecond=0)
-        if now >= usa_time:
-            usa_time += timedelta(days=1)
+        # Próximo horário New York (10:30)
+    ny_time = now.replace(hour=10, minute=30, second=0, microsecond=0)
+    if now >= ny_time:
+        ny_time += timedelta(days=1)
         
         # Próximo horário ÁSIA (21:00)
         asia_time = now.replace(hour=21, minute=0, second=0, microsecond=0)
         if now >= asia_time:
             asia_time += timedelta(days=1)
         
-        usa_countdown = int((usa_time - now).total_seconds())
+        ny_countdown = int((ny_time - now).total_seconds())
         asia_countdown = int((asia_time - now).total_seconds())
         
         return jsonify({
-            'usa_countdown': usa_countdown,
-            'asia_countdown': asia_countdown,
-            'usa_time': usa_time.strftime('%d/%m/%Y %H:%M:%S'),
+            'new_york_countdown': ny_countdown,
+        'asia_countdown': asia_countdown,
+        'new_york_time': ny_time.strftime('%d/%m/%Y %H:%M:%S'),
             'asia_time': asia_time.strftime('%d/%m/%Y %H:%M:%S'),
             'current_time': now.strftime('%d/%m/%Y %H:%M:%S')
         })

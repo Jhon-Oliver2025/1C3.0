@@ -79,14 +79,14 @@ def get_cleanup_status():
             'morning_cleanup': {
                 'status': morning_status,
                 'time': '10:00',
-                'description': 'Limpeza matinal (pré-mercado USA)',
+                'description': 'Limpeza matinal (pré-mercado New York)'},
                 'last_execution': last_morning_cleanup.strftime('%Y-%m-%d %H:%M:%S') if last_morning_cleanup else None,
                 'next_execution': next_morning.strftime('%Y-%m-%d %H:%M:%S')
             },
             'evening_cleanup': {
                 'status': evening_status,
                 'time': '21:00', 
-                'description': 'Limpeza noturna (pré-mercado ÁSIA)',
+                'description': 'Limpeza noturna (pré-mercado Ásia)'},
                 'last_execution': last_evening_cleanup.strftime('%Y-%m-%d %H:%M:%S') if last_evening_cleanup else None,
                 'next_execution': next_evening.strftime('%Y-%m-%d %H:%M:%S')
             },

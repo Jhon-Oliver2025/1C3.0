@@ -60,8 +60,8 @@ def setup_market_scheduler(db_instance=None, gerenciador_sinais=None):
     
     logger.info("🕐 Agendador de mercado configurado com sucesso!")
     logger.info("📅 Limpezas programadas:")
-    logger.info("   • 10:00 - Limpeza matinal (pré-mercado USA)")
-    logger.info("   • 21:00 - Limpeza noturna (pré-mercado ÁSIA)")
+    logger.info("   • 10:00 - Limpeza matinal (pré-mercado New York)")
+    logger.info("   • 21:00 - Limpeza noturna (pré-mercado Ásia)")
     # REMOVIDO: logger.info("   • 00:00 - Manutenção geral")
     
     scheduler.start()
@@ -86,7 +86,7 @@ def restart_scheduler(db_instance=None, gerenciador_sinais=None):
         return scheduler
 
 def execute_morning_cleanup(gerenciador):
-    """Executa limpeza matinal às 10:00 - Preparação para mercado USA"""
+    """Executa limpeza matinal às 10:00 - Preparação para mercado New York"""
     try:
         logger.info("🌅 === INICIANDO LIMPEZA MATINAL (10:00) ===")
         
@@ -105,7 +105,7 @@ def execute_morning_cleanup(gerenciador):
         gerenciador.limpar_sinais_futuros()
         
         logger.info("✅ Limpeza matinal concluída com sucesso!")
-        logger.info("🇺🇸 Sistema preparado para abertura do mercado americano (10:30)")
+        logger.info("🗽 Sistema preparado para abertura do mercado de New York (10:30)")
         
     except Exception as e:
         logger.error(f"❌ Erro durante limpeza matinal: {e}")
@@ -115,7 +115,7 @@ def execute_morning_cleanup(gerenciador):
             f.write(f"MORNING_CLEANUP_ERROR: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {str(e)}\n")
 
 def execute_evening_cleanup(gerenciador):
-    """Executa limpeza noturna às 21:00 - Preparação para mercado ÁSIA"""
+    """Executa limpeza noturna às 21:00 - Preparação para mercado Ásia"""
     try:
         logger.info("🌙 === INICIANDO LIMPEZA NOTURNA (21:00) ===")
         
@@ -197,7 +197,7 @@ def get_scheduler_status():
         jobs_info.append({'error': f'Erro ao obter jobs: {str(e)}'})
     
     return {
-        'morning_cleanup': '10:00 - Limpeza matinal (pré-mercado USA)',
+        'morning_cleanup': '10:00 - Limpeza matinal (pré-mercado New York)',
         'evening_cleanup': '21:00 - Limpeza noturna (pré-mercado ÁSIA)',
         'status': 'active' if scheduler_running else 'inactive',
         'scheduler_running': scheduler_running,

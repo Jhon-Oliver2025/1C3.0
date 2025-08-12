@@ -170,10 +170,10 @@ class MarketScheduler:
         """Retorna os próximos horários de abertura dos mercados"""
         now = datetime.now(pytz.timezone('America/Sao_Paulo'))
         
-        # Próximo horário USA (10:30)
-        usa_time = now.replace(hour=10, minute=30, second=0, microsecond=0)
-        if now >= usa_time:
-            usa_time += timedelta(days=1)
+        # Próximo horário New York (10:30)
+        ny_time = now.replace(hour=10, minute=30, second=0, microsecond=0)
+        if now >= ny_time:
+            ny_time += timedelta(days=1)
         
         # Próximo horário ÁSIA (21:00)
         asia_time = now.replace(hour=21, minute=0, second=0, microsecond=0)
@@ -181,8 +181,8 @@ class MarketScheduler:
             asia_time += timedelta(days=1)
         
         return {
-            'usa_countdown': int((usa_time - now).total_seconds()),
+            'new_york_countdown': int((ny_time - now).total_seconds()),
             'asia_countdown': int((asia_time - now).total_seconds()),
-            'usa_time': usa_time.strftime('%d/%m/%Y %H:%M:%S'),
+            'new_york_time': ny_time.strftime('%d/%m/%Y %H:%M:%S'),
             'asia_time': asia_time.strftime('%d/%m/%Y %H:%M:%S')
         }
