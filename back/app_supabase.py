@@ -394,7 +394,7 @@ def create_app():
             supabase: Client = create_client(supabase_url, supabase_key)
             
             # Buscar sinais diretamente do banco de dados
-            result = supabase.table('signals').select('*').eq('status', 'OPEN').in_('signal_class', ['PREMIUM', 'ELITE', 'PREMIUM+', 'ELITE+']).gte('created_at', (datetime.now() - timedelta(hours=24)).isoformat()).order('created_at', desc=True).limit(50).execute()
+            result = supabase.table('signals').select('*').eq('status', 'OPEN').gte('created_at', (datetime.now() - timedelta(hours=24)).isoformat()).order('created_at', desc=True).limit(50).execute()
             
             signals = []
             for signal in result.data:
