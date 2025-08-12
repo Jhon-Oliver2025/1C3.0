@@ -153,6 +153,31 @@ export const usePWA = (): PWAState & PWAActions => {
       
       console.log('💡 PWA pode ser instalado');
     };
+    
+    // Verificar se pode ser instalado mesmo sem o evento beforeinstallprompt
+    const checkInstallability = () => {
+      // Se não está instalado e é um navegador compatível
+      if (!checkIfInstalled()) {
+        const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+        const isSafari = /Safari/.test(navigator.userAgent) && /Apple Computer/.test(navigator.vendor);
+        const isEdge = /Edg/.test(navigator.userAgent);
+        const isFirefox = /Firefox/.test(navigator.userAgent);
+        
+        // Se é um navegador que suporta PWA, considerar instalável
+        if (isChrome || isSafari || isEdge || isFirefox) {
+          // Aguardar um pouco para o evento beforeinstallprompt
+          setTimeout(() => {
+            if (!deferredPrompt && !checkIfInstalled()) {
+              setIsInstallable(true);
+              console.log('💡 PWA instalável detectado (fallback)');
+            }
+          }, 2000);
+        }
+      }
+    };
+    
+    // Executar verificação após carregamento
+     setTimeout(checkInstallability, 1000);
 
     // Listener para quando o app é instalado
     const handleAppInstalled = () => {
