@@ -220,10 +220,11 @@ const DashboardPage: React.FC = () => {
         throw new Error('Token de autenticação não encontrado');
       }
       
-      const response = await fetch('/api/signals/public', {
+      const response = await fetch('/api/signals/', {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
       
