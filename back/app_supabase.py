@@ -393,10 +393,11 @@ def create_app():
             
             supabase: Client = create_client(supabase_url, supabase_key)
             
-            # Buscar sinais diretamente do banco de dados (SEM filtro de tempo para debug)
+            # Buscar sinais diretamente do banco de dados (com filtro de 24h restaurado)
             try:
-                result = supabase.table('signals').select('*').eq('status', 'OPEN').order('created_at', desc=True).limit(20).execute()
-                print(f"🔍 DEBUG: Encontrados {len(result.data)} sinais OPEN no total")
+                from datetime import timezone
+                utc_24h_ago = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+                result = supabase.table('signals').select('*').eq('status', 'OPEN').gte('created_at', utc_24h_ago).order('created_at', desc=True).limit(20).execute()
             except Exception as e:
                 print(f"⚠️ Erro na consulta Supabase: {e}")
                 return jsonify({
