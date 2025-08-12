@@ -445,7 +445,7 @@ def create_app():
                     'symbol': signal.get('symbol', ''),
                     'type': signal_type,
                     'entry_price': entry_price,
-                    'entry_time': signal.get('entry_time', ''),
+                    'entry_time': signal.get('entry_time', signal.get('created_at', '')),
                     'target_price': target_price,
                     'projection_percentage': round(projection_percentage, 2),
                     'signal_class': signal_class,
