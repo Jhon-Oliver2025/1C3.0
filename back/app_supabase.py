@@ -414,20 +414,43 @@ def create_app():
                 if quality_score < 80.0:
                     continue  # Pular sinais de baixa qualidade
                 
+                # Calcular projection_percentage e signal_class baseado nos dados existentes
+                entry_price = float(signal.get('entry_price') or 0)
+                target_price = float(signal.get('target_price') or 0)
+                signal_type = signal.get('type', '')
+                
+                # Calcular projeção
+                if entry_price > 0 and target_price > 0:
+                    if signal_type == 'COMPRA':
+                        projection_percentage = ((target_price - entry_price) / entry_price) * 100
+                    else:  # VENDA
+                        projection_percentage = ((entry_price - target_price) / entry_price) * 100
+                else:
+                    projection_percentage = 0
+                
+                # Determinar signal_class baseado no quality_score
+                if quality_score >= 110:
+                    signal_class = "ELITE+"
+                elif quality_score >= 95:
+                    signal_class = "ELITE"
+                elif quality_score >= 85:
+                    signal_class = "PREMIUM+"
+                elif quality_score >= 80:
+                    signal_class = "PREMIUM"
+                else:
+                    signal_class = "STANDARD"
+                
                 # Formatar dados para o frontend
                 formatted_signal = {
                     'symbol': signal.get('symbol', ''),
-                    'type': signal.get('type', ''),
-                    'entry_price': float(signal.get('entry_price') or 0),
-                    'entry_time': signal.get('created_at', ''),
-                    'target_price': float(signal.get('target_price') or 0),
-                    'projection_percentage': float(signal.get('projection_percentage') or 0),
-                    'signal_class': signal.get('signal_class', ''),
+                    'type': signal_type,
+                    'entry_price': entry_price,
+                    'entry_time': signal.get('entry_time', ''),
+                    'target_price': target_price,
+                    'projection_percentage': round(projection_percentage, 2),
+                    'signal_class': signal_class,
                     'status': signal.get('status', ''),
-                    'quality_score': quality_score,
-                    'rsi': float(signal.get('rsi') or 50),
-                    'btc_correlation': float(signal.get('btc_correlation') or 0),
-                    'btc_trend': signal.get('btc_trend', '')
+                    'quality_score': quality_score
                 }
                 signals.append(formatted_signal)
             
