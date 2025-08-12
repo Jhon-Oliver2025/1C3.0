@@ -393,16 +393,14 @@ def create_app():
             
             supabase: Client = create_client(supabase_url, supabase_key)
             
-            # Buscar sinais diretamente do banco de dados (sem filtro de tempo para debug)
-            result = supabase.table('signals').select('*').eq('status', 'OPEN').order('created_at', desc=True).limit(50).execute()
-            
-            print(f"🔍 DEBUG: Encontrados {len(result.data)} sinais OPEN no Supabase")
+            # Buscar sinais diretamente do banco de dados
+            result = supabase.table('signals').select('*').eq('status', 'OPEN').gte('created_at', (datetime.now() - timedelta(hours=24)).isoformat()).order('created_at', desc=True).limit(50).execute()
             
             signals = []
             for signal in result.data:
-                # Filtrar apenas sinais de alta qualidade (75+ pontos)
+                # Filtrar apenas sinais de qualidade (70+ pontos)
                 quality_score = float(signal.get('quality_score') or 0)
-                if quality_score < 75.0:
+                if quality_score < 70.0:
                     continue  # Pular sinais de baixa qualidade
                 
                 # Formatar dados para o frontend
