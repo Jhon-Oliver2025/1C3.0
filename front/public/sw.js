@@ -3,7 +3,7 @@
  * Implementa cache strategies e funcionalidade offline
  */
 
-const CACHE_VERSION = '1.2.0';
+const CACHE_VERSION = '1.3.0';
 const CACHE_TIMESTAMP = Date.now();
 const CACHE_NAME = `1crypten-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
 const STATIC_CACHE = `1crypten-static-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
