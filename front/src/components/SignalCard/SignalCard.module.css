@@ -47,6 +47,13 @@
   letter-spacing: 0.5px;
 }
 
+.signalClassStars {
+  font-size: 12px;
+  margin-top: 2px;
+  text-shadow: 0 0 8px currentColor;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
 .typeButton {
   padding: 6px 12px;
   border-radius: 6px;

@@ -8,7 +8,7 @@ interface SignalCardProps {
   targetPrice: string;
   projectionPercentage: string;
   date: string;
-  signalClass: 'PREMIUM' | 'ELITE' | 'PADRÃO';
+  signalClass: 'PREMIUM' | 'PREMIUM+' | 'ELITE' | 'ELITE+' | 'PADRÃO';
   onToggleFavorite?: () => void;
   isFavorite?: boolean;
 }
@@ -53,12 +53,48 @@ const SignalCard: React.FC<SignalCardProps> = ({
 
   const isPositiveProjection = parseFloat(projectionPercentage) > 0;
 
+  // Função para renderizar estrelas baseadas na classificação
+  const renderStars = (signalClass: string): string => {
+    switch (signalClass) {
+      case 'PREMIUM+':
+        return '⭐'; // 1 estrela
+      case 'ELITE':
+        return '⭐⭐'; // 2 estrelas
+      case 'ELITE+':
+        return '⭐⭐⭐'; // 3 estrelas
+      default:
+        return ''; // Sem estrelas para PREMIUM
+    }
+  };
+
+  // Função para obter a cor da classificação
+  const getClassColor = (signalClass: string): string => {
+    switch (signalClass) {
+      case 'PREMIUM+':
+        return '#C0C0C0'; // Prata
+      case 'ELITE':
+        return '#FFD700'; // Dourado
+      case 'ELITE+':
+        return '#FFD700'; // Dourado
+      default:
+        return '#9ca3af'; // Cinza padrão
+    }
+  };
+
   return (
     <div className={`${styles.signalCard} ${styles[type.toLowerCase()]}`}>
       {/* Header do Card - Símbolo e Tipo */}
       <div className={styles.cardHeader}>
         <div className={styles.symbolContainer}>
           <span className={styles.symbol}>{symbol}</span>
+          {renderStars(signalClass) && (
+            <span 
+              className={styles.signalClassStars}
+              style={{ color: getClassColor(signalClass) }}
+            >
+              {renderStars(signalClass)}
+            </span>
+          )}
         </div>
         <div className={`${styles.typeButton} ${styles[type.toLowerCase()]}`}>
           {type}

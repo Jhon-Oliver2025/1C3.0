@@ -47,7 +47,7 @@ class TechnicalAnalysis:
         self.config = {
             'trend_timeframe': '4h',
             'entry_timeframe': '1h',
-            'quality_score_minimum': 70.0,  # Alterado de 80.0 para 70.0
+            'quality_score_minimum': 85.0,  # Apenas PREMIUM+ ou superior
             'scan_interval': 60,  # 60 segundos
             'pairs_update_interval': 1200,  # 20 minutos
             'target_percentage_min': 6.0,
@@ -828,14 +828,22 @@ class TechnicalAnalysis:
         try:
             # Calcular indicadores
             close_series = pd.Series(df['close'].values, dtype=float)
+            high_series = pd.Series(df['high'].values, dtype=float)
+            low_series = pd.Series(df['low'].values, dtype=float)
+            
             ema20 = EMAIndicator(close=close_series, window=20).ema_indicator()
             ema50 = EMAIndicator(close=close_series, window=50).ema_indicator()
             rsi = RSIIndicator(close=close_series, window=14).rsi()
+            atr = AverageTrueRange(high=high_series, low=low_series, close=close_series, window=14).average_true_range()
             
             current_price = df['close'].iloc[-1]
             current_ema20 = ema20.iloc[-1]
             current_ema50 = ema50.iloc[-1]
             current_rsi = rsi.iloc[-1]
+            current_atr = atr.iloc[-1]
+            
+            # Calcular ATR ratio para volatilidade
+            atr_ratio = current_atr / current_price if current_price > 0 else 0.02
             
             # Condições de tendência
             is_uptrend = current_price > current_ema20 * 0.99 and current_ema20 > current_ema50 * 1.002
@@ -854,7 +862,8 @@ class TechnicalAnalysis:
                 'rsi': current_rsi,
                 'price_change': price_change,
                 'momentum_positive': momentum_positive,
-                'volume_ratio': volume_ratio
+                'volume_ratio': volume_ratio,
+                'atr_ratio': atr_ratio
             }
             
         except Exception as e:
