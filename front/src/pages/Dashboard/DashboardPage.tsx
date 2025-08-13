@@ -249,6 +249,7 @@ const DashboardPage: React.FC = () => {
       
       // Mapear os dados da API para o formato esperado
       const mappedSignals: Signal[] = signalsArray.map((signal: any) => ({
+        id: signal.id || `${signal.symbol}-${signal.entry_time}`,
         symbol: signal.symbol,
         type: signal.type === 'LONG' || signal.type === 'COMPRA' ? 'COMPRA' : 'VENDA',
         entry_price: parseFloat(signal.entry_price) || 0,
