@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import styles from './Navbar.module.css';
-import logo2 from '../../assets/logo2.png';
+import logo3 from '/logo3.png';
 // CORRIGIDO: Removidos FaChartBar, FaUser, FaCog que não são mais utilizados
 import { FaHome, FaQuestionCircle, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
 
@@ -24,7 +24,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout, isBackendOnl
         <NavLink to="/" end className={styles.logoLink}>
           {/* MODIFIED: Conditional class application */}
           <div className={`${styles.logoWrapper} ${isBackendOnline === true ? styles.online : (isBackendOnline === false ? styles.offline : '')}`}>
-            <img src={logo2} alt="CrypTen Logo" className={styles.crypTenLogo} />
+            <img src={logo3} alt="CrypTen Logo" className={styles.crypTenLogo} />
           </div>
         </NavLink>
       </div>

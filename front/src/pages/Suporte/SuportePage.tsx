@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './SuportePage.module.css';
-import logo2 from '../../assets/logo2.png';
+import logo3 from '/logo3.png';
 
 /**
  * Componente da página de Suporte
@@ -54,7 +54,7 @@ const SuportePage: React.FC = () => {
         </button>
         <div className="mobile-logo-container">
            <img 
-             src={logo2} 
+             src={logo3} 
              alt="Logo do Sistema" 
              className={`mobile-system-logo ${isBackendOnline ? 'online' : 'offline'}`}
              title={isBackendOnline ? 'Backend Online' : 'Backend Offline'}
