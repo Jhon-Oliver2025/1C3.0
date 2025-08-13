@@ -37,3 +37,4 @@ tqdm
 websocket-client>=1.8.0
 Werkzeug>=2.3.7
 waitress>=2.1.2
+psutil>=5.9.0
