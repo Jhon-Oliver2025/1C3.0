@@ -4,7 +4,7 @@
   "description": "Plataforma avançada de sinais de trading para criptomoedas com análise técnica em tempo real",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0A192F",
+  "background_color": "#000000",
   "theme_color": "#64FFDA",
   "orientation": "portrait",
   "scope": "/",
