@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerador de Ícones com Fundo Preto</title>
+</head>
+<body>
+    <h1>Gerador de Ícones 1Crypten - Fundo Preto</h1>
+    <canvas id="canvas" width="512" height="512" style="border: 1px solid #ccc;"></canvas>
+    <br><br>
+    <button onclick="generateIcon(72)">Gerar 72x72</button>
+    <button onclick="generateIcon(96)">Gerar 96x96</button>
+    <button onclick="generateIcon(128)">Gerar 128x128</button>
+    <button onclick="generateIcon(144)">Gerar 144x144</button>
+    <button onclick="generateIcon(152)">Gerar 152x152</button>
+    <button onclick="generateIcon(192)">Gerar 192x192</button>
+    <button onclick="generateIcon(384)">Gerar 384x384</button>
+    <button onclick="generateIcon(512)">Gerar 512x512</button>
+    <br><br>
+    <a id="downloadLink" style="display: none;">Download Ícone</a>
+
+    <script>
+        function generateIcon(size) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Redimensionar canvas
+            canvas.width = size;
+            canvas.height = size;
+            
+            // Fundo preto
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, size, size);
+            
+            // Círculo principal verde
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const radius = size * 0.35;
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = '#00ff88';
+            ctx.fill();
+            
+            // Borda branca
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = size * 0.008;
+            ctx.stroke();
+            
+            // Texto "1C"
+            ctx.fillStyle = '#000000';
+            ctx.font = `bold ${size * 0.25}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('1C', centerX, centerY);
+            
+            // Círculos decorativos
+            const decorRadius = size * 0.006;
+            ctx.fillStyle = '#00ff88';
+            
+            // Pontos cardinais
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - radius * 1.4, decorRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY + radius * 1.4, decorRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(centerX - radius * 1.4, centerY, decorRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(centerX + radius * 1.4, centerY, decorRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Download
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.getElementById('downloadLink');
+                link.href = url;
+                link.download = `icon-${size}x${size}.png`;
+                link.style.display = 'block';
+                link.textContent = `Download icon-${size}x${size}.png`;
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>

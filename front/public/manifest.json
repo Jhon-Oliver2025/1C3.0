@@ -2,9 +2,9 @@
   "name": "1Crypten",
   "short_name": "1Crypten",
   "description": "Plataforma avançada de sinais de trading para criptomoedas com análise técnica em tempo real",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
-  "background_color": "#1a1a1a",
+  "background_color": "#000000",
   "theme_color": "#00ff88",
   "orientation": "portrait",
   "scope": "/",
@@ -19,8 +19,6 @@
     "client_mode": "navigate-existing"
   },
   "id": "/",
-  "start_url": "/?source=pwa",
-  "scope": "/",
   "related_applications": [],
   "protocol_handlers": [],
   "icons": [
@@ -132,12 +130,5 @@
       "form_factor": "wide",
       "label": "Dashboard de sinais no desktop"
     }
-  ],
-  "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  }
+  ]
 }
