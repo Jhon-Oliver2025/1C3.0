@@ -20,6 +20,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import App1CryptenPage from './pages/App1CryptenPage/App1CryptenPage';
 import MainLayout from './components/MainLayout/MainLayout';
+import UpdateNotification from './components/UpdateNotification/UpdateNotification';
 
 /**
  * Componente para verificar autenticação
@@ -113,6 +114,9 @@ function App() {
       {/* Rota catch-all - redireciona para landing page */}
       <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      
+      {/* Componente de notificação de atualização */}
+      <UpdateNotification />
     </div>
   );
 }

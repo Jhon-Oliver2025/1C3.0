@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './App1CryptenPage.module.css';
-import logo2 from '../../assets/logo2.png';
+import logo3 from '/logo3.png';
 
 interface AppInstallState {
   isInstallable: boolean;
@@ -122,7 +122,7 @@ const useAppInstall = () => {
           gap: 16px;
           margin-bottom: 24px;
         ">
-          <img src="${logo2}" alt="1Crypten" style="width: 48px; height: 48px; border-radius: 8px;" />
+          <img src="${logo3}" alt="1Crypten" style="width: 48px; height: 48px; border-radius: 8px;" />
           <h2 style="margin: 0; color: #64FFDA; font-size: 24px; font-weight: 700;">Instalar 1Crypten</h2>
         </div>
         <p style="
@@ -233,9 +233,13 @@ const App1CryptenPage: React.FC = () => {
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <img src={logo2} alt="1Crypten" className={styles.appIcon} />
+          <img src={logo3} alt="1Crypten" className={styles.appIcon} />
           <h2 className={styles.heroTitle}>1Crypten</h2>
           <p className={styles.heroSubtitle}>Sinais de Trading em Tempo Real</p>
+          <div className={styles.versionInfo}>
+            <span className={styles.version}>v1.3.0</span>
+            <span className={styles.versionLabel}>Versão Atual</span>
+          </div>
           
           {/* Status do App */}
           {isInstalled ? (

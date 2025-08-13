@@ -370,4 +370,28 @@ self.addEventListener('notificationclick', (event) => {
   }
 });
 
+// Listener para mensagens de atualização forçada
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('🔄 Forçando ativação da nova versão do Service Worker...');
+    self.skipWaiting();
+  }
+});
+
+// Notificar clientes sobre nova versão disponível
+self.addEventListener('activate', (event) => {
+  console.log('✅ Nova versão do Service Worker ativada!');
+  
+  event.waitUntil(
+    clients.matchAll().then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage({
+          type: 'SW_UPDATED',
+          version: CACHE_VERSION
+        });
+      });
+    })
+  );
+});
+
 console.log('🚀 Service Worker 1Crypten carregado!');
