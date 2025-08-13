@@ -272,3 +272,60 @@ def verify_token():
     except Exception as e:
         current_app.logger.error(f"Erro ao verificar token: {str(e)}")
         return jsonify({'error': 'Erro interno do servidor'}), 500
+
+@auth_bp.route('/verify-token', methods=['POST'])
+def verify_token():
+    """Endpoint para verificar se um token ainda é válido"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'valid': False, 'error': 'Dados não fornecidos'}), 400
+            
+        token = data.get('token')
+        if not token:
+            # Tentar pegar do header Authorization
+            auth_header = request.headers.get('Authorization')
+            if auth_header and auth_header.startswith('Bearer '):
+                token = auth_header.split(' ')[1]
+            else:
+                return jsonify({'valid': False, 'error': 'Token não fornecido'}), 400
+        
+        bot_instance = getattr(current_app, 'bot_instance', None)
+        if not bot_instance:
+            return jsonify({'valid': False, 'error': 'Sistema não inicializado'}), 500
+            
+        # Verificar se token existe
+        token_data = bot_instance.db.get_auth_token(token)
+        if not token_data:
+            return jsonify({'valid': False, 'error': 'Token inválido'}), 200
+            
+        # Verificar se token expirou
+        expires_at = datetime.fromisoformat(token_data['expires_at'])
+        now = datetime.now()
+        
+        if now > expires_at:
+            bot_instance.db.remove_auth_token(token)
+            return jsonify({'valid': False, 'error': 'Token expirado'}), 200
+            
+        # Buscar dados do usuário
+        user = bot_instance.db.get_user_by_id(token_data['user_id'])
+        if not user:
+            return jsonify({'valid': False, 'error': 'Usuário não encontrado'}), 200
+            
+        # Calcular tempo até expiração em segundos
+        expires_in = int((expires_at - now).total_seconds())
+        
+        return jsonify({
+            'valid': True,
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email'],
+                'is_admin': user.get('is_admin', False)
+            },
+            'expires_in': expires_in
+        }), 200
+        
+    except Exception as e:
+        current_app.logger.error(f"Erro ao verificar token: {str(e)}")
+        return jsonify({'valid': False, 'error': 'Erro interno do servidor'}), 500

@@ -56,11 +56,6 @@ const DashboardPage: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Não renderizar nada se não estiver autenticado
-  if (!isAuthenticated) {
-    return null;
-  }
-
   // Função para buscar status dos mercados da API
   const fetchMarketStatus = async () => {
     try {
@@ -131,6 +126,16 @@ const DashboardPage: React.FC = () => {
     "Não se perca no espaço. Siga o caminho que te guia à liberdade.",
     "O mundo das criptomoedas é a nova corrida espacial. Você está pronto?"
   ];
+
+  // Não renderizar nada se não estiver autenticado
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p>Verificando autenticação...</p>
+      </div>
+    );
+  }
 
   /**
    * Atualiza o horário atual a cada segundo
