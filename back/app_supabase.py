@@ -442,10 +442,10 @@ def create_app():
             
             signals = []
             for signal in result.data:
-                # Filtrar apenas sinais de alta qualidade (80+ pontos)
+                # Filtrar apenas sinais de qualidade mínima (50+ pontos)
                 quality_score = float(signal.get('quality_score') or 0)
-                if quality_score < 80.0:
-                    continue  # Pular sinais de baixa qualidade
+                if quality_score < 50.0:
+                    continue  # Pular sinais de qualidade muito baixa
                 
                 # Calcular projection_percentage e signal_class baseado nos dados existentes
                 entry_price = float(signal.get('entry_price') or 0)
