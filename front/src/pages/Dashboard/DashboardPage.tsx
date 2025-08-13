@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import SignalCard from '../../components/SignalCard/SignalCard';
 // PWA removido - agora temos página dedicada para o App 1Crypten
 import styles from './DashboardPage.module.css';
-import logo2 from '../../assets/logo2.png';
+import logo3 from '/logo3.png';
 
 /**
  * Interface para definir a estrutura de um sinal
@@ -155,10 +155,10 @@ const DashboardPage: React.FC = () => {
     fetchMarketStatus();
     fetchCleanupStatus();
     
-    // Atualizar sinais a cada 30 segundos (refresh sutil)
+    // Verificar novos sinais a cada 2 minutos (sem refresh da página)
     const signalsTimer = setInterval(() => {
-      fetchSignals();
-    }, 30000);
+      fetchSignalsUpdate();
+    }, 120000);
     
     // Atualizar status dos mercados a cada 30 segundos
     const marketTimer = setInterval(() => {
@@ -277,6 +277,72 @@ const DashboardPage: React.FC = () => {
   };
 
   /**
+   * Verifica novos sinais sem fazer refresh da página
+   * Mantém os sinais existentes e adiciona apenas novos
+   */
+  const fetchSignalsUpdate = async () => {
+    try {
+      console.log('🔄 Verificando novos sinais...');
+      
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      
+      const response = await fetch('/api/signals/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        if (response.status === 403) {
+          console.log('⚠️ Acesso negado - verificando autenticação');
+          return;
+        }
+        throw new Error(`Erro na API: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const signalsArray = data.signals || data;
+      
+      if (Array.isArray(signalsArray)) {
+        // Mapear novos sinais
+        const newSignals: Signal[] = signalsArray.map((signal: any) => ({
+          id: signal.id || `${signal.symbol}-${signal.entry_time}`,
+          symbol: signal.symbol,
+          type: signal.type as 'COMPRA' | 'VENDA',
+          entry_price: parseFloat(signal.entry_price),
+          target_price: parseFloat(signal.target_price),
+          projection_percentage: parseFloat(signal.projection_percentage),
+          signal_class: signal.signal_class,
+          entry_time: signal.entry_time,
+          status: signal.status || 'OPEN',
+          is_favorite: false
+        }));
+        
+        // Verificar se há novos sinais (comparar por ID ou símbolo+tempo)
+        const currentSignalIds = signals.map(s => s.id);
+        const reallyNewSignals = newSignals.filter(newSignal => 
+          !currentSignalIds.includes(newSignal.id)
+        );
+        
+        if (reallyNewSignals.length > 0) {
+          console.log(`✨ ${reallyNewSignals.length} novos sinais encontrados!`);
+          setSignals(prevSignals => [...prevSignals, ...reallyNewSignals]);
+        } else {
+          console.log('📊 Nenhum sinal novo - mantendo sinais existentes');
+        }
+        
+        setIsBackendOnline(true);
+      }
+    } catch (err) {
+      console.error('⚠️ Erro ao verificar novos sinais:', err);
+      // Não mostrar erro para o usuário em verificações automáticas
+    }
+  };
+
+  /**
    * Alterna o estado do menu mobile
    */
   const toggleMobileMenu = () => {
@@ -315,7 +381,7 @@ const DashboardPage: React.FC = () => {
         </button>
         <div className="mobile-logo-container">
            <img 
-             src={logo2} 
+             src={logo3} 
              alt="Logo do Sistema" 
              className={`mobile-system-logo ${isBackendOnline ? 'online' : 'offline'}`}
              title={isBackendOnline ? 'Backend Online' : 'Backend Offline'}
