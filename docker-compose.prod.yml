@@ -53,6 +53,11 @@ services:
       - SENDPULSE_API_URL=${SENDPULSE_API_URL}
       - CORS_ORIGINS=https://1crypten.space,https://www.1crypten.space
       - API_BASE_URL=https://api.1crypten.space
+      # Configurações de performance
+      - GUNICORN_WORKERS=4
+      - GUNICORN_THREADS=2
+      - GUNICORN_TIMEOUT=120
+      - GUNICORN_KEEPALIVE=5
     volumes:
       - ./back/data:/app/data
     depends_on:
@@ -66,17 +71,17 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
-          cpus: '1.0'
+          memory: 2G          # Dobrado para melhor performance
+          cpus: '2.0'         # Dobrado para processar mais requisições
         reservations:
-          memory: 512M
-          cpus: '0.5'
+          memory: 512M        # Garantir memória mínima
+          cpus: '0.5'         # Garantir CPU mínima
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/api/status')"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/')"]
+      interval: 30s         # Aumentado para reduzir overhead
+      timeout: 10s          # Aumentado para dar mais tempo
+      retries: 5            # Mais tentativas antes de falhar
+      start_period: 60s     # Mais tempo para inicialização
 
   frontend:
     build: ./front
