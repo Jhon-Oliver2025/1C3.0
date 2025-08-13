@@ -65,12 +65,7 @@
     <title>1Crypten - Trading Signals</title>
   </head>
   <body>
-    <!-- PWA Install Banner -->
-    <div id="pwa-install-banner" style="display: none; position: fixed; top: 0; left: 0; right: 0; background: #64FFDA; color: #0A192F; padding: 12px; text-align: center; z-index: 9999; font-weight: bold;">
-      📱 Instale o 1Crypten como aplicativo!
-      <button id="pwa-install-btn" style="margin-left: 10px; background: #0A192F; color: #64FFDA; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Instalar</button>
-      <button id="pwa-dismiss-btn" style="margin-left: 5px; background: transparent; color: #0A192F; border: 1px solid #0A192F; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Agora não</button>
-    </div>
+    <!-- Banner removido - agora temos página dedicada para o App 1Crypten -->
     
     <div id="root"></div>
     
@@ -101,47 +96,15 @@
         });
       }
       
-      // PWA Install Prompt
-      let deferredPrompt;
-      const installBanner = document.getElementById('pwa-install-banner');
-      const installBtn = document.getElementById('pwa-install-btn');
-      const dismissBtn = document.getElementById('pwa-dismiss-btn');
-      
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        
-        // Mostrar banner apenas se não foi instalado
-        if (!window.matchMedia('(display-mode: standalone)').matches) {
-          installBanner.style.display = 'block';
-        }
-      });
-      
-      installBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          console.log('PWA install outcome:', outcome);
-          deferredPrompt = null;
-          installBanner.style.display = 'none';
-        }
-      });
-      
-      dismissBtn.addEventListener('click', () => {
-        installBanner.style.display = 'none';
-        localStorage.setItem('pwa-dismissed', Date.now());
-      });
-      
-      // Verificar se já foi dispensado recentemente
-      const dismissed = localStorage.getItem('pwa-dismissed');
-      if (dismissed && Date.now() - dismissed < 7 * 24 * 60 * 60 * 1000) {
-        installBanner.style.display = 'none';
-      }
+      // PWA Install Prompt removido - agora gerenciado pela página dedicada
+      console.log('🎯 Service Worker ativo - App 1Crypten pronto para instalação via /app');
       
       // Detectar se já está instalado
       if (window.matchMedia('(display-mode: standalone)').matches) {
-        console.log('🎉 PWA já está instalado!');
-        document.body.classList.add('pwa-installed');
+        console.log('🎉 App 1Crypten já está instalado!');
+        document.body.classList.add('app-installed');
+      }
+      });
       }
     </script>
     

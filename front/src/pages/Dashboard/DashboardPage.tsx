@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SignalCard from '../../components/SignalCard/SignalCard';
-import PWAInstallButton from '../../components/PWA/PWAInstallButton';
+// PWA removido - agora temos página dedicada para o App 1Crypten
 import styles from './DashboardPage.module.css';
 import logo2 from '../../assets/logo2.png';
 
@@ -339,9 +339,9 @@ const DashboardPage: React.FC = () => {
                </Link>
                
                {/* Botão de instalação PWA */}
-               <div style={{ padding: '8px 0' }}>
-                 <PWAInstallButton variant="secondary" size="medium" />
-               </div>
+               <Link to="/app" className="mobile-menu-item">
+                 📱 Baixar App
+               </Link>
                
                <button className="mobile-menu-item logout" onClick={handleLogout}>
                  Sair

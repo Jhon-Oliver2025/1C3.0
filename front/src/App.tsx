@@ -18,12 +18,8 @@ import SuportePage from './pages/Suporte/SuportePage';
 import SairPage from './pages/SairPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
+import App1CryptenPage from './pages/App1CryptenPage/App1CryptenPage';
 import MainLayout from './components/MainLayout/MainLayout';
-
-// Importar componentes PWA
-import PWAProvider from './components/PWA/PWAProvider';
-import PWAUpdateNotification from './components/PWA/PWAUpdateNotification';
-import PWAInstallButton from './components/PWA/PWAInstallButton';
 
 /**
  * Componente para verificar autenticação
@@ -40,10 +36,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
  */
 function App() {
   return (
-    <PWAProvider>
-      {/* Notificação de atualização PWA */}
-      <PWAUpdateNotification position="top" />
-      
+    <div>
       <Routes>
       {/* Rota pública - Landing Page */}
       <Route path="/" element={<LandingPage />} />
@@ -111,10 +104,16 @@ function App() {
         </ProtectedRoute>
       } />
       
+      <Route path="/app" element={
+        <ProtectedRoute>
+          <App1CryptenPage />
+        </ProtectedRoute>
+      } />
+      
       {/* Rota catch-all - redireciona para landing page */}
       <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </PWAProvider>
+    </div>
   );
 }
 
