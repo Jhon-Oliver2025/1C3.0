@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Criar Ícone Maskable 1Crypten</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #0A192F;
+            color: white;
+        }
+        canvas {
+            border: 2px solid #64FFDA;
+            margin: 10px;
+        }
+        .container {
+            text-align: center;
+        }
+        button {
+            background: #64FFDA;
+            color: #0A192F;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Gerador de Ícone Maskable 1Crypten</h1>
+        <p>Este gerador cria ícones maskable otimizados para PWA</p>
+        
+        <canvas id="canvas192" width="192" height="192"></canvas>
+        <canvas id="canvas512" width="512" height="512"></canvas>
+        
+        <br>
+        <button onclick="generateIcons()">🎨 Gerar Ícones Maskable</button>
+        <button onclick="downloadIcon(192)">📥 Download 192x192</button>
+        <button onclick="downloadIcon(512)">📥 Download 512x512</button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function generateIcons() {
+            const status = document.getElementById('status');
+            status.innerHTML = '🔄 Gerando ícones...';
+            
+            // Gerar ícone 192x192
+            generateMaskableIcon(192);
+            
+            // Gerar ícone 512x512
+            generateMaskableIcon(512);
+            
+            status.innerHTML = '✅ Ícones gerados com sucesso!';
+        }
+        
+        function generateMaskableIcon(size) {
+            const canvas = document.getElementById(`canvas${size}`);
+            const ctx = canvas.getContext('2d');
+            
+            // Limpar canvas
+            ctx.clearRect(0, 0, size, size);
+            
+            // Fundo gradiente 1Crypten
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#0A192F');
+            gradient.addColorStop(0.5, '#112240');
+            gradient.addColorStop(1, '#0A192F');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Círculo de fundo para melhor contraste
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const radius = size * 0.45;
+            
+            const bgGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+            bgGradient.addColorStop(0, 'rgba(100, 255, 218, 0.1)');
+            bgGradient.addColorStop(1, 'rgba(100, 255, 218, 0.05)');
+            
+            ctx.fillStyle = bgGradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Texto "1C" estilizado
+            const fontSize = size * 0.35;
+            ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Sombra do texto
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = size * 0.02;
+            ctx.shadowOffsetX = size * 0.01;
+            ctx.shadowOffsetY = size * 0.01;
+            
+            // Gradiente do texto
+            const textGradient = ctx.createLinearGradient(0, centerY - fontSize/2, 0, centerY + fontSize/2);
+            textGradient.addColorStop(0, '#64FFDA');
+            textGradient.addColorStop(0.5, '#4CAF50');
+            textGradient.addColorStop(1, '#64FFDA');
+            
+            ctx.fillStyle = textGradient;
+            ctx.fillText('1C', centerX, centerY - fontSize * 0.05);
+            
+            // Subtítulo "CRYPTEN"
+            const subFontSize = size * 0.08;
+            ctx.font = `bold ${subFontSize}px Arial, sans-serif`;
+            ctx.shadowBlur = size * 0.01;
+            ctx.fillStyle = '#64FFDA';
+            ctx.fillText('CRYPTEN', centerX, centerY + fontSize * 0.35);
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            
+            // Borda sutil
+            ctx.strokeStyle = 'rgba(100, 255, 218, 0.3)';
+            ctx.lineWidth = size * 0.005;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius * 0.95, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+        
+        function downloadIcon(size) {
+            const canvas = document.getElementById(`canvas${size}`);
+            const link = document.createElement('a');
+            link.download = `icon-maskable-${size}x${size}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Gerar ícones automaticamente ao carregar
+        window.onload = function() {
+            setTimeout(generateIcons, 500);
+        };
+    </script>
+</body>
+</html>
