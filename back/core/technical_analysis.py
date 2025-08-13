@@ -47,7 +47,7 @@ class TechnicalAnalysis:
         self.config = {
             'trend_timeframe': '4h',
             'entry_timeframe': '1h',
-            'quality_score_minimum': 50.0,  # Reduzido para permitir mais sinais
+            'quality_score_minimum': 80.0,  # Mínimo 80 pontos para sinais de qualidade
             'scan_interval': 60,  # 60 segundos
             'pairs_update_interval': 1200,  # 20 minutos
             'target_percentage_min': 6.0,
