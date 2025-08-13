@@ -49,7 +49,7 @@ const DashboardPage: React.FC = () => {
   // Função para buscar status dos mercados da API
   const fetchMarketStatus = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://1crypten.space';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/api/market-status`, {
         headers: {
           'Content-Type': 'application/json'
@@ -81,7 +81,7 @@ const DashboardPage: React.FC = () => {
   const fetchCleanupStatus = async () => {
     try {
       const token = localStorage.getItem('token');
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://1crypten.space';
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/api/cleanup-status`, {
         headers: {
           'Authorization': `Bearer ${token}`,
