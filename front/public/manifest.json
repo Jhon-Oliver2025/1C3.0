@@ -1,5 +1,5 @@
 {
-  "name": "1Crypten - Trading Signals",
+  "name": "1Crypten",
   "short_name": "1Crypten",
   "description": "Plataforma avançada de sinais de trading para criptomoedas com análise técnica em tempo real",
   "start_url": "/",
@@ -85,7 +85,7 @@
       "purpose": "maskable any"
     },
     {
-       "src": "/src/assets/logo3.png",
+       "src": "/logo3.png",
        "sizes": "any",
        "type": "image/png",
        "purpose": "any"
