@@ -9,6 +9,7 @@ import logo3 from '/logo3.png';
  * Interface para definir a estrutura de um sinal
  */
 interface Signal {
+  id: string;
   symbol: string;
   type: 'COMPRA' | 'VENDA';
   entry_price: number;
