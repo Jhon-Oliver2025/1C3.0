@@ -30,6 +30,7 @@ from api_routes.notifications import notifications_bp
 from api_routes.market_times import market_times_bp
 from api_routes.market_status import market_status_bp
 from api_routes.cleanup_status import cleanup_status_bp
+from api_routes.debug import debug_bp
 
 # Configurar CORS
 CORS(server, resources={
@@ -215,13 +216,14 @@ def create_app():
     
     # Registrar blueprints das rotas de API
     server.register_blueprint(auth_bp, url_prefix='/api/auth')
-    server.register_blueprint(signals_bp, url_prefix='/api/signals')
-    server.register_blueprint(trading_bp, url_prefix='/api/trading')
-    server.register_blueprint(users_bp, url_prefix='/api/users')
-    server.register_blueprint(notifications_bp, url_prefix='/api/notifications')
-    server.register_blueprint(market_times_bp, url_prefix='/api')
-    server.register_blueprint(market_status_bp, url_prefix='/api')
-    server.register_blueprint(cleanup_status_bp, url_prefix='/api')
+server.register_blueprint(signals_bp, url_prefix='/api/signals')
+server.register_blueprint(trading_bp, url_prefix='/api/trading')
+server.register_blueprint(users_bp, url_prefix='/api/users')
+server.register_blueprint(notifications_bp, url_prefix='/api/notifications')
+server.register_blueprint(market_times_bp, url_prefix='/api')
+server.register_blueprint(market_status_bp, url_prefix='/api')
+server.register_blueprint(cleanup_status_bp, url_prefix='/api')
+server.register_blueprint(debug_bp, url_prefix='/api/debug')
     
     # Registrar rotas básicas
     @server.route('/api/health')
