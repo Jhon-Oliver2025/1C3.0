@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SignalCard from '../../components/SignalCard/SignalCard';
+import { useAuthToken } from '../../hooks/useAuthToken';
 // PWA removido - agora temos página dedicada para o App 1Crypten
 import styles from './DashboardPage.module.css';
 import logo3 from '/logo3.png';
@@ -46,6 +47,19 @@ const DashboardPage: React.FC = () => {
   });
   
   const navigate = useNavigate();
+  const { isAuthenticated, authenticatedFetch, logout } = useAuthToken();
+
+  // Redirecionar para login se não estiver autenticado
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Não renderizar nada se não estiver autenticado
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // Função para buscar status dos mercados da API
   const fetchMarketStatus = async () => {
@@ -81,14 +95,8 @@ const DashboardPage: React.FC = () => {
   // Função para buscar status das limpezas da API
   const fetchCleanupStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
       const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/cleanup-status`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await authenticatedFetch(`${apiUrl}/api/cleanup-status`);
       
       if (response.ok) {
         const contentType = response.headers.get('content-type');
@@ -216,25 +224,11 @@ const DashboardPage: React.FC = () => {
       
       console.log('🔄 Carregando sinais da API...');
       
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Token de autenticação não encontrado');
-      }
-      
-      const response = await fetch('/api/signals/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await authenticatedFetch('/api/signals/', {
+        method: 'GET'
       });
       
       if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem('token');
-          navigate('/login');
-          return;
-        }
         throw new Error(`Erro na API: ${response.status}`);
       }
       
@@ -286,15 +280,8 @@ const DashboardPage: React.FC = () => {
     try {
       console.log('🔄 Verificando novos sinais...');
       
-      const token = localStorage.getItem('token');
-      if (!token) return;
-      
-      const response = await fetch('/api/signals/', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await authenticatedFetch('/api/signals/', {
+        method: 'GET'
       });
       
       if (!response.ok) {
