@@ -120,15 +120,17 @@ class GerenciadorSinais:
                 if col in df.columns:
                     df[col] = pd.to_numeric(df[col], errors='coerce')
         
-            # Determinar horário de corte baseado na hora atual
+            # Determinar horário de corte baseado na hora atual (MODO PERMISSIVO)
             agora = datetime.now(self.timezone)  # Usar timezone
             
-            if agora.hour >= 21:  # Após 21:00 - mostrar apenas sinais gerados após 21:00 de hoje
-                corte = agora.replace(hour=21, minute=0, second=0, microsecond=0)
-                print(f"🌙 Modo noturno: Exibindo sinais gerados após 21:00")
-            elif agora.hour >= 10:  # Entre 10:00-21:00 - mostrar sinais gerados após 10:00 de hoje
+            # NOVO: Modo mais permissivo para evitar perda de sinais durante restarts
+            if agora.hour >= 21:  # Após 21:00 - mostrar sinais gerados após 10:00 de hoje
                 corte = agora.replace(hour=10, minute=0, second=0, microsecond=0)
-                print(f"☀️ Modo diurno: Exibindo sinais gerados após 10:00")
+                print(f"🌙 Modo noturno: Exibindo sinais gerados após 10:00 (permissivo)")
+            elif agora.hour >= 10:  # Entre 10:00-21:00 - mostrar sinais gerados após 21:00 de ontem
+                ontem = agora - timedelta(days=1)
+                corte = ontem.replace(hour=21, minute=0, second=0, microsecond=0)
+                print(f"☀️ Modo diurno: Exibindo sinais gerados após 21:00 de ontem (permissivo)")
             else:  # Antes das 10:00 - mostrar sinais gerados após 21:00 do dia anterior
                 ontem = agora - timedelta(days=1)
                 corte = ontem.replace(hour=21, minute=0, second=0, microsecond=0)

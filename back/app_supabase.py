@@ -73,7 +73,7 @@ class KryptonBotSupabase:
             from core.gerenciar_sinais import GerenciadorSinais
             from core.database import Database
             from core.market_scheduler import MarketScheduler
-            from core.signal_cleanup import cleanup_system
+            # from core.signal_cleanup import cleanup_system  # Removido - duplicação com MarketScheduler
             
             # Inicializar instância do banco de dados
             self.db = Database()
@@ -106,12 +106,9 @@ class KryptonBotSupabase:
                 print(f"⚠️ Erro ao inicializar Market Scheduler: {scheduler_error}")
                 self.market_scheduler = None
             
-            # Inicializar sistema de limpeza automática
-            try:
-                cleanup_system.start_scheduler()
-                print(f"🧹 Sistema de limpeza ativo - Próxima limpeza: {cleanup_system.get_next_cleanup_time()}")
-            except Exception as cleanup_error:
-                print(f"⚠️ Erro ao inicializar sistema de limpeza: {cleanup_error}")
+            # Sistema de limpeza já está integrado no MarketScheduler
+            # Removido para evitar duplicação de limpezas
+            print("🧹 Sistema de limpeza integrado ao MarketScheduler")
             
             # Inicializar monitoramento contínuo de mercado
             try:
