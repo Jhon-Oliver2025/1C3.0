@@ -532,14 +532,38 @@ def main():
     print(f"🔧 Debug mode: {debug}")
     print(f"🗄️ Database: Supabase")
     
-    # Iniciar servidor
+    # Iniciar servidor com configurações otimizadas
     try:
-        app.run(
-            host=host,
-            port=port,
-            debug=debug,
-            threaded=True
-        )
+        if debug:
+            # Modo desenvolvimento
+            app.run(
+                host=host,
+                port=port,
+                debug=debug,
+                threaded=True
+            )
+        else:
+            # Modo produção com Waitress (mais estável que Flask dev server)
+            try:
+                from waitress import serve
+                print("🚀 Usando Waitress para produção...")
+                serve(
+                    app,
+                    host=host,
+                    port=port,
+                    threads=10,
+                    connection_limit=1000,
+                    cleanup_interval=30,
+                    channel_timeout=120
+                )
+            except ImportError:
+                print("⚠️ Waitress não disponível, usando Flask dev server")
+                app.run(
+                    host=host,
+                    port=port,
+                    debug=debug,
+                    threaded=True
+                )
     except KeyboardInterrupt:
         print("\n👋 Encerrando aplicação...")
     except Exception as e:
