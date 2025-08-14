@@ -167,6 +167,53 @@ class Database:
             print(f"❌ Erro ao adicionar sinal: {e}")
             traceback.print_exc()
             return False
+
+    def get_auth_token(self, token: str) -> Optional[Dict[str, Any]]:
+        """Busca um token de autenticação no banco de dados"""
+        try:
+            if not os.path.exists(self.auth_tokens_file):
+                return None
+                
+            df = pd.read_csv(self.auth_tokens_file)
+            if df.empty:
+                return None
+                
+            # Buscar token específico
+            token_row = df[df['token'] == token]
+            if token_row.empty:
+                return None
+                
+            # Converter para dicionário
+            token_data = token_row.iloc[0].to_dict()
+            return token_data
+            
+        except Exception as e:
+            print(f"❌ Erro ao buscar token de autenticação: {e}")
+            traceback.print_exc()
+            return None
+
+    def remove_auth_token(self, token: str) -> bool:
+        """Remove um token de autenticação do banco de dados"""
+        try:
+            if not os.path.exists(self.auth_tokens_file):
+                return False
+                
+            df = pd.read_csv(self.auth_tokens_file)
+            if df.empty:
+                return False
+                
+            # Remover token específico
+            df_filtered = df[df['token'] != token]
+            
+            # Salvar de volta
+            df_filtered.to_csv(self.auth_tokens_file, index=False)
+            print(f"✅ Token de autenticação removido: {token[:8]}...")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Erro ao remover token de autenticação: {e}")
+            traceback.print_exc()
+            return False
     
     def _save_to_supabase(self, signal_data: Dict[str, Any]) -> bool:
         """Salva o sinal no banco de dados Supabase"""
