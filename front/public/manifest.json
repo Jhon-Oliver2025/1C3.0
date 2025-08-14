@@ -24,7 +24,13 @@
   "protocol_handlers": [],
   "icons": [
     {
-      "src": "/icons/icon-72x72.png",
+      "src": "/logo3.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-72x72-black.png",
       "sizes": "72x72",
       "type": "image/png",
       "purpose": "any"

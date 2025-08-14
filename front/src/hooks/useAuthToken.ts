@@ -165,14 +165,14 @@ export const useAuthToken = () => {
     }
   }, [token, verifyToken]);
 
-  // Verificar token periodicamente (a cada 5 minutos)
+  // Verificar token periodicamente (a cada 30 minutos)
   useEffect(() => {
     if (!isAuthenticated) return;
 
     const interval = setInterval(() => {
       console.log('🔍 Verificação periódica do token...');
       verifyToken();
-    }, 5 * 60 * 1000); // 5 minutos
+    }, 30 * 60 * 1000); // 30 minutos
 
     return () => clearInterval(interval);
   }, [isAuthenticated, verifyToken]);
