@@ -105,6 +105,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
+  // Estratégia para API crítica (Network First) - DEVE VIR ANTES de isApiUrl
+  if (isNetworkFirstUrl(request.url)) {
+    console.log('🔄 Network First para API crítica:', request.url);
+    event.respondWith(networkFirst(request, API_CACHE));
+    return;
+  }
+  
   // Forçar Network First para APIs de status (sempre buscar dados atualizados)
   if (request.url.includes('/api/market-status') || request.url.includes('/api/cleanup-status')) {
     console.log('🔄 Forçando Network First para API de status:', request.url);
@@ -112,13 +119,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Estratégia para API crítica (Network First)
-  if (isNetworkFirstUrl(request.url)) {
-    event.respondWith(networkFirst(request, API_CACHE));
-    return;
-  }
-  
-  // Estratégia para API de sinais (Stale While Revalidate)
+  // Estratégia para outras APIs (Stale While Revalidate)
   if (isApiUrl(request.url)) {
     event.respondWith(staleWhileRevalidate(request, API_CACHE));
     return;
@@ -288,6 +289,14 @@ self.addEventListener('message', (event) => {
   
   if (event.data && event.data.type === 'CLEAR_CACHE') {
     clearAllCaches().then(() => {
+      event.ports[0].postMessage({ success: true, message: 'Cache limpo com sucesso' });
+    }).catch((error) => {
+      event.ports[0].postMessage({ success: false, error: error.message });
+    });
+  }
+  
+  if (event.data && event.data.type === 'CLEAR_API_CACHE') {
+    clearApiCache().then(() => {
       event.ports[0].postMessage({ success: true });
     });
   }
@@ -300,6 +309,17 @@ async function clearAllCaches() {
   const cacheNames = await caches.keys();
   return Promise.all(
     cacheNames.map(cacheName => caches.delete(cacheName))
+  );
+}
+
+/**
+ * Limpa apenas o cache da API
+ */
+async function clearApiCache() {
+  const cacheNames = await caches.keys();
+  const apiCacheNames = cacheNames.filter(name => name.includes('api'));
+  return Promise.all(
+    apiCacheNames.map(cacheName => caches.delete(cacheName))
   );
 }
 

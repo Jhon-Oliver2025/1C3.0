@@ -48,6 +48,36 @@ const DashboardPage: React.FC = () => {
   
   const navigate = useNavigate();
   const { isAuthenticated, authenticatedFetch, logout } = useAuthToken();
+  
+  /**
+   * Limpa o cache da API para resolver problemas de dados duplicados
+   */
+  const clearApiCache = async () => {
+    try {
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        const messageChannel = new MessageChannel();
+        
+        return new Promise((resolve, reject) => {
+          messageChannel.port1.onmessage = (event) => {
+            if (event.data.success) {
+              console.log('✅ Cache da API limpo com sucesso');
+              resolve(event.data);
+            } else {
+              console.error('❌ Erro ao limpar cache da API:', event.data.error);
+              reject(new Error(event.data.error));
+            }
+          };
+          
+          navigator.serviceWorker.controller.postMessage(
+            { type: 'CLEAR_API_CACHE' },
+            [messageChannel.port2]
+          );
+        });
+      }
+    } catch (error) {
+      console.error('❌ Erro ao limpar cache da API:', error);
+    }
+  };
 
   // Redirecionar para login se não estiver autenticado
   useEffect(() => {
@@ -296,6 +326,16 @@ const DashboardPage: React.FC = () => {
       if (debugBuyCount + debugSellCount !== sortedSignals.length) {
         console.error('❌ ERRO: Soma dos tipos não confere com o total!');
         console.log('Sinais com tipos problemáticos:', sortedSignals.filter(s => s.type !== 'COMPRA' && s.type !== 'VENDA'));
+        
+        // Limpar cache da API para resolver problemas de dados duplicados
+        console.log('🧹 Limpando cache da API devido a inconsistência...');
+        await clearApiCache();
+        
+        // Recarregar sinais após limpar cache
+        setTimeout(() => {
+          console.log('🔄 Recarregando sinais após limpeza do cache...');
+          fetchSignals();
+        }, 1000);
       }
     } catch (err) {
       console.error('❌ Erro ao carregar sinais:', err);
