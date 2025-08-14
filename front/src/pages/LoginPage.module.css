@@ -155,3 +155,83 @@
 .policyLinks a:hover {
   text-decoration: underline;
 }
+
+/* Media Queries para dispositivos móveis */
+@media (max-width: 768px) {
+  .loginCard {
+    padding: 30px 20px;
+    margin: 10px;
+    max-width: 90%;
+  }
+
+  .crypTenLogo {
+    height: 80px; /* Logo menor no mobile */
+  }
+
+  .loginCard h2 {
+    font-size: 1.8em; /* Título maior no mobile */
+    margin-bottom: 15px;
+  }
+
+  .loginCard p {
+    font-size: 1.1em; /* Subtítulo maior no mobile */
+    margin-bottom: 25px;
+  }
+
+  .formGroup label {
+    font-size: 1.1em; /* Labels maiores no mobile */
+    margin-bottom: 10px;
+  }
+
+  .formGroup input {
+    font-size: 1.2em; /* Inputs maiores no mobile */
+    padding: 15px;
+    width: calc(100% - 30px);
+  }
+
+  .loginButton {
+    font-size: 1.3em; /* Botão maior no mobile */
+    padding: 15px;
+  }
+
+  .registerLink {
+    font-size: 1em; /* Link de registro maior no mobile */
+    margin-top: 20px;
+  }
+
+  .forgotPasswordLink {
+    font-size: 1em; /* Link de senha maior no mobile */
+    margin-top: 15px;
+  }
+
+  .policyLinks {
+    font-size: 0.95em; /* Links de política maiores no mobile */
+    margin-top: 25px;
+  }
+}
+
+@media (max-width: 480px) {
+  .loginCard {
+    padding: 25px 15px;
+    margin: 5px;
+    max-width: 95%;
+  }
+
+  .loginCard h2 {
+    font-size: 1.6em;
+  }
+
+  .loginCard p {
+    font-size: 1em;
+  }
+
+  .formGroup input {
+    font-size: 1.1em;
+    padding: 12px;
+  }
+
+  .loginButton {
+    font-size: 1.2em;
+    padding: 12px;
+  }
+}
