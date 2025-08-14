@@ -19,6 +19,7 @@ import SairPage from './pages/SairPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import App1CryptenPage from './pages/App1CryptenPage/App1CryptenPage';
+
 import MainLayout from './components/MainLayout/MainLayout';
 import UpdateNotification from './components/UpdateNotification/UpdateNotification';
 
@@ -51,6 +52,8 @@ function App() {
       {/* Rotas públicas de informação */}
       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
       <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+      
+
       
       {/* Rotas protegidas com layout */}
       <Route path="/dashboard" element={
@@ -110,6 +113,8 @@ function App() {
           <App1CryptenPage />
         </ProtectedRoute>
       } />
+      
+
       
       {/* Rota catch-all - redireciona para landing page */}
       <Route path="*" element={<Navigate to="/" replace />} />

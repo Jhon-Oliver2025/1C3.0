@@ -16,58 +16,88 @@ scheduler = None
 def setup_market_scheduler(db_instance=None, gerenciador_sinais=None):
     """Configura o agendador de tarefas do mercado com limpezas automáticas"""
     global scheduler
+    import os
     
-    # Se o scheduler já estiver rodando, parar primeiro
-    if scheduler is not None and scheduler.running:
-        logger.info("🔄 Parando scheduler existente...")
-        scheduler.shutdown(wait=False)
+    log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
     
-    # Configurar timezone para São Paulo (UTC-3)
-    timezone = pytz.timezone('America/Sao_Paulo')
-    scheduler = BackgroundScheduler(timezone=timezone)
-    
-    # Usar instâncias passadas ou criar novas
-    if db_instance is None:
-        db_instance = Database()
-    if gerenciador_sinais is None:
-        gerenciador = GerenciadorSinais(db_instance)
-    else:
-        gerenciador = gerenciador_sinais
-    
-    # === LIMPEZA MATINAL ÀS 10:00 ===
-    scheduler.add_job(
-        func=lambda: execute_morning_cleanup(gerenciador),
-        trigger="cron",
-        hour=10,
-        minute=0,
-        timezone=timezone,
-        id='morning_cleanup',
-        name='Limpeza Matinal - 10:00'
-    )
-    
-    # === LIMPEZA NOTURNA ÀS 21:00 ===
-    scheduler.add_job(
-        func=lambda: execute_evening_cleanup(gerenciador),
-        trigger="cron",
-        hour=21,
-        minute=0,
-        timezone=timezone,
-        id='evening_cleanup',
-        name='Limpeza Noturna - 21:00'
-    )
-    
-    # REMOVIDO: Job de manutenção à meia-noite (00:00)
-    
-    logger.info("🕐 Agendador de mercado configurado com sucesso!")
-    logger.info("📅 Limpezas programadas:")
-    logger.info("   • 10:00 - Limpeza matinal (pré-mercado New York)")
-    logger.info("   • 21:00 - Limpeza noturna (pré-mercado Ásia)")
-    # REMOVIDO: logger.info("   • 00:00 - Manutenção geral")
-    
-    scheduler.start()
-    atexit.register(lambda: scheduler.shutdown())
-    
-    return scheduler
+    try:
+        # Registrar tentativa de inicialização
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write(f"SCHEDULER_SETUP_STARTED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
+        # Se o scheduler já estiver rodando, parar primeiro
+        if scheduler is not None and scheduler.running:
+            logger.info("🔄 Parando scheduler existente...")
+            scheduler.shutdown(wait=False)
+            with open(log_file, 'a', encoding='utf-8') as f:
+                f.write(f"SCHEDULER_STOPPED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
+        # Configurar timezone para São Paulo (UTC-3)
+        timezone = pytz.timezone('America/Sao_Paulo')
+        scheduler = BackgroundScheduler(timezone=timezone)
+        
+        # Usar instâncias passadas ou criar novas
+        if db_instance is None:
+            db_instance = Database()
+        if gerenciador_sinais is None:
+            gerenciador = GerenciadorSinais(db_instance)
+        else:
+            gerenciador = gerenciador_sinais
+        
+        # === LIMPEZA MATINAL ÀS 10:00 ===
+        scheduler.add_job(
+            func=lambda: execute_morning_cleanup(gerenciador),
+            trigger="cron",
+            hour=10,
+            minute=0,
+            timezone=timezone,
+            id='morning_cleanup',
+            name='Limpeza Matinal - 10:00',
+            max_instances=1,  # Evitar execuções simultâneas
+            coalesce=True     # Combinar execuções perdidas
+        )
+        
+        # === LIMPEZA NOTURNA ÀS 21:00 ===
+        scheduler.add_job(
+            func=lambda: execute_evening_cleanup(gerenciador),
+            trigger="cron",
+            hour=21,
+            minute=0,
+            timezone=timezone,
+            id='evening_cleanup',
+            name='Limpeza Noturna - 21:00',
+            max_instances=1,  # Evitar execuções simultâneas
+            coalesce=True     # Combinar execuções perdidas
+        )
+        
+        logger.info("🕐 Agendador de mercado configurado com sucesso!")
+        logger.info("📅 Limpezas programadas:")
+        logger.info("   • 10:00 - Limpeza matinal (pré-mercado New York)")
+        logger.info("   • 21:00 - Limpeza noturna (pré-mercado Ásia)")
+        
+        # Iniciar scheduler
+        scheduler.start()
+        atexit.register(lambda: scheduler.shutdown())
+        
+        # Registrar sucesso da inicialização
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write(f"SCHEDULER_SETUP_SUCCESS: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"SCHEDULER_JOBS_CONFIGURED: morning_cleanup(10:00), evening_cleanup(21:00)\n")
+        
+        logger.info("✅ Scheduler iniciado e jobs configurados com sucesso!")
+        
+        return scheduler
+        
+    except Exception as e:
+        error_msg = f"❌ Erro ao configurar scheduler: {e}"
+        logger.error(error_msg)
+        
+        # Registrar erro de inicialização
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write(f"SCHEDULER_SETUP_ERROR: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {str(e)}\n")
+        
+        # Re-raise para que o erro seja tratado pelo chamador
+        raise
 
 def is_scheduler_running():
     """Verifica se o scheduler está rodando"""
@@ -87,14 +117,17 @@ def restart_scheduler(db_instance=None, gerenciador_sinais=None):
 
 def execute_morning_cleanup(gerenciador):
     """Executa limpeza matinal às 10:00 - Preparação para mercado New York"""
+    import os
+    import traceback
+    
+    log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+    
     try:
         logger.info("🌅 === INICIANDO LIMPEZA MATINAL (10:00) ===")
         
-        # Registrar execução no arquivo de log (Windows compatible)
-        import os
-        log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+        # Registrar início da execução
         with open(log_file, 'a', encoding='utf-8') as f:
-            f.write(f"MORNING_CLEANUP_EXECUTED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"MORNING_CLEANUP_STARTED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         
         # 1. Limpar sinais antigos (antes das 10:00)
         logger.info("🧹 Limpando sinais antes das 10:00...")
@@ -104,26 +137,39 @@ def execute_morning_cleanup(gerenciador):
         logger.info("🔮 Limpando sinais com datas futuras...")
         gerenciador.limpar_sinais_futuros()
         
+        # Registrar sucesso
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write(f"MORNING_CLEANUP_SUCCESS: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
         logger.info("✅ Limpeza matinal concluída com sucesso!")
         logger.info("🗽 Sistema preparado para abertura do mercado de New York (10:30)")
         
     except Exception as e:
-        logger.error(f"❌ Erro durante limpeza matinal: {e}")
-        import os
-        log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+        error_msg = f"❌ Erro durante limpeza matinal: {e}"
+        logger.error(error_msg)
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        
+        # Registrar erro detalhado
         with open(log_file, 'a', encoding='utf-8') as f:
             f.write(f"MORNING_CLEANUP_ERROR: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {str(e)}\n")
+            f.write(f"MORNING_CLEANUP_TRACEBACK: {traceback.format_exc()}\n")
+        
+        # Re-raise para que o scheduler saiba que houve erro
+        raise
 
 def execute_evening_cleanup(gerenciador):
     """Executa limpeza noturna às 21:00 - Preparação para mercado Ásia"""
+    import os
+    import traceback
+    
+    log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+    
     try:
         logger.info("🌙 === INICIANDO LIMPEZA NOTURNA (21:00) ===")
         
-        # Registrar execução no arquivo de log (Windows compatible)
-        import os
-        log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+        # Registrar início da execução
         with open(log_file, 'a', encoding='utf-8') as f:
-            f.write(f"EVENING_CLEANUP_EXECUTED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"EVENING_CLEANUP_STARTED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         
         # 1. Limpar sinais antigos (antes das 21:00)
         logger.info("🧹 Limpando sinais antes das 21:00...")
@@ -133,15 +179,25 @@ def execute_evening_cleanup(gerenciador):
         logger.info("🔍 Verificando sinais com problemas...")
         gerenciador.limpar_sinais_futuros()
         
+        # Registrar sucesso
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write(f"EVENING_CLEANUP_SUCCESS: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        
         logger.info("✅ Limpeza noturna concluída com sucesso!")
         logger.info("🌏 Sistema preparado para abertura do mercado asiático (21:00)")
         
     except Exception as e:
-        logger.error(f"❌ Erro durante limpeza noturna: {e}")
-        import os
-        log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+        error_msg = f"❌ Erro durante limpeza noturna: {e}"
+        logger.error(error_msg)
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        
+        # Registrar erro detalhado
         with open(log_file, 'a', encoding='utf-8') as f:
             f.write(f"EVENING_CLEANUP_ERROR: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {str(e)}\n")
+            f.write(f"EVENING_CLEANUP_TRACEBACK: {traceback.format_exc()}\n")
+        
+        # Re-raise para que o scheduler saiba que houve erro
+        raise
 
 # REMOVIDO: Função execute_midnight_maintenance
 
