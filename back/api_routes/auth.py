@@ -230,48 +230,7 @@ def reset_password():
         current_app.logger.error(f"Erro ao redefinir senha: {str(e)}")
         return jsonify({'error': 'Erro interno do servidor'}), 500
 
-@auth_bp.route('/verify-token', methods=['POST'])
-def verify_token():
-    """Endpoint para verificar se um token é válido"""
-    try:
-        auth_header = request.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith('Bearer '):
-            return jsonify({'error': 'Token não fornecido'}), 401
-            
-        token = auth_header.split(' ')[1]
-        
-        bot_instance = getattr(current_app, 'bot_instance', None)
-        if not bot_instance:
-            return jsonify({'error': 'Sistema não inicializado'}), 500
-            
-        # Verificar token
-        token_data = bot_instance.db.get_auth_token(token)
-        if not token_data:
-            return jsonify({'error': 'Token inválido'}), 401
-            
-        # Verificar se token expirou
-        if datetime.now() > datetime.fromisoformat(token_data['expires_at']):
-            bot_instance.db.remove_auth_token(token)
-            return jsonify({'error': 'Token expirado'}), 401
-            
-        # Buscar dados do usuário
-        user = bot_instance.db.get_user_by_id(token_data['user_id'])
-        if not user:
-            return jsonify({'error': 'Usuário não encontrado'}), 401
-            
-        return jsonify({
-            'success': True,
-            'user': {
-                'id': user['id'],
-                'username': user['username'],
-                'email': user['email'],
-                'is_admin': user.get('is_admin', False)
-            }
-        }), 200
-        
-    except Exception as e:
-        current_app.logger.error(f"Erro ao verificar token: {str(e)}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+# Endpoint verify-token removido (duplicado) - mantendo apenas a versão completa abaixo
 
 @auth_bp.route('/verify-token', methods=['POST'])
 def verify_token():
