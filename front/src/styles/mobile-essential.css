@@ -336,7 +336,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('../assets/terra2.png'), linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3));
+  background-image: url('/terra2.png'), linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3));
   background-size: cover, cover;
   background-position: center, center;
   background-repeat: no-repeat, no-repeat;
