@@ -3,12 +3,11 @@
  * Implementa cache strategies e funcionalidade offline
  */
 
-const CACHE_VERSION = '1.3.0';
-const CACHE_TIMESTAMP = Date.now();
-const CACHE_NAME = `1crypten-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
-const STATIC_CACHE = `1crypten-static-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
-const DYNAMIC_CACHE = `1crypten-dynamic-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
-const API_CACHE = `1crypten-api-v${CACHE_VERSION}-${CACHE_TIMESTAMP}`;
+const CACHE_VERSION = '1.3.1';
+const CACHE_NAME = `1crypten-v${CACHE_VERSION}`;
+const STATIC_CACHE = `1crypten-static-v${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `1crypten-dynamic-v${CACHE_VERSION}`;
+const API_CACHE = `1crypten-api-v${CACHE_VERSION}`;
 
 // Recursos estáticos para cache
 const STATIC_ASSETS = [
@@ -398,19 +397,27 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Notificar clientes sobre nova versão disponível
+// Notificar clientes sobre nova versão disponível apenas se for realmente nova
 self.addEventListener('activate', (event) => {
   console.log('✅ Nova versão do Service Worker ativada!');
   
   event.waitUntil(
-    clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage({
-          type: 'SW_UPDATED',
-          version: CACHE_VERSION
-        });
-      });
-    })
+    Promise.all([
+      // Assumir controle de todas as abas
+       self.clients.claim(),
+      // Notificar clientes apenas se for uma atualização real
+      clients.matchAll().then((clients) => {
+        // Só notificar se houver clientes e for uma atualização real
+        if (clients.length > 0 && self.skipWaiting) {
+          clients.forEach((client) => {
+            client.postMessage({
+              type: 'SW_UPDATED',
+              version: CACHE_VERSION
+            });
+          });
+        }
+      })
+    ])
   );
 });
 

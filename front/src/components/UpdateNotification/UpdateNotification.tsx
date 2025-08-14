@@ -45,22 +45,23 @@ const UpdateNotification: React.FC<UpdateNotificationProps> = ({ onUpdate }) => 
 
     checkForUpdates();
 
-    // Simular detecção de atualização para demonstração
-    const simulateUpdate = () => {
-      const lastVersion = localStorage.getItem('app-version');
-      const currentVersion = '1.3.0';
-      
-      if (lastVersion && lastVersion !== currentVersion) {
-        setNewVersion(currentVersion);
+    // Listener para mensagens do Service Worker
+    const handleServiceWorkerMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'SW_UPDATED') {
+        setNewVersion(event.data.version || '1.3.1');
         setShowUpdate(true);
       }
-      
-      localStorage.setItem('app-version', currentVersion);
     };
 
-    // Verificar após 3 segundos
-    const timer = setTimeout(simulateUpdate, 3000);
-    return () => clearTimeout(timer);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+    }
+
+    return () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+      }
+    };
   }, []);
 
   /**
