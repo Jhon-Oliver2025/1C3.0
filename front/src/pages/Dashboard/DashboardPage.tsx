@@ -246,19 +246,38 @@ const DashboardPage: React.FC = () => {
         throw new Error('Formato de dados inválido da API');
       }
       
+      // Debug: verificar tipos de sinais recebidos
+      const signalTypes = signalsArray.map(s => s.type);
+      console.log('🔍 Tipos de sinais recebidos:', [...new Set(signalTypes)]);
+      
       // Mapear os dados da API para o formato esperado
-      const mappedSignals: Signal[] = signalsArray.map((signal: any) => ({
-        id: signal.id || `${signal.symbol}-${signal.entry_time}`,
-        symbol: signal.symbol,
-        type: signal.type === 'LONG' || signal.type === 'COMPRA' ? 'COMPRA' : 'VENDA',
-        entry_price: parseFloat(signal.entry_price) || 0,
-        entry_time: signal.entry_time,
-        target_price: parseFloat(signal.target_price) || 0,
-        projection_percentage: parseFloat(signal.projection_percentage) || 0,
-        signal_class: signal.signal_class,
-        status: signal.status,
-        is_favorite: false
-      }));
+      const mappedSignals: Signal[] = signalsArray.map((signal: any) => {
+        // Normalizar o tipo do sinal
+        let normalizedType: 'COMPRA' | 'VENDA';
+        const originalType = signal.type?.toUpperCase();
+        
+        if (originalType === 'LONG' || originalType === 'COMPRA' || originalType === 'BUY') {
+          normalizedType = 'COMPRA';
+        } else if (originalType === 'SHORT' || originalType === 'VENDA' || originalType === 'SELL') {
+          normalizedType = 'VENDA';
+        } else {
+          console.warn(`⚠️ Tipo de sinal desconhecido: ${signal.type} para ${signal.symbol}`);
+          normalizedType = 'COMPRA'; // Default para COMPRA em caso de tipo desconhecido
+        }
+        
+        return {
+          id: signal.id || `${signal.symbol}-${signal.entry_time}`,
+          symbol: signal.symbol,
+          type: normalizedType,
+          entry_price: parseFloat(signal.entry_price) || 0,
+          entry_time: signal.entry_time,
+          target_price: parseFloat(signal.target_price) || 0,
+          projection_percentage: parseFloat(signal.projection_percentage) || 0,
+          signal_class: signal.signal_class,
+          status: signal.status,
+          is_favorite: false
+        };
+      });
       
       // Ordenar sinais por data/hora mais recente primeiro
       const sortedSignals = mappedSignals.sort((a, b) => {
@@ -268,6 +287,16 @@ const DashboardPage: React.FC = () => {
       });
       
       setSignals(sortedSignals);
+      
+      // Debug: verificar contagem após mapeamento
+      const debugBuyCount = sortedSignals.filter(s => s.type === 'COMPRA').length;
+      const debugSellCount = sortedSignals.filter(s => s.type === 'VENDA').length;
+      console.log(`📊 Contagem após mapeamento: Total: ${sortedSignals.length}, Compra: ${debugBuyCount}, Venda: ${debugSellCount}`);
+      
+      if (debugBuyCount + debugSellCount !== sortedSignals.length) {
+        console.error('❌ ERRO: Soma dos tipos não confere com o total!');
+        console.log('Sinais com tipos problemáticos:', sortedSignals.filter(s => s.type !== 'COMPRA' && s.type !== 'VENDA'));
+      }
     } catch (err) {
       console.error('❌ Erro ao carregar sinais:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar sinais');

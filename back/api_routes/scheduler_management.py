@@ -265,6 +265,177 @@ def get_scheduler_logs():
             'message': 'Erro ao ler logs do scheduler'
         }), 500
 
+@scheduler_management_bp.route('/api/scheduler/delete-signals', methods=['POST'])
+def delete_signals_manually():
+    """
+    Deleta sinais manualmente do sistema
+    Permite deletar todos os sinais ou sinais específicos por critérios
+    """
+    try:
+        data = request.get_json() or {}
+        delete_type = data.get('type', 'all')  # all, by_status, by_symbol, by_ids
+        criteria = data.get('criteria', {})
+        
+        # Importar dependências
+        from core.database import Database
+        from core.gerenciar_sinais import GerenciadorSinais
+        
+        # Inicializar componentes
+        db = Database()
+        gerenciador = GerenciadorSinais(db)
+        
+        deleted_count = 0
+        results = []
+        
+        if delete_type == 'all':
+            # Deletar todos os sinais
+            try:
+                logger.info("🗑️ Deletando todos os sinais...")
+                # Usar método do gerenciador para limpar todos os sinais
+                import os
+                import pandas as pd
+                
+                signals_file = gerenciador.signals_file
+                if os.path.exists(signals_file):
+                    df = pd.read_csv(signals_file)
+                    deleted_count = len(df)
+                    
+                    # Criar DataFrame vazio com as mesmas colunas
+                    empty_df = pd.DataFrame(columns=df.columns)
+                    empty_df.to_csv(signals_file, index=False)
+                    
+                    results.append({
+                        'type': 'all_signals',
+                        'success': True,
+                        'deleted_count': deleted_count,
+                        'message': f'Todos os {deleted_count} sinais foram deletados'
+                    })
+                else:
+                    results.append({
+                        'type': 'all_signals',
+                        'success': True,
+                        'deleted_count': 0,
+                        'message': 'Arquivo de sinais não encontrado - nenhum sinal para deletar'
+                    })
+                    
+            except Exception as e:
+                results.append({
+                    'type': 'all_signals',
+                    'success': False,
+                    'error': str(e)
+                })
+        
+        elif delete_type == 'by_status':
+            # Deletar sinais por status (ex: OPEN, CLOSED)
+            status = criteria.get('status', 'OPEN')
+            try:
+                logger.info(f"🗑️ Deletando sinais com status: {status}...")
+                import os
+                import pandas as pd
+                
+                signals_file = gerenciador.signals_file
+                if os.path.exists(signals_file):
+                    df = pd.read_csv(signals_file)
+                    signals_to_delete = df[df['status'] == status]
+                    deleted_count = len(signals_to_delete)
+                    
+                    # Manter apenas sinais que NÃO têm o status especificado
+                    df_cleaned = df[df['status'] != status]
+                    df_cleaned.to_csv(signals_file, index=False)
+                    
+                    results.append({
+                        'type': 'by_status',
+                        'success': True,
+                        'deleted_count': deleted_count,
+                        'criteria': {'status': status},
+                        'message': f'{deleted_count} sinais com status "{status}" foram deletados'
+                    })
+                else:
+                    results.append({
+                        'type': 'by_status',
+                        'success': True,
+                        'deleted_count': 0,
+                        'message': 'Arquivo de sinais não encontrado'
+                    })
+                    
+            except Exception as e:
+                results.append({
+                    'type': 'by_status',
+                    'success': False,
+                    'error': str(e)
+                })
+        
+        elif delete_type == 'by_symbol':
+            # Deletar sinais de um símbolo específico
+            symbol = criteria.get('symbol', '')
+            if not symbol:
+                return jsonify({
+                    'success': False,
+                    'error': 'Símbolo é obrigatório para deletar por símbolo',
+                    'message': 'Parâmetro "symbol" não fornecido'
+                }), 400
+            
+            try:
+                logger.info(f"🗑️ Deletando sinais do símbolo: {symbol}...")
+                import os
+                import pandas as pd
+                
+                signals_file = gerenciador.signals_file
+                if os.path.exists(signals_file):
+                    df = pd.read_csv(signals_file)
+                    signals_to_delete = df[df['symbol'] == symbol]
+                    deleted_count = len(signals_to_delete)
+                    
+                    # Manter apenas sinais que NÃO são do símbolo especificado
+                    df_cleaned = df[df['symbol'] != symbol]
+                    df_cleaned.to_csv(signals_file, index=False)
+                    
+                    results.append({
+                        'type': 'by_symbol',
+                        'success': True,
+                        'deleted_count': deleted_count,
+                        'criteria': {'symbol': symbol},
+                        'message': f'{deleted_count} sinais do símbolo "{symbol}" foram deletados'
+                    })
+                else:
+                    results.append({
+                        'type': 'by_symbol',
+                        'success': True,
+                        'deleted_count': 0,
+                        'message': 'Arquivo de sinais não encontrado'
+                    })
+                    
+            except Exception as e:
+                results.append({
+                    'type': 'by_symbol',
+                    'success': False,
+                    'error': str(e)
+                })
+        
+        # Registrar operação no log
+        log_file = os.path.join(os.getcwd(), 'scheduler_log.txt')
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write(f"MANUAL_DELETE_EXECUTED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - Type: {delete_type}, Deleted: {sum(r.get('deleted_count', 0) for r in results)}\n")
+        
+        success_count = sum(1 for r in results if r.get('success', False))
+        total_deleted = sum(r.get('deleted_count', 0) for r in results)
+        
+        return jsonify({
+            'success': success_count > 0,
+            'results': results,
+            'summary': f'{total_deleted} sinais deletados com sucesso',
+            'delete_type': delete_type,
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro na deleção manual de sinais: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'message': 'Erro ao deletar sinais manualmente'
+        }), 500
+
 @scheduler_management_bp.route('/api/scheduler/health-check', methods=['GET'])
 def scheduler_health_check():
     """
