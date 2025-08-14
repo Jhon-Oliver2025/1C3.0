@@ -4,11 +4,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url('../assets/terra.png');
-  background-size: cover;
-  background-position: center;
+  background-color: #000000; /* Fundo preto */
+  background-image: url('/logo3.png');
+  background-size: 200px 200px; /* Tamanho do logo */
+  background-position: center top 20px; /* Posição do logo no topo */
   background-repeat: no-repeat;
-  background-attachment: fixed;
   margin: 0; /* Remover margens */
   padding: 0; /* Remover padding */
   position: fixed; /* Fixar posição */

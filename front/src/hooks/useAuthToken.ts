@@ -158,12 +158,12 @@ export const useAuthToken = () => {
     return response;
   }, [verifyToken, logout]);
 
-  // Verificar token na inicialização
+  // Verificar token na inicialização apenas se não estiver autenticado
   useEffect(() => {
-    if (token) {
+    if (token && !isAuthenticated) {
       verifyToken();
     }
-  }, [token, verifyToken]);
+  }, [token, isAuthenticated, verifyToken]);
 
   // Verificar token periodicamente (a cada 30 minutos)
   useEffect(() => {
@@ -177,18 +177,18 @@ export const useAuthToken = () => {
     return () => clearInterval(interval);
   }, [isAuthenticated, verifyToken]);
 
-  // Verificar token quando a página ganha foco
-  useEffect(() => {
-    const handleFocus = () => {
-      if (isAuthenticated) {
-        console.log('🔍 Página ganhou foco, verificando token...');
-        verifyToken();
-      }
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [isAuthenticated, verifyToken]);
+  // Verificação de foco removida para evitar logout ao pressionar F5
+  // useEffect(() => {
+  //   const handleFocus = () => {
+  //     if (isAuthenticated) {
+  //       console.log('🔍 Página ganhou foco, verificando token...');
+  //       verifyToken();
+  //     }
+  //   };
+  //
+  //   window.addEventListener('focus', handleFocus);
+  //   return () => window.removeEventListener('focus', handleFocus);
+  // }, [isAuthenticated, verifyToken]);
 
   return {
     token,
