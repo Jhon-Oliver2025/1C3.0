@@ -43,26 +43,19 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       target: 'es2015',
-      minify: isProduction ? 'terser' : 'esbuild',
+      minify: 'esbuild', // Usar sempre esbuild para evitar problemas com terser no Docker
       sourcemap: false,
       chunkSizeWarningLimit: 1000,
       assetsInlineLimit: 4096,
-      terserOptions: isProduction ? {
-        compress: {
-          drop_console: true,
-          drop_debugger: true,
-          pure_funcs: ['console.log', 'console.info']
-        }
-      } : undefined,
       rollupOptions: {
-         output: {
-           manualChunks: {
-             vendor: ['react', 'react-dom'],
-             styled: ['styled-components'],
-             router: ['react-router-dom']
-           }
-         }
-       }
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            styled: ['styled-components'],
+            router: ['react-router-dom']
+          }
+        }
+      }
     }
   };
 })
