@@ -13,28 +13,6 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    
-    // Otimizações para produção
-    build: {
-      minify: 'terser',
-      terserOptions: {
-        compress: {
-          drop_console: isProduction, // Remove console.log em produção
-          drop_debugger: isProduction,
-          pure_funcs: isProduction ? ['console.log', 'console.info'] : []
-        }
-      },
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom'],
-            styled: ['styled-components']
-          }
-        }
-      },
-      chunkSizeWarningLimit: 1000,
-      assetsInlineLimit: 4096 // Inline assets menores que 4kb
-    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src')
@@ -65,17 +43,26 @@ export default defineConfig(({ mode }) => {
     },
     build: {
       target: 'es2015',
-      minify: 'esbuild',
+      minify: isProduction ? 'terser' : 'esbuild',
       sourcemap: false,
       chunkSizeWarningLimit: 1000,
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom'],
-            router: ['react-router-dom']
-          }
+      assetsInlineLimit: 4096,
+      terserOptions: isProduction ? {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+          pure_funcs: ['console.log', 'console.info']
         }
-      }
+      } : undefined,
+      rollupOptions: {
+         output: {
+           manualChunks: {
+             vendor: ['react', 'react-dom'],
+             styled: ['styled-components'],
+             router: ['react-router-dom']
+           }
+         }
+       }
     }
   };
 })
