@@ -17,10 +17,12 @@ COPY tsconfig*.json ./
 COPY vite.config.ts ./
 COPY eslint.config.js ./
 
-# Limpar cache e instalar dependências
+# Instalar dependências
 RUN npm cache clean --force
-RUN rm -rf node_modules package-lock.json
 RUN npm install --legacy-peer-deps
+
+# Instalar terser explicitamente (necessário para build em produção)
+RUN npm install --save-dev terser
 
 # Copiar código fonte
 COPY src/ ./src/
