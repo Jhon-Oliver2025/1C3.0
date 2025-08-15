@@ -13,6 +13,28 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    
+    // Otimizações para produção
+    build: {
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: isProduction, // Remove console.log em produção
+          drop_debugger: isProduction,
+          pure_funcs: isProduction ? ['console.log', 'console.info'] : []
+        }
+      },
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom'],
+            styled: ['styled-components']
+          }
+        }
+      },
+      chunkSizeWarningLimit: 1000,
+      assetsInlineLimit: 4096 // Inline assets menores que 4kb
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src')

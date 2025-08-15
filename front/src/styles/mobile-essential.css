@@ -17,7 +17,7 @@
   --accent-color: #0f3460;
   --bg-light: #0f172a;
   --bg-card: #ffffff;
-  --bg-gradient: linear-gradient(135deg, #0A192F 0%, #1a365d 100%);
+  --bg-gradient: #000000;
 
   /* Cores de Texto */
   --text-primary: #1a1a2e;
@@ -105,7 +105,7 @@ body {
   left: 0;
   right: 0;
   height: 72px;
-  background: linear-gradient(135deg, #0A192F 0%, #1a365d 100%);
+  background: #000000;
   display: flex;
   align-items: center;
   justify-content: space-between;

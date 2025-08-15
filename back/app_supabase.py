@@ -31,6 +31,7 @@ from api_routes.market_times import market_times_bp
 from api_routes.market_status import market_status_bp
 from api_routes.cleanup_status import cleanup_status_bp
 from api_routes.debug import debug_bp
+from api_routes.payments import payments_bp
 
 # Configurar CORS
 CORS(server, resources={
@@ -224,6 +225,7 @@ def create_app():
     server.register_blueprint(market_status_bp, url_prefix='/api')
     server.register_blueprint(cleanup_status_bp, url_prefix='/api')
     server.register_blueprint(debug_bp, url_prefix='/api/debug')
+    server.register_blueprint(payments_bp, url_prefix='/api/payments')
     
     # Registrar rotas básicas
     @server.route('/api/health')

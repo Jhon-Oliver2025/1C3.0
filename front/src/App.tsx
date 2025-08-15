@@ -19,6 +19,15 @@ import SairPage from './pages/SairPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import App1CryptenPage from './pages/App1CryptenPage/App1CryptenPage';
+import VitrineAlunosPage from './pages/Vitrini/VitrineAlunosPage';
+import ModuloVideoAulasPage from './pages/Vitrini/ModuloVideoAulasPage';
+import AulaPage from './pages/Aula/AulaPage';
+import PaymentSuccessPage from './pages/Payment/PaymentSuccessPage';
+import PaymentFailurePage from './pages/Payment/PaymentFailurePage';
+import CheckoutDemoPage from './pages/CheckoutDemo/CheckoutDemoPage';
+import CheckoutDespertarCryptoPage from './pages/CheckoutDespertarCrypto/CheckoutDespertarCryptoPage';
+import SalesPage from './pages/SalesPage/SalesPage';
+import SalesAdminPage from './pages/SalesAdmin/SalesAdminPage';
 
 import MainLayout from './components/MainLayout/MainLayout';
 import UpdateNotification from './components/UpdateNotification/UpdateNotification';
@@ -53,7 +62,21 @@ function App() {
       <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
       <Route path="/terms-of-service" element={<TermsOfServicePage />} />
       
-
+      {/* Rotas das páginas Elementor */}
+      <Route path="/vitrine-alunos" element={<VitrineAlunosPage />} />
+      <Route path="/modulo-video-aulas" element={<ModuloVideoAulasPage />} />
+      <Route path="/checkout-demo" element={<CheckoutDemoPage />} />
+      <Route path="/checkout/despertar-crypto" element={<CheckoutDespertarCryptoPage />} />
+      <Route path="/sales" element={<SalesPage />} />
+      <Route path="/sales-admin" element={<SalesAdminPage />} />
+      
+      {/* Rotas das aulas do Despertar Crypto */}
+      <Route path="/aula/:aulaId" element={<AulaPage />} />
+      
+      {/* Rotas de pagamento */}
+      <Route path="/payment/success" element={<PaymentSuccessPage />} />
+      <Route path="/payment/failure" element={<PaymentFailurePage />} />
+      <Route path="/payment/pending" element={<PaymentSuccessPage />} />
       
       {/* Rotas protegidas com layout */}
       <Route path="/dashboard" element={
