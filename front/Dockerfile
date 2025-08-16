@@ -1,5 +1,5 @@
-# Usar Node.js 18 Alpine
-FROM node:18-alpine
+# Usar Node.js 20 Alpine (versão mais estável)
+FROM node:20-alpine
 
 # Instalar dependências do sistema necessárias
 RUN apk add --no-cache \
@@ -13,13 +13,16 @@ WORKDIR /app
 # Copiar arquivos de configuração
 COPY package.json ./
 COPY package-lock.json ./
-COPY tsconfig.json ./
+COPY tsconfig*.json ./
 COPY vite.config.ts ./
 COPY eslint.config.js ./
 
 # Instalar dependências
 RUN npm cache clean --force
-RUN npm install --legacy-peer-deps --no-audit --no-fund
+RUN npm install --frozen-lockfile --legacy-peer-deps
+
+# Verificar instalação
+RUN npm list --depth=0
 
 # Copiar código fonte
 COPY src/ ./src/
