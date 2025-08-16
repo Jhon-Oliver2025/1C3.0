@@ -10,15 +10,16 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
-# Copiar arquivos de configuração (CORRIGIDO)
-COPY package*.json ./
-COPY tsconfig*.json ./
+# Copiar arquivos de configuração
+COPY package.json ./
+COPY package-lock.json ./
+COPY tsconfig.json ./
 COPY vite.config.ts ./
 COPY eslint.config.js ./
 
 # Instalar dependências
 RUN npm cache clean --force
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps --no-audit --no-fund
 
 # Copiar código fonte
 COPY src/ ./src/
@@ -29,7 +30,9 @@ COPY index.html ./
 ENV NODE_ENV=production
 ENV GENERATE_SOURCEMAP=false
 ENV CI=false
-ENV NODE_OPTIONS="--max-old-space-size=8192"
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NPM_CONFIG_LOGLEVEL=warn
+ENV NPM_CONFIG_PROGRESS=false
 # Configurações adicionais para estabilidade do build
 ENV VITE_BUILD_TIMEOUT=600000
 ENV VITE_BUILD_ROLLUP_TIMEOUT=600000
