@@ -1,50 +1,33 @@
-# Usar Node.js 20 Alpine (versão mais estável)
-FROM node:20-alpine
+# Usar Node.js 18 LTS (versão mais testada)
+FROM node:18-alpine
 
-# Instalar dependências do sistema necessárias
-RUN apk add --no-cache \
-    git \
-    python3 \
-    make \
-    g++
+# Instalar dependências básicas
+RUN apk add --no-cache git
 
 WORKDIR /app
 
-# Copiar arquivos de configuração
-COPY package.json ./
-COPY package-lock.json ./
-COPY tsconfig*.json ./
-COPY vite.config.ts ./
-COPY eslint.config.js ./
+# Copiar package files
+COPY package*.json ./
 
 # Instalar dependências
-RUN npm cache clean --force
-RUN npm install --frozen-lockfile --legacy-peer-deps
+RUN npm ci --only=production --legacy-peer-deps
+RUN npm install --save-dev vite @vitejs/plugin-react typescript
 
-# Verificar instalação
-RUN npm list --depth=0
+# Copiar arquivos de configuração
+COPY tsconfig*.json ./
+COPY vite.config.ts ./
+COPY index.html ./
 
 # Copiar código fonte
 COPY src/ ./src/
 COPY public/ ./public/
-COPY index.html ./
 
-# Definir variáveis de ambiente para build
+# Configurar ambiente
 ENV NODE_ENV=production
-ENV GENERATE_SOURCEMAP=false
-ENV CI=false
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-ENV NPM_CONFIG_LOGLEVEL=warn
-ENV NPM_CONFIG_PROGRESS=false
-# Configurações adicionais para estabilidade do build
-ENV VITE_BUILD_TIMEOUT=600000
-ENV VITE_BUILD_ROLLUP_TIMEOUT=600000
+ENV CI=true
 
-# Build da aplicação
+# Build simples
 RUN npm run build
-
-# Verificar se o build foi criado
-RUN ls -la dist/
 
 # Estágio 2: Servir com Nginx
 FROM nginx:alpine
