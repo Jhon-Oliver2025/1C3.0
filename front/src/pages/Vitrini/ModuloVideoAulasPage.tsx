@@ -2,7 +2,6 @@ import React from 'react';
 import { PageRenderer } from '../../components/ElementorRenderer';
 import { ElementorPage } from '../../types/elementor';
 import StandardFooter from '../../components/StandardFooter/StandardFooter';
-import moduloVideoAulasData from './Modulo-VideoAulas.json.json';
 
 /**
  * Página Módulo de Vídeo Aulas
@@ -10,8 +9,13 @@ import moduloVideoAulasData from './Modulo-VideoAulas.json.json';
  */
 
 const ModuloVideoAulasPage: React.FC = () => {
-  // Converter os dados JSON para o tipo correto
-  const pageData = moduloVideoAulasData as ElementorPage;
+  // Dados temporários para o módulo de vídeo aulas
+  const pageData: ElementorPage = {
+    id: 'modulo-video-aulas',
+    title: 'Módulo de Vídeo Aulas',
+    content: [],
+    settings: {}
+  };
   
   return (
     <div className="modulo-video-aulas-page">
