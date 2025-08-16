@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import logo1Crypten from '../../assets/members1cT.png'; // Importa o logo da 1crypten
 import mainBanner from '../../assets/Bannerprincipal.png'; // Importa o banner principal
+import { useCourseAccess } from '../../hooks/useCourseAccess'; // Hook para controle de acesso
+import { useAdminCheck } from '../../hooks/useAdminCheck'; // Hook para verificar se é admin
 
 import thumb01 from '../../assets/Tamb/01.png';
 import thumb02 from '../../assets/Tamb/02.png';
@@ -20,6 +23,56 @@ import StandardFooter from '../../components/StandardFooter/StandardFooter'; // 
  */
 
 const VitrineAlunosPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { userCourses, hasAccessToCourse, isLoading } = useCourseAccess();
+  const { isAdmin } = useAdminCheck(); // Verificar se é admin
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Verificar autenticação
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login', { 
+        state: { 
+          returnUrl: '/vitrine-alunos',
+          message: 'Faça login para acessar a área de membros'
+        }
+      });
+      return;
+    }
+    setIsAuthenticated(true);
+  }, [navigate]);
+
+  // Função para verificar se o usuário tem acesso a um curso específico
+  const getUserCourseAccess = (courseFilter: string) => {
+    switch (courseFilter) {
+      case 'purchased':
+        return hasAccessToCourse('despertar_crypto');
+      case 'masterclass':
+        return hasAccessToCourse('masterclass');
+      case 'app_mentoria':
+        return hasAccessToCourse('app_mentoria');
+      default:
+        return false;
+    }
+  };
+
+  // Mostrar loading enquanto verifica acesso
+  if (!isAuthenticated || isLoading) {
+    return (
+      <div style={{ 
+        backgroundColor: '#000000', 
+        minHeight: '100vh', 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        color: 'white'
+      }}>
+        <div>Carregando área de membros...</div>
+      </div>
+    );
+  }
+
   const vitrineData = {
     sections: [
       {
@@ -100,17 +153,17 @@ const VitrineAlunosPage: React.FC = () => {
             },
             {
               id: '9',
-              title: 'Aula 9 - Estratégias Avançadas',
-              description: 'Técnicas profissionais de investimento crypto.',
-              thumbnail: 'https://via.placeholder.com/200x150/FF6B35/FFFFFF?text=Aula+9',
+              title: 'Aula 9 - ESTRATÉGIAS AVANÇADAS',
+              description: '"Dominando as Técnicas dos Profissionais"',
+              thumbnail: thumb01,
               progress: '0%',
               link: '/aula/despertar-crypto-09'
             },
             {
               id: '10',
-              title: 'Aula 10 - Futuro das Criptomoedas',
-              description: 'Tendências e oportunidades futuras no mercado.',
-              thumbnail: 'https://via.placeholder.com/200x150/6A4C93/FFFFFF?text=Aula+10',
+              title: 'Aula 10 - O FUTURO É AGORA',
+              description: '"Construindo Seu Legado Financeiro"',
+              thumbnail: thumb02,
               progress: '0%',
               link: '/aula/despertar-crypto-10'
             }
@@ -237,13 +290,46 @@ const VitrineAlunosPage: React.FC = () => {
       ]
     };
 
-  return (
-    <div className="vitrine-alunos-page" style={{ backgroundColor: '#000000', minHeight: '100vh', margin: 0, padding: 0 }}>
-      <img src={logo1Crypten} alt="Logo 1Crypten" style={{ position: 'absolute', top: '20px', left: '20px', width: '130px', zIndex: 100 }} />
-      <CourseShowcase data={vitrineData} />
-      <StandardFooter /> {/* Renderiza o componente StandardFooter */}
-    </div>
-  );
+  // Preparar informações de acesso para o CourseShowcase
+  const userAccessInfo = {
+    hasDespertarCrypto: hasAccessToCourse('despertar_crypto'),
+    hasMasterclass: hasAccessToCourse('masterclass'),
+    hasAppMentoria: hasAccessToCourse('app_mentoria')
+  };
+
+  // Verificar se o usuário tem acesso a pelo menos um curso
+  const hasAnyCourse = userAccessInfo.hasDespertarCrypto || userAccessInfo.hasMasterclass || userAccessInfo.hasAppMentoria;
+  
+  // Mostrar mensagem se o usuário não tem acesso a nenhum curso (exceto para admins)
+  if (!hasAnyCourse && !isAdmin) {
+    return (
+      <div style={{ 
+        backgroundColor: '#000000', 
+        minHeight: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center',
+        color: 'white',
+        padding: '20px',
+        textAlign: 'center'
+      }}>
+        <img src={logo1Crypten} alt="Logo 1Crypten" style={{ width: '200px', marginBottom: '30px' }} />
+        <h2>Bem-vindo à Área de Membros!</h2>
+        <p style={{ fontSize: '1.2em', marginBottom: '30px', maxWidth: '600px' }}>
+          Você ainda não possui acesso a nenhum curso. Adquira um de nossos cursos para começar sua jornada no mundo das criptomoedas.
+        </p>
+      </div>
+     );
+   }
+
+   // Renderizar a vitrine com os cursos que o usuário tem acesso
+   return (
+     <div className="vitrine-alunos-page" style={{ backgroundColor: '#000000', padding: '20px' }}>
+       <CourseShowcase data={vitrineData} userAccess={userAccessInfo} isAdmin={isAdmin} />
+       <StandardFooter /> {/* Renderiza o componente StandardFooter */}
+     </div>
+   );
 };
 
 export default VitrineAlunosPage;

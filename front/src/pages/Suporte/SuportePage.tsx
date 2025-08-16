@@ -8,8 +8,6 @@ import logo3 from '/logo3.png';
  * Exibe informações de contato e canais de suporte
  */
 const SuportePage: React.FC = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isBackendOnline, setIsBackendOnline] = useState(true);
   const navigate = useNavigate();
 
   /**
@@ -30,59 +28,11 @@ const SuportePage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  /**
-   * Alterna o estado do menu mobile
-   */
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  /**
-   * Função para realizar logout
-   */
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
+  // Funções de navegação removidas - agora gerenciadas pelo MainLayout
 
   return (
     <div className={styles.suporteContainer}>
-      {/* HEADER FIXO */}
-      <header className="mobile-top-header">
-        <button className="mobile-menu-button" onClick={toggleMobileMenu} aria-label="Menu">
-          ☰
-        </button>
-        <div className="mobile-logo-container">
-           <img 
-             src={logo3} 
-             alt="Logo do Sistema" 
-             className={`mobile-system-logo ${isBackendOnline ? 'online' : 'offline'}`}
-             title={isBackendOnline ? 'Backend Online' : 'Backend Offline'}
-           />
-         </div>
-      </header>
-
-      {/* MENU MOBILE OVERLAY */}
-      {isMobileMenuOpen && (
-        <div className="mobile-menu-overlay" onClick={toggleMobileMenu}>
-          <div className="mobile-menu-content" onClick={(e) => e.stopPropagation()}>
-            <div className="mobile-menu-header">
-              <h3>Menu</h3>
-              <button className="mobile-menu-close" onClick={toggleMobileMenu}>
-                ×
-              </button>
-            </div>
-            <div className="mobile-menu-items">
-              <Link to="/dashboard" className="mobile-menu-item" onClick={toggleMobileMenu}>
-                Dashboard
-              </Link>
-              <button className="mobile-menu-item logout" onClick={handleLogout}>
-                Sair
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Conteúdo da página de suporte */}
 
       {/* CONTEÚDO PRINCIPAL */}
       <div className={styles.mainContent}>

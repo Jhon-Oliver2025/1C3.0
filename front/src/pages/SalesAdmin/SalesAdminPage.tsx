@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { Save, Eye, BarChart3, Settings, Clock, Palette, Type, Target } from 'lucide-react';
 import StandardFooter from '../../components/StandardFooter/StandardFooter';
+import logo3 from '/logo3.png';
 
 /**
  * Página de Administração da Página de Vendas
@@ -489,13 +490,16 @@ const SalesAdminPage: React.FC = () => {
     <AdminContainer>
       <AdminHeader>
         <HeaderContent>
-          <Title>
-            <Settings size={32} />
-            Admin - Página de Vendas
-          </Title>
-          <Subtitle>Gerencie headlines, botões CTA, delays e métricas de retenção</Subtitle>
+          <Title>Admin - Página de Vendas</Title>
         </HeaderContent>
-        
+        <div>
+          <span style={{ color: '#94a3b8', fontSize: '0.9em' }}>
+            {new Date().toLocaleDateString('pt-BR')}
+          </span>
+        </div>
+      </AdminHeader>
+
+        {/* Botões de ação abaixo do header */}
         <ActionButtons>
           <PreviewButton href="/sales" target="_blank">
             <Eye size={20} />
@@ -506,7 +510,6 @@ const SalesAdminPage: React.FC = () => {
             Salvar Configurações
           </SaveButton>
         </ActionButtons>
-      </AdminHeader>
 
       <TabNavigation>
         <TabButton 
@@ -1257,31 +1260,36 @@ const AdminContainer = styled.div`
 `;
 
 const AdminHeader = styled.header`
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  padding: 2rem;
-  border-bottom: 1px solid #333;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 12px;
+  border: 1px solid #3b82f6;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 `;
 
 const HeaderContent = styled.div`
   flex: 1;
 `;
 
-const Title = styled.h1`
+const LogoContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
-  background: linear-gradient(135deg, #2196f3, #00bcd4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+`;
+
+const Logo = styled.img`
+  height: 50px;
+  width: auto;
+`;
+
+const Title = styled.h1`
+  color: #64FFDA;
+  font-size: 2.5em;
+  margin: 0;
 `;
 
 const Subtitle = styled.p`
@@ -1293,7 +1301,8 @@ const Subtitle = styled.p`
 const ActionButtons = styled.div`
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  justify-content: flex-start;
 `;
 
 const PreviewButton = styled.a`

@@ -1,12 +1,12 @@
 .suporteContainer {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0A192F 0%, #000000 100%);
+  background: #000000;
   overflow-x: hidden;
   position: relative;
 }
 
 .mainContent {
-  padding-top: var(--mobile-header-height);
+  padding-top: 0;
   padding: 88px 16px 32px;
   max-width: 1200px;
   margin: 0 auto;

@@ -32,6 +32,12 @@ interface Layout {
 
 interface CourseShowcaseProps {
   data: Layout;
+  userAccess?: {
+    hasDespertarCrypto: boolean;
+    hasMasterclass: boolean;
+    hasAppMentoria: boolean;
+  };
+  isAdmin?: boolean;
 }
 
 const ShowcaseContainer = styled.div`
@@ -290,7 +296,31 @@ const CoursePrice = styled.p`
   font-weight: bold;
 `;
 
-const CourseShowcase: React.FC<CourseShowcaseProps> = ({ data }) => {
+const CourseShowcase: React.FC<CourseShowcaseProps> = ({ data, userAccess, isAdmin }) => {
+  
+  // Função para verificar se o usuário tem acesso a uma seção
+  const hasAccessToSection = (filter?: string) => {
+    if (!userAccess || !filter) return true;
+    
+    switch (filter) {
+      case 'purchased':
+        return userAccess.hasDespertarCrypto;
+      case 'masterclass':
+        return userAccess.hasMasterclass;
+      case 'app_mentoria':
+        return userAccess.hasAppMentoria;
+      default:
+        return true;
+    }
+  };
+  
+  // Para admins, mostrar todas as seções. Para usuários normais, filtrar baseado no acesso
+  const filteredSections = isAdmin ? data.sections : data.sections.filter(section => {
+    if (section.type === 'course_list') {
+      return hasAccessToSection(section.filter);
+    }
+    return true;
+  });
   // Estado para armazenar o progresso dos vídeos
   const [videoProgressData, setVideoProgressData] = useState<{[key: string]: {currentTime: number, duration: number}}>({});
   
@@ -335,7 +365,7 @@ const CourseShowcase: React.FC<CourseShowcaseProps> = ({ data }) => {
   return (
     <ShowcaseContainer>
       <ContentWrapper>
-        {data.sections.map((section, index) => {
+        {filteredSections.map((section, index) => {
           if (section.type === 'banner' && section.image) {
             return (
               <Banner key={index} $imageUrl={section.image}>

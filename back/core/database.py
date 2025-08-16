@@ -285,6 +285,32 @@ class Database:
             traceback.print_exc()
             return False
 
+    def verify_auth_token(self, token: str) -> Optional[str]:
+        """Verifica se um token de autenticação é válido e retorna o user_id"""
+        try:
+            if os.path.exists(self.auth_tokens_file):
+                df = pd.read_csv(self.auth_tokens_file)
+                
+                # Buscar token
+                token_row = df[df['token'] == token]
+                
+                if len(token_row) > 0:
+                    token_data = token_row.iloc[0]
+                    expires_at = pd.to_datetime(token_data['expires_at'])
+                    
+                    # Verificar se não expirou
+                    if datetime.now() < expires_at:
+                        return str(token_data['user_id'])
+                    else:
+                        # Token expirado, remover
+                        self.remove_auth_token(token)
+                        
+            return None
+            
+        except Exception as e:
+            print(f"Erro ao verificar token de autenticação: {e}")
+            return None
+
     def save_auth_token(self, token: str, user_id: int, expires_at: datetime):
         """Salva um token de autenticação no arquivo CSV"""
         try:

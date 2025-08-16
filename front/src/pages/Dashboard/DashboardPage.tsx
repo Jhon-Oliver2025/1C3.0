@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SignalCard from '../../components/SignalCard/SignalCard';
 import { useAuthToken } from '../../hooks/useAuthToken';
+import { useAdminCheck } from '../../hooks/useAdminCheck';
 // PWA removido - agora temos página dedicada para o App 1Crypten
 import styles from './DashboardPage.module.css';
+import './DashboardMobile.css';
 import logo3 from '/logo3.png';
 
 /**
@@ -32,7 +34,6 @@ const DashboardPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Estado para status dos mercados
   const [marketStatus, setMarketStatus] = useState({
@@ -48,6 +49,7 @@ const DashboardPage: React.FC = () => {
   
   const navigate = useNavigate();
   const { isAuthenticated, authenticatedFetch, logout } = useAuthToken();
+  const { isAdmin } = useAdminCheck();
   
   /**
    * Limpa o cache da API para resolver problemas de dados duplicados
@@ -157,15 +159,7 @@ const DashboardPage: React.FC = () => {
     "O mundo das criptomoedas é a nova corrida espacial. Você está pronto?"
   ];
 
-  // Não renderizar nada se não estiver autenticado
-  if (!isAuthenticated) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner}></div>
-        <p>Verificando autenticação...</p>
-      </div>
-    );
-  }
+  // Verificação de autenticação removida - gerenciada pelo MainLayout
 
   /**
    * Atualiza o horário atual a cada segundo
@@ -405,12 +399,7 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  /**
-   * Alterna o estado do menu mobile
-   */
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
+
 
   /**
    * Função para realizar logout
@@ -437,48 +426,9 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      {/* HEADER FIXO (Container 0) */}
-      <header className="mobile-top-header">
-        <button className="mobile-menu-button" onClick={toggleMobileMenu} aria-label="Menu">
-          ☰
-        </button>
-        <div className="mobile-logo-container">
-           <img 
-             src={logo3} 
-             alt="Logo do Sistema" 
-             className={`mobile-system-logo ${isBackendOnline ? 'online' : 'offline'}`}
-             title={isBackendOnline ? 'Backend Online' : 'Backend Offline'}
-           />
-         </div>
-      </header>
 
-      {/* MENU MOBILE OVERLAY */}
-      {isMobileMenuOpen && (
-        <div className="mobile-menu-overlay" onClick={toggleMobileMenu}>
-          <div className="mobile-menu-content" onClick={(e) => e.stopPropagation()}>
-            <div className="mobile-menu-header">
-              <h3>Menu</h3>
-              <button className="mobile-menu-close" onClick={toggleMobileMenu}>
-                ×
-              </button>
-            </div>
-            <div className="mobile-menu-items">
-               <Link to="/suporte" className="mobile-menu-item" onClick={toggleMobileMenu}>
-                 Suporte
-               </Link>
-               
-               {/* Botão de instalação PWA */}
-               <Link to="/app" className="mobile-menu-item">
-                 📱 Baixar App
-               </Link>
-               
-               <button className="mobile-menu-item logout" onClick={handleLogout}>
-                 Sair
-               </button>
-             </div>
-          </div>
-        </div>
-      )}
+
+
 
       {/* CONTAINER 1 - MOTIVAÇÃO + CABEÇALHO (Fixo) */}
       <div className="mobile-motivation-header-container">
@@ -496,7 +446,7 @@ const DashboardPage: React.FC = () => {
         <div className="mobile-signals-container">
           {/* Cabeçalho dos Sinais (150px) */}
           <div className="mobile-signals-header">
-            {/* Linha 1: Status dos Mercados */}
+            {/* Linha 1: Status dos Mercados + Status Backend */}
             <div className="mobile-market-times">
               <div className="mobile-market-item">
                 <span className="mobile-market-label">New York</span>
@@ -517,6 +467,7 @@ const DashboardPage: React.FC = () => {
                 <span className="mobile-market-time">{formatTime(currentTime)}</span>
                 <span className="mobile-market-status crypto">ABERTO</span>
               </div>
+
             </div>
             
             {/* Linha 2: Estatísticas */}

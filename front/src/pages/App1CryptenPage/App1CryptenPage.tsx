@@ -222,14 +222,6 @@ const App1CryptenPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <header className={styles.header}>
-        <Link to="/dashboard" className={styles.backButton}>
-          ← Voltar
-        </Link>
-        <h1 className={styles.title}>App 1Crypten</h1>
-      </header>
-
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>

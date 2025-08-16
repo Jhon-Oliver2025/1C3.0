@@ -4,7 +4,7 @@
   justify-content: space-between; /* Mantém o logo à esquerda e os links à direita */
   align-items: center; /* Centraliza verticalmente os itens */
   padding: 10px 40px; /* Padding lateral */
-  background-color: #0A192F;
+  background-color: #000000;
   color: white;
   position: fixed;
   top: 0;
@@ -47,6 +47,33 @@
   width: auto;
   object-fit: contain;
   display: block; /* Remove qualquer espaço extra */
+}
+
+/* Estilos para o logo de membros */
+.membersLogoLink {
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  text-decoration: none;
+}
+
+.membersLogoLink:hover {
+  transform: scale(1.05);
+  opacity: 0.8;
+}
+
+.membersLogo {
+  height: 35px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.2s ease;
+}
+
+.membersLogo:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .logoLink { /* Adicionado estilo para o link do logo */
@@ -125,50 +152,65 @@
   box-shadow: 0 4px 10px rgba(100, 255, 218, 0.4);
 }
 
-.hamburger {
-  display: none; /* Escondido por padrão em desktop */
-  cursor: pointer;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.bar {
-  width: 25px;
-  height: 3px;
-  background-color: #CCD6F6; /* Cor clara para as barras do hambúrguer */
-  border-radius: 2px;
-}
+/* Removido: Hamburger duplicado - usando apenas mobileMenuButton */
 
 /* Styles for the mobile menu */
 .mobileMenu {
-  /* Remove centering and align to left */
+  position: fixed;
+  top: 60px;
+  left: 0;
+  width: 280px;
+  height: calc(100% - 60px);
+  background-color: #000000;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Alinha itens à esquerda */
-  justify-content: flex-start; /* Alinha conteúdo ao topo */
-  padding: 20px; /* Padding ajustado */
-  position: absolute;
-  top: 100%; /* Abaixo da navbar */
-  left: 0;
-  width: 100%;
-  height: calc(100vh - 72px); /* Ocupa a altura restante da viewport */
-  background-color: #0A192F; /* Mesmo azul escuro profundo */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  animation: slideDown 0.3s ease-out forwards;
+  gap: 15px;
+  z-index: 1001;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
   overflow-y: auto;
-  z-index: 999;
-  gap: 0.5rem;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Seções do Menu */
+.menuSection {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.menuSection:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.menuSectionTitle {
+  color: #64FFDA;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 10px 0;
+  padding: 0 0 5px 0;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.2);
 }
 
 .mobileNavLink {
   color: #CCD6F6;
   text-decoration: none;
-  padding: 0.8rem 1rem; /* Reduzido padding horizontal */
-  font-size: 1.2rem;
-  text-align: left; /* Alinhamento à esquerda */
-  width: 100%; /* Ocupa toda a largura disponível */
+  padding: 8px 12px;
+  font-size: 14px;
+  text-align: left;
+  width: 100%;
   transition: background-color 0.3s ease, color 0.3s ease;
   border-bottom: 1px solid rgba(204, 214, 246, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mobileNavLink:hover {
@@ -179,15 +221,35 @@
   border-bottom: none;
 }
 
-.activeMobileNavLink { /* Estilo para o link ativo em mobile */
+.activeMobileNavLink {
   background-color: rgba(100, 255, 218, 0.2);
   color: #64FFDA;
   font-weight: bold;
   text-decoration: none;
-  padding: 0.8rem 1rem; /* Reduzido padding horizontal */
-  font-size: 1.2rem;
-  text-align: left; /* Alinhamento à esquerda */
-  width: 100%; /* Ocupa toda a largura disponível */
+  padding: 8px 12px;
+  font-size: 14px;
+  text-align: left;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Estilo específico para o botão de logout no menu mobile */
+.mobileNavLink.logoutLink {
+  color: #FF6B6B;
+  border: 1px solid #FF6B6B;
+  border-radius: 6px;
+  margin-top: 10px;
+  background-color: rgba(255, 107, 107, 0.1);
+}
+
+.mobileNavLink.logoutLink:hover {
+  background-color: rgba(255, 107, 107, 0.2);
+  border-color: #FF4C4C;
 }
 
 /* Animação para o menu mobile */
@@ -202,16 +264,13 @@
   }
 }
 
+/* Esconder navegação desktop em todas as telas */
+.desktopNav {
+  display: none; /* Links sempre escondidos - usar apenas menu hambúrguer */
+}
+
 /* Media Queries para responsividade */
 @media (max-width: 768px) {
-  .desktopNav {
-    display: none; /* Esconde os links em desktop em telas menores */
-  }
-
-  .hamburger {
-    display: flex; /* Mostra o ícone de hambúrguer */
-  }
-
   .navbar {
     padding: 0.8rem 1rem; /* Ajusta o padding para telas menores */
   }
@@ -237,31 +296,7 @@
 }
 
 /* Se quiser adicionar animação de entrada */
-.mobileMenuOverlay {
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.mobileMenuOverlay[data-visible="true"] {
-  opacity: 1;
-}
-
-.mobileMenu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 250px;
-  height: 100%;
-  background-color: #1a1a1a;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  z-index: 101;
-  transform: translateX(0);
-  transition: transform 0.3s ease;
-}
-
+/* Mobile Menu Overlay e Menu - definições únicas */
 .mobileMenuOverlay {
   position: fixed;
   top: 0;
@@ -269,5 +304,66 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 100;
+  z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Botão Menu (visível em todas as telas) */
+.mobileMenuButton {
+  display: block;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 15px;
+  z-index: 1001;
+  position: relative;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.mobileMenuButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Status do Backend - canto direito */
+.backendStatus {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  padding-right: 20px;
+}
+
+.backendLogo {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.backendLogo.online {
+  border: 2px solid #07FF86;
+  box-shadow: 0 0 10px rgba(7, 255, 134, 0.5);
+  animation: pulse-green 2s infinite;
+}
+
+.backendLogo.offline {
+  border: 2px solid #FF0000;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 5px rgba(7, 255, 134, 0.5); }
+  50% { box-shadow: 0 0 15px rgba(7, 255, 134, 0.8); }
+  100% { box-shadow: 0 0 5px rgba(7, 255, 134, 0.5); }
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+  50% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.8); }
+  100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
 }

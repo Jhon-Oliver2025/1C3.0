@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import './styles/mobile-essential.css';
+// Removido: mobile-essential.css (causava conflitos de header)
 
 // Importar componentes de páginas
 import LandingPage from './pages/LandingPage';
@@ -28,6 +28,7 @@ import CheckoutDemoPage from './pages/CheckoutDemo/CheckoutDemoPage';
 import CheckoutDespertarCryptoPage from './pages/CheckoutDespertarCrypto/CheckoutDespertarCryptoPage';
 import SalesPage from './pages/SalesPage/SalesPage';
 import SalesAdminPage from './pages/SalesAdmin/SalesAdminPage';
+import CRMPage from './pages/CRM/CRMPage';
 
 import MainLayout from './components/MainLayout/MainLayout';
 import UpdateNotification from './components/UpdateNotification/UpdateNotification';
@@ -63,15 +64,39 @@ function App() {
       <Route path="/terms-of-service" element={<TermsOfServicePage />} />
       
       {/* Rotas das páginas Elementor */}
-      <Route path="/vitrine-alunos" element={<VitrineAlunosPage />} />
-      <Route path="/modulo-video-aulas" element={<ModuloVideoAulasPage />} />
+      <Route path="/vitrine-alunos" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <VitrineAlunosPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/modulo-video-aulas" element={
+         <ProtectedRoute>
+           <MainLayout>
+             <ModuloVideoAulasPage />
+           </MainLayout>
+         </ProtectedRoute>
+       } />
       <Route path="/checkout-demo" element={<CheckoutDemoPage />} />
       <Route path="/checkout/despertar-crypto" element={<CheckoutDespertarCryptoPage />} />
       <Route path="/sales" element={<SalesPage />} />
-      <Route path="/sales-admin" element={<SalesAdminPage />} />
+      <Route path="/sales-admin" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <SalesAdminPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
       
       {/* Rotas das aulas do Despertar Crypto */}
-      <Route path="/aula/:aulaId" element={<AulaPage />} />
+      <Route path="/aula/:aulaId" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <AulaPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
       
       {/* Rotas de pagamento */}
       <Route path="/payment/success" element={<PaymentSuccessPage />} />
@@ -121,7 +146,9 @@ function App() {
       
       <Route path="/suporte" element={
         <ProtectedRoute>
-          <SuportePage />
+          <MainLayout>
+            <SuportePage />
+          </MainLayout>
         </ProtectedRoute>
       } />
       
@@ -133,11 +160,19 @@ function App() {
       
       <Route path="/app" element={
         <ProtectedRoute>
-          <App1CryptenPage />
+          <MainLayout>
+            <App1CryptenPage />
+          </MainLayout>
         </ProtectedRoute>
       } />
       
-
+      <Route path="/crm" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <CRMPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
       
       {/* Rota catch-all - redireciona para landing page */}
       <Route path="*" element={<Navigate to="/" replace />} />

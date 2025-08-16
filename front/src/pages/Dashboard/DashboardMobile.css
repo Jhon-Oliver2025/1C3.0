@@ -1,0 +1,225 @@
+/* ========================================
+   📱 ESTILOS MOBILE ESPECÍFICOS DO DASHBOARD
+======================================== */
+
+/* Container principal de motivação e cabeçalho */
+.mobile-motivation-header-container {
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  background: transparent;
+  padding: 2px;
+  margin-top: 0;
+}
+
+/* Seção motivacional */
+.mobile-motivational {
+  position: relative;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0 0 0;
+  text-align: center;
+  transition: opacity 0.8s ease-in-out;
+  overflow: hidden;
+  border-radius: 12px;
+  z-index: 1;
+  background: url('/terra2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-motivational-text {
+  color: #64FFDA;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  padding: 0 20px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Gap de segurança */
+.mobile-safety-gap {
+  height: 4px;
+  background: transparent;
+}
+
+/* Container de sinais */
+.mobile-signals-container {
+  background: transparent;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Cabeçalho dos sinais */
+.mobile-signals-header {
+  background: linear-gradient(135deg, #0A192F 0%, #1a1a2e 100%);
+  padding: 16px;
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+/* Horários dos mercados */
+.mobile-market-times {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mobile-market-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px;
+  background: rgba(100, 255, 218, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.mobile-market-label {
+  color: #CCD6F6;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.mobile-market-time {
+  color: #64FFDA;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.mobile-market-status {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.mobile-market-status.open {
+  background: rgba(7, 255, 134, 0.2);
+  color: #07FF86;
+  border: 1px solid #07FF86;
+}
+
+.mobile-market-status.closed {
+  background: rgba(255, 0, 0, 0.2);
+  color: #FF6B6B;
+  border: 1px solid #FF6B6B;
+}
+
+.mobile-market-status.crypto {
+  background: rgba(100, 255, 218, 0.2);
+  color: #64FFDA;
+  border: 1px solid #64FFDA;
+}
+
+/* Estatísticas */
+.mobile-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.mobile-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8px;
+  background: rgba(100, 255, 218, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.mobile-stat-label {
+  color: #CCD6F6;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.mobile-stat-value {
+  color: #64FFDA;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.mobile-stat-value.buy {
+  color: #07FF86;
+}
+
+.mobile-stat-value.sell {
+  color: #FF6B6B;
+}
+
+/* Container de cards */
+.mobile-cards-container {
+  margin-top: 8px;
+  padding: 16px;
+  height: calc(100vh - 300px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Barra de rolagem customizada */
+.mobile-cards-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mobile-cards-container::-webkit-scrollbar-track {
+  background: rgba(100, 255, 218, 0.1);
+  border-radius: 3px;
+}
+
+.mobile-cards-container::-webkit-scrollbar-thumb {
+  background: rgba(100, 255, 218, 0.3);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.mobile-cards-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 255, 218, 0.6);
+}
+
+/* Lista de sinais */
+.mobile-signals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Responsividade */
+@media (min-width: 768px) {
+  .mobile-cards-container {
+    max-width: 768px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .mobile-signals-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobile-cards-container {
+    max-width: 1024px;
+  }
+  
+  .mobile-signals-list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

@@ -1,6 +1,6 @@
 import React from 'react';
 import RealTimeStats from '../../components/RealTimeStats/RealTimeStats';
-import '../../styles/mobile-essential.css';
+// Removido: mobile-essential.css (causava conflitos de header)
 
 /**
  * Página de Estatísticas em Tempo Real

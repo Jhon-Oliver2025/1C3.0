@@ -1,10 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation, NavLink } from 'react-router-dom';
-import TopHeader from '../Layout/TopHeader';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../Navbar/Navbar';
-import styles from '../Layout/Layout.module.css';
-import { FaHome, FaQuestionCircle, FaSignOutAlt, FaChartBar } from 'react-icons/fa';
 
 // Adicionar interface para props
 interface MainLayoutProps {
@@ -14,13 +11,8 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isBackendOnline, setIsBackendOnline] = useState<boolean>(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   // Function to check backend status
   const checkBackendStatus = useCallback(async () => {
@@ -35,7 +27,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     setIsAuthenticated(!!token);
 
     // Check backend status immediately and then every 5 seconds
@@ -46,7 +38,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   }, [checkBackendStatus]);
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('token');
     setIsAuthenticated(false);
     navigate('/login');
   };
@@ -55,76 +47,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const isDashboardRoute = location.pathname === '/dashboard';
 
   return (
-    <div className={styles.layoutContainer}>
-      {/* Sidebar mobile */}
-      <div className={`${styles.sidebarOverlay} ${isMenuOpen ? styles.open : ''}`} onClick={toggleMenu} />
-      <div className={`${styles.sidebar} ${isMenuOpen ? styles.open : ''}`}>
-        <nav className={styles.sidebarNav}>
-          {isAuthenticated ? (
-            <>
-              <NavLink to="/dashboard" className={({isActive}) => 
-                `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
-                onClick={toggleMenu}>
-                <FaHome /> Dashboard
-              </NavLink>
-              {/* REMOVIDO: <NavLink to="/btc-sentiment" className={({isActive}) => 
-                `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
-                onClick={toggleMenu}>
-                <FaChartBar /> Sentimento BTC
-              </NavLink> */}
-              <NavLink to="/dashboard" className={({isActive}) => 
-                `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
-                onClick={toggleMenu}>
-                <FaHome /> Dashboard
-              </NavLink>
-              <NavLink to="/estatisticas" className={({isActive}) => 
-                `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
-                onClick={toggleMenu}>
-                <FaChartBar /> Estatísticas
-              </NavLink>
-              <NavLink to="/suporte" className={({isActive}) => 
-                `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
-                onClick={toggleMenu}>
-                <FaQuestionCircle /> Suporte
-              </NavLink>
-              {/* REMOVIDO: <NavLink to="/configuracoes" className={({isActive}) => 
-                `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
-                onClick={toggleMenu}>
-                <FaCog /> Configurações
-              </NavLink> */}
-              <button className={styles.sidebarLink} onClick={handleLogout}>
-                <FaSignOutAlt /> Sair
-              </button>
-            </>
-          ) : (
-            <NavLink to="/login" className={({isActive}) => 
-              `${styles.sidebarLink} ${isActive ? styles.active : ''}`} 
-              onClick={toggleMenu}>
-              Login
-            </NavLink>
-          )}
-        </nav>
-      </div>
-
-      {/* Desktop Navbar */}
-      <div className={styles.desktopNavContainer}>
-        <Navbar 
-          isAuthenticated={isAuthenticated} 
-          onLogout={handleLogout} 
-          isBackendOnline={isDashboardRoute ? isBackendOnline : undefined}
-        />
-      </div>
-
-      {/* Mobile Header */}
-      <div className={styles.mobileNavContainer}>
-        <TopHeader 
-          isBackendOnline={isDashboardRoute ? isBackendOnline : undefined}
-          onMenuToggle={toggleMenu}
-        />
-      </div>
+    <div style={{ minHeight: '100vh' }}>
+      {/* ÚNICO HEADER DO SISTEMA */}
+      <Navbar 
+        isAuthenticated={isAuthenticated} 
+        onLogout={handleLogout} 
+        isBackendOnline={isDashboardRoute ? isBackendOnline : undefined}
+      />
 
       {/* Main Content */}
-      <main className={styles.mainContent}>
+      <main style={{ paddingTop: isDashboardRoute ? '60px' : '70px' }}>
         {children}
       </main>
     </div>

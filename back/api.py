@@ -15,7 +15,7 @@ from api_routes.notifications import notifications_bp
 from api_routes.market_times import market_times_bp
 from api_routes.market_status import market_status_bp
 from api_routes.cleanup_status import cleanup_status_bp
-from api_routes.analytics import analytics_bp
+# from api_routes.analytics import analytics_bp  # Módulo não existe
 from api_routes.scheduler_management import scheduler_management_bp
 
 def create_app():
@@ -51,7 +51,7 @@ def register_api_routes(app_instance, bot_instance):
     app_instance.register_blueprint(market_times_bp, url_prefix='/api')
     app_instance.register_blueprint(market_status_bp, url_prefix='/api')
     app_instance.register_blueprint(cleanup_status_bp, url_prefix='/api')
-    app_instance.register_blueprint(analytics_bp, url_prefix='/api/analytics')
+    # app_instance.register_blueprint(analytics_bp, url_prefix='/api/analytics')  # Módulo não existe
     app_instance.register_blueprint(scheduler_management_bp, url_prefix='/api')
     
     # Rota raiz

@@ -1,3 +1,4 @@
 id,username,email,password,is_admin,status
 86bab845-1921-43b8-bdf7-b13fb17efdc8,admin,jonatasprojetos2013@gmail.com,$2b$12$tZZmsFsR8xOWif4Uk6148OmZIzvwbhjyBqV5aWEmCt.G4F639Fl0.,True,active
 bbed070a-48e6-4bcc-9290-504521460ab7,test,test@test.com,$2b$12$Uqj/fZZHKHIGVzIUgpg9U.3hzA9EsxHrvoCzFQotJVlxWTFOOZCc2,False,active
+c95323c6-7e6a-4082-8282-e918ba0ee40b,estruturablogs83,estruturablogs83@gmail.com,$2b$12$L/L5P2kLHYs63Vy0urVA..MKiEVKs1Yt.21jZ1MPzQa2pHDZ1tJ2K,False,pending

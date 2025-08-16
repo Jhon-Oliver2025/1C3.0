@@ -232,6 +232,47 @@ def reset_password():
 
 # Endpoint verify-token removido (duplicado) - mantendo apenas a versão completa abaixo
 
+@auth_bp.route('/check-admin', methods=['GET'])
+def check_admin():
+    """Verifica se o usuário atual é administrador"""
+    try:
+        # Obter token do header Authorization
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'is_admin': False, 'error': 'Token não fornecido'}), 401
+            
+        token = auth_header.split(' ')[1]
+        
+        bot_instance = getattr(current_app, 'bot_instance', None)
+        if not bot_instance:
+            return jsonify({'is_admin': False, 'error': 'Sistema não inicializado'}), 500
+            
+        # Verificar token
+        user_id = bot_instance.db.verify_auth_token(token)
+        if not user_id:
+            return jsonify({'is_admin': False, 'error': 'Token inválido'}), 401
+            
+        # Buscar usuário
+        user = bot_instance.db.get_user_by_id(user_id)
+        if not user:
+            return jsonify({'is_admin': False, 'error': 'Usuário não encontrado'}), 404
+            
+        # Verificar se é admin (pode ser por email específico ou campo is_admin)
+        is_admin = user.get('is_admin', False) or user.get('email') == 'jonatasprojetos2013@gmail.com'
+        
+        return jsonify({
+            'is_admin': is_admin,
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email']
+            }
+        }), 200
+        
+    except Exception as e:
+        current_app.logger.error(f"Erro ao verificar admin: {str(e)}")
+        return jsonify({'is_admin': False, 'error': 'Erro interno do servidor'}), 500
+
 @auth_bp.route('/verify-token', methods=['POST'])
 def verify_token():
     """Endpoint para verificar se um token ainda é válido"""
