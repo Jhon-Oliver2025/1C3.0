@@ -1,5 +1,5 @@
-# Usar Node.js 18 LTS (versão mais testada)
-FROM node:18-alpine
+# Usar Node.js 20 Alpine (para compatibilidade com dependências)
+FROM node:20-alpine
 
 # Instalar dependências básicas
 RUN apk add --no-cache git
