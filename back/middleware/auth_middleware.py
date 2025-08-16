@@ -53,3 +53,10 @@ def jwt_required(f):
             return jsonify({'message': 'Erro interno na verificação do token.'}), 500
 
     return decorated_function
+
+
+def get_current_user():
+    """Função para obter o usuário atual autenticado"""
+    if hasattr(g, 'user_data') and g.user_data:
+        return g.user_data
+    return None
