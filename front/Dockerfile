@@ -6,8 +6,7 @@ RUN apk add --no-cache \
     git \
     python3 \
     make \
-    g++ \
-    libc6-compat
+    g++
 
 WORKDIR /app
 
@@ -19,10 +18,7 @@ COPY eslint.config.js ./
 
 # Instalar dependências
 RUN npm cache clean --force
-RUN npm install --legacy-peer-deps
-
-# Instalar terser explicitamente (necessário para build em produção)
-RUN npm install --save-dev terser
+RUN npm ci --legacy-peer-deps
 
 # Copiar código fonte
 COPY src/ ./src/
@@ -38,11 +34,11 @@ ENV NODE_OPTIONS="--max-old-space-size=8192"
 ENV VITE_BUILD_TIMEOUT=600000
 ENV VITE_BUILD_ROLLUP_TIMEOUT=600000
 
-# Build da aplicação com fallback
-RUN npm run build || (echo "Build falhou, tentando build simplificado..." && npm run build -- --mode development)
+# Build da aplicação
+RUN npm run build
 
 # Verificar se o build foi criado
-RUN ls -la dist/ || (echo "Criando fallback básico..." && mkdir -p dist && echo '<h1>Loading...</h1>' > dist/index.html)
+RUN ls -la dist/
 
 # Estágio 2: Servir com Nginx
 FROM nginx:alpine
