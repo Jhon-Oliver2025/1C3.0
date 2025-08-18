@@ -4,13 +4,13 @@
 
 /* Container principal de motivação e cabeçalho */
 .mobile-motivation-header-container {
-  position: absolute;
+  position: relative;
   top: 4px;
   left: 0;
   right: 0;
   z-index: 1001; /* Z-index menor que a navbar (1004) */
   background: transparent;
-  padding: 2px;
+  padding: 0;
   margin: 0;
 }
 

@@ -33,19 +33,20 @@ const SuportePage: React.FC = () => {
 
   return (
     <div className={styles.suporteContainer}>
-      {/* CONTAINER MOTIVACIONAL (seguindo padrão do Dashboard) */}
+      {/* CONTAINER MOTIVACIONAL NO TOPO DA DIV PRINCIPAL (4px) */}
       <div className="mobile-motivation-header-container">
+        {/* Seção Motivacional */}
         <div className="mobile-motivational">
           <p className="mobile-motivational-text">
             Estamos aqui para apoiar sua jornada rumo ao sucesso financeiro.
           </p>
         </div>
+
+        {/* Espaçamento de Segurança (4px) */}
         <div className="mobile-safety-gap"></div>
       </div>
-      
-      {/* Conteúdo da página de suporte */}
 
-      {/* CONTEÚDO PRINCIPAL */}
+      {/* CONTEÚDO DA PÁGINA SUPORTE */}
       <div className={styles.mainContent}>
         <div className={styles.suporteHeader}>
           <h1 className={styles.title}>Central de Suporte</h1>

@@ -320,13 +320,16 @@ const VitrineAlunosPage: React.FC = () => {
    // Renderizar a vitrine com os cursos que o usuário tem acesso
    return (
      <div className="vitrine-alunos-page" style={{ backgroundColor: '#000000', padding: '20px' }}>
-       {/* CONTAINER MOTIVACIONAL (seguindo padrão do Dashboard) */}
+       {/* CONTAINER MOTIVACIONAL NO TOPO DA DIV PRINCIPAL (4px) */}
        <div className="mobile-motivation-header-container">
+         {/* Seção Motivacional */}
          <div className="mobile-motivational">
            <p className="mobile-motivational-text">
              Bem-vindo à 1Crypten! Sua jornada de aprendizado começa aqui.
            </p>
          </div>
+
+         {/* Espaçamento de Segurança (4px) */}
          <div className="mobile-safety-gap"></div>
        </div>
        

@@ -223,16 +223,20 @@ const App1CryptenPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      {/* CONTAINER MOTIVACIONAL (seguindo padrão do Dashboard) */}
+      {/* CONTAINER MOTIVACIONAL NO TOPO DA DIV PRINCIPAL (4px) */}
       <div className="mobile-motivation-header-container">
+        {/* Seção Motivacional */}
         <div className="mobile-motivational">
           <p className="mobile-motivational-text">
             Tenha o poder dos sinais na palma da sua mão, onde quer que esteja.
           </p>
         </div>
+
+        {/* Espaçamento de Segurança (4px) */}
         <div className="mobile-safety-gap"></div>
       </div>
-      
+
+      {/* CONTEÚDO DA PÁGINA APP1CRYPTEN */}
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>

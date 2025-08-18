@@ -1319,16 +1319,20 @@ const BTCAnalysisPage: React.FC = () => {
 
   return (
     <BTCContainer>
-      {/* CONTAINER MOTIVACIONAL (seguindo padrão do Dashboard) */}
+      {/* CONTAINER MOTIVACIONAL NO TOPO DA DIV PRINCIPAL (4px) */}
       <div className="mobile-motivation-header-container">
+        {/* Seção Motivacional */}
         <div className="mobile-motivational">
           <p className="mobile-motivational-text">
             Analise o Bitcoin com precisão e confirme sinais que geram resultados.
           </p>
         </div>
+
+        {/* Espaçamento de Segurança (4px) */}
         <div className="mobile-safety-gap"></div>
       </div>
-      
+
+      {/* CONTEÚDO DA PÁGINA BTC ANALYSIS */}
       <Header>
         <Title>
           <BTCIcon />
