@@ -4,7 +4,7 @@ import logo1Crypten from '../../assets/members1cT.png'; // Importa o logo da 1cr
 import mainBanner from '../../assets/Bannerprincipal.png'; // Importa o banner principal
 import { useCourseAccess } from '../../hooks/useCourseAccess'; // Hook para controle de acesso
 import { useAdminCheck } from '../../hooks/useAdminCheck'; // Hook para verificar se é admin
-import MotivationalHeader from '../../components/MotivationalHeader/MotivationalHeader';
+import '../Dashboard/DashboardMobile.css';
 
 import thumb01 from '../../assets/Tamb/01.png';
 import thumb02 from '../../assets/Tamb/02.png';
@@ -320,7 +320,16 @@ const VitrineAlunosPage: React.FC = () => {
    // Renderizar a vitrine com os cursos que o usuário tem acesso
    return (
      <div className="vitrine-alunos-page" style={{ backgroundColor: '#000000', padding: '20px' }}>
-       <MotivationalHeader text="Bem-vindo à 1Crypten! Sua jornada de aprendizado começa aqui." />
+       {/* CONTAINER MOTIVACIONAL (seguindo padrão do Dashboard) */}
+       <div className="mobile-motivation-header-container">
+         <div className="mobile-motivational">
+           <p className="mobile-motivational-text">
+             Bem-vindo à 1Crypten! Sua jornada de aprendizado começa aqui.
+           </p>
+         </div>
+         <div className="mobile-safety-gap"></div>
+       </div>
+       
        <CourseShowcase data={vitrineData} userAccess={userAccessInfo} isAdmin={isAdmin} />
        <StandardFooter /> {/* Renderiza o componente StandardFooter */}
      </div>

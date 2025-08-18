@@ -15,7 +15,7 @@ import {
   FaSync
 } from 'react-icons/fa';
 import logo3 from '/logo3.png';
-import MotivationalHeader from '../../components/MotivationalHeader/MotivationalHeader';
+import '../Dashboard/DashboardMobile.css';
 
 // Interfaces
 interface PendingSignal {
@@ -1319,7 +1319,16 @@ const BTCAnalysisPage: React.FC = () => {
 
   return (
     <BTCContainer>
-      <MotivationalHeader text="Analise o Bitcoin com precisão e confirme sinais que geram resultados." />
+      {/* CONTAINER MOTIVACIONAL (seguindo padrão do Dashboard) */}
+      <div className="mobile-motivation-header-container">
+        <div className="mobile-motivational">
+          <p className="mobile-motivational-text">
+            Analise o Bitcoin com precisão e confirme sinais que geram resultados.
+          </p>
+        </div>
+        <div className="mobile-safety-gap"></div>
+      </div>
+      
       <Header>
         <Title>
           <BTCIcon />

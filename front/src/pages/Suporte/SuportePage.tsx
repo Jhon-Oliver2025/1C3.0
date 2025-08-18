@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './SuportePage.module.css';
 import logo3 from '/logo3.png';
-import MotivationalHeader from '../../components/MotivationalHeader/MotivationalHeader';
+import '../Dashboard/DashboardMobile.css';
 
 /**
  * Componente da página de Suporte
@@ -33,7 +33,16 @@ const SuportePage: React.FC = () => {
 
   return (
     <div className={styles.suporteContainer}>
-      <MotivationalHeader text="Estamos aqui para apoiar sua jornada rumo ao sucesso financeiro." />
+      {/* CONTAINER MOTIVACIONAL (seguindo padrão do Dashboard) */}
+      <div className="mobile-motivation-header-container">
+        <div className="mobile-motivational">
+          <p className="mobile-motivational-text">
+            Estamos aqui para apoiar sua jornada rumo ao sucesso financeiro.
+          </p>
+        </div>
+        <div className="mobile-safety-gap"></div>
+      </div>
+      
       {/* Conteúdo da página de suporte */}
 
       {/* CONTEÚDO PRINCIPAL */}

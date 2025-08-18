@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { Save, Eye, BarChart3, Settings, Clock, Palette, Type, Target } from 'lucide-react';
 import StandardFooter from '../../components/StandardFooter/StandardFooter';
 import logo3 from '/logo3.png';
-import MotivationalHeader from '../../components/MotivationalHeader/MotivationalHeader';
+import '../Dashboard/DashboardMobile.css';
 
 /**
  * Página de Administração da Página de Vendas
@@ -489,7 +489,16 @@ const SalesAdminPage: React.FC = () => {
 
   return (
     <AdminContainer>
-      <MotivationalHeader text="Configure sua estratégia de vendas e transforme visitantes em clientes." />
+      {/* CONTAINER MOTIVACIONAL (seguindo padrão do Dashboard) */}
+      <div className="mobile-motivation-header-container">
+        <div className="mobile-motivational">
+          <p className="mobile-motivational-text">
+            Configure sua estratégia de vendas e transforme visitantes em clientes.
+          </p>
+        </div>
+        <div className="mobile-safety-gap"></div>
+      </div>
+      
       <AdminHeader>
         <HeaderContent>
           <Title>Admin - Página de Vendas</Title>

@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './App1CryptenPage.module.css';
 import logo3 from '/logo3.png';
-import MotivationalHeader from '../../components/MotivationalHeader/MotivationalHeader';
+import '../Dashboard/DashboardMobile.css';
 
 interface AppInstallState {
   isInstallable: boolean;
@@ -223,7 +223,16 @@ const App1CryptenPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <MotivationalHeader text="Tenha o poder dos sinais na palma da sua mão, onde quer que esteja." />
+      {/* CONTAINER MOTIVACIONAL (seguindo padrão do Dashboard) */}
+      <div className="mobile-motivation-header-container">
+        <div className="mobile-motivational">
+          <p className="mobile-motivational-text">
+            Tenha o poder dos sinais na palma da sua mão, onde quer que esteja.
+          </p>
+        </div>
+        <div className="mobile-safety-gap"></div>
+      </div>
+      
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
