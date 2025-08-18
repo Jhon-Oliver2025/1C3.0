@@ -28,8 +28,61 @@ class SignalCleanup:
         
         print("🧹 Sistema de Limpeza de Sinais inicializado")
     
+    def daily_system_restart(self) -> None:
+        """Executa restart completo do sistema às 21:00"""
+        try:
+            now_sp = datetime.now(self.sao_paulo_tz)
+            
+            print("\n" + "="*80)
+            print(f"🔄 RESTART DIÁRIO DO SISTEMA - {now_sp.strftime('%d/%m/%Y %H:%M:%S')} (SP)")
+            print("🌙 REINÍCIO COMPLETO PARA NOVA SESSÃO DE TRADING")
+            print("="*80)
+            
+            # 1. Limpar todos os sinais antigos
+            print("🧹 Executando limpeza completa de sinais...")
+            self.cleanup_old_signals()
+            
+            # 2. Resetar sistema BTC de confirmação
+            print("₿ Reiniciando sistema de confirmação BTC...")
+            try:
+                # Obter instância do BTCSignalManager do app
+                from flask import current_app
+                if hasattr(current_app, 'bot_instance') and current_app.bot_instance:
+                    bot_instance = current_app.bot_instance
+                    if hasattr(bot_instance, 'btc_signal_manager') and bot_instance.btc_signal_manager:
+                        btc_manager = bot_instance.btc_signal_manager
+                        
+                        # Resetar controle de sinais confirmados diários
+                        btc_manager.reset_daily_confirmed_signals()
+                        
+                        # Verificar sinais ainda ativos pós-restart
+                        btc_manager.check_post_restart_signals()
+                        
+                        print("✅ Sistema BTC reiniciado com sucesso")
+                        print(f"📊 Controle de duplicação resetado")
+                    else:
+                        print("⚠️ BTCSignalManager não encontrado")
+                else:
+                    print("⚠️ Bot instance não encontrada")
+            except Exception as e:
+                print(f"⚠️ Erro ao reiniciar sistema BTC: {e}")
+            
+            # 3. Atualizar estatísticas do sistema
+            print("📊 Atualizando estatísticas do sistema...")
+            self.update_system_stats()
+            
+            print(f"\n🎯 RESTART COMPLETO FINALIZADO")
+            print(f"⏰ Próximo restart: {self.get_next_restart_time()}")
+            print("✅ Sistema pronto para nova sessão de trading!")
+            print("="*80)
+            
+        except Exception as e:
+            print(f"❌ Erro no restart do sistema: {e}")
+            import traceback
+            traceback.print_exc()
+    
     def cleanup_old_signals(self) -> None:
-        """Remove sinais antigos do banco de dados"""
+        """Remove todos os sinais antigos do banco de dados"""
         try:
             if not self.supabase_url or not self.supabase_key:
                 print("⚠️ Supabase não configurado para limpeza")
@@ -38,26 +91,10 @@ class SignalCleanup:
             supabase: Client = create_client(self.supabase_url, self.supabase_key)
             now_sp = datetime.now(self.sao_paulo_tz)
             
-            print(f"🧹 Iniciando limpeza de sinais - {now_sp.strftime('%d/%m/%Y %H:%M:%S')} (SP)")
-            
-            # Determinar horário de corte baseado no horário atual
-            if now_sp.hour == 10:
-                # Limpeza das 10:00 - remover sinais desde a última limpeza (21:00 de ontem)
-                yesterday = now_sp - timedelta(days=1)
-                cutoff_time = yesterday.replace(hour=21, minute=0, second=0, microsecond=0)
-                cleanup_type = "Preparação Mercado Americano"
-            elif now_sp.hour == 21:
-                # Limpeza das 21:00 - remover sinais desde a última limpeza (10:00 de hoje)
-                cutoff_time = now_sp.replace(hour=10, minute=0, second=0, microsecond=0)
-                cleanup_type = "Preparação Mercado Asiático"
-            else:
-                print(f"⚠️ Limpeza executada fora do horário programado: {now_sp.hour}:00")
-                return
-            
-            # Converter para UTC
+            # Remover todos os sinais anteriores ao restart (24h atrás)
+            cutoff_time = now_sp - timedelta(hours=24)
             cutoff_time_utc = cutoff_time.astimezone(pytz.UTC)
             
-            print(f"🎯 {cleanup_type}")
             print(f"🗑️ Removendo sinais anteriores a: {cutoff_time.strftime('%d/%m/%Y %H:%M')} (SP)")
             
             # Buscar sinais para remoção
@@ -84,24 +121,36 @@ class SignalCleanup:
             total_remaining = remaining_signals.count if remaining_signals.count else 0
             
             print(f"📊 Sinais restantes no sistema: {total_remaining}")
-            print(f"🧹 Limpeza finalizada - {datetime.now(self.sao_paulo_tz).strftime('%d/%m/%Y %H:%M:%S')} (SP)")
             
         except Exception as e:
             print(f"❌ Erro na limpeza de sinais: {e}")
             import traceback
             traceback.print_exc()
     
+    def update_system_stats(self) -> None:
+        """Atualiza estatísticas do sistema após restart"""
+        try:
+            now_sp = datetime.now(self.sao_paulo_tz)
+            
+            # Aqui podemos adicionar lógica para salvar estatísticas do restart
+            # Por exemplo, salvar no banco de dados informações sobre:
+            # - Horário do último restart
+            # - Número de sinais removidos
+            # - Status do sistema BTC
+            # - Métricas de performance
+            
+            print(f"📈 Estatísticas atualizadas - {now_sp.strftime('%d/%m/%Y %H:%M:%S')}")
+            
+        except Exception as e:
+            print(f"❌ Erro ao atualizar estatísticas: {e}")
+    
     def schedule_cleanup(self) -> None:
-        """Agenda limpezas automáticas"""
-        # Agendar limpeza às 10:00 (preparação mercado americano)
-        schedule.every().day.at("10:00").do(self.cleanup_old_signals)
+        """Agenda restart diário do sistema"""
+        # Agendar restart único às 21:00 (reinício completo do sistema)
+        schedule.every().day.at("21:00").do(self.daily_system_restart)
         
-        # Agendar limpeza às 21:00 (preparação mercado asiático)
-        schedule.every().day.at("21:00").do(self.cleanup_old_signals)
-        
-        print("📅 Limpezas agendadas:")
-        print("   🇺🇸 10:00 - Preparação Mercado Americano")
-        print("   🇯🇵 21:00 - Preparação Mercado Asiático")
+        print("📅 Restart do sistema agendado:")
+        print("   🔄 21:00 - Restart Diário Completo do Sistema")
         print("   🌍 Timezone: America/Sao_Paulo")
     
     def start_scheduler(self) -> None:
@@ -143,24 +192,38 @@ class SignalCleanup:
         print("🔧 Executando limpeza manual...")
         self.cleanup_old_signals()
     
-    def get_next_cleanup_time(self) -> str:
-        """Retorna o horário da próxima limpeza"""
+    def get_next_restart_time(self) -> str:
+        """Retorna o horário do próximo restart do sistema"""
         now_sp = datetime.now(self.sao_paulo_tz)
         
-        # Próxima limpeza às 10:00
-        next_10 = now_sp.replace(hour=10, minute=0, second=0, microsecond=0)
-        if next_10 <= now_sp:
-            next_10 += timedelta(days=1)
+        # Próximo restart às 21:00
+        next_restart = now_sp.replace(hour=21, minute=0, second=0, microsecond=0)
+        if next_restart <= now_sp:
+            next_restart += timedelta(days=1)
         
-        # Próxima limpeza às 21:00
-        next_21 = now_sp.replace(hour=21, minute=0, second=0, microsecond=0)
-        if next_21 <= now_sp:
-            next_21 += timedelta(days=1)
+        return next_restart.strftime('%d/%m/%Y %H:%M:%S')
+    
+    def get_time_until_restart(self) -> dict:
+        """Retorna tempo restante até o próximo restart"""
+        now_sp = datetime.now(self.sao_paulo_tz)
         
-        # Retornar a próxima mais próxima
-        next_cleanup = min(next_10, next_21)
+        # Próximo restart às 21:00
+        next_restart = now_sp.replace(hour=21, minute=0, second=0, microsecond=0)
+        if next_restart <= now_sp:
+            next_restart += timedelta(days=1)
         
-        return next_cleanup.strftime('%d/%m/%Y %H:%M:%S')
+        time_diff = next_restart - now_sp
+        hours = time_diff.seconds // 3600
+        minutes = (time_diff.seconds % 3600) // 60
+        seconds = time_diff.seconds % 60
+        
+        return {
+            'hours': hours,
+            'minutes': minutes,
+            'seconds': seconds,
+            'total_seconds': time_diff.total_seconds(),
+            'next_restart': next_restart.strftime('%d/%m/%Y %H:%M:%S')
+        }
 
 # Instância global para uso em outros módulos
 cleanup_system = SignalCleanup()

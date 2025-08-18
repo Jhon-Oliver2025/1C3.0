@@ -54,6 +54,49 @@ class BTCCorrelationAnalyzer:
         
         print("✅ BTCCorrelationAnalyzer inicializado com sucesso!")
     
+    def get_btc_price_data(self) -> Dict[str, Any]:
+        """Obtém dados básicos de preço do BTC para a API"""
+        try:
+            # Obter dados recentes do BTC
+            btc_df = self._get_btc_klines('1h', 24)  # Últimas 24 horas
+            if btc_df is None or len(btc_df) < 2:
+                return self._get_default_price_data()
+            
+            current_price = float(btc_df['close'].iloc[-1])
+            previous_price = float(btc_df['close'].iloc[-2])
+            high_24h = float(btc_df['high'].max())
+            low_24h = float(btc_df['low'].min())
+            volume_24h = float(btc_df['volume'].sum())
+            
+            # Calcular variação
+            change_24h = ((current_price - previous_price) / previous_price) * 100
+            
+            return {
+                'symbol': 'BTCUSDT',
+                'price': current_price,
+                'change_24h': change_24h,
+                'high_24h': high_24h,
+                'low_24h': low_24h,
+                'volume_24h': volume_24h,
+                'last_updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            }
+            
+        except Exception as e:
+            print(f"❌ Erro ao obter dados de preço BTC: {e}")
+            return self._get_default_price_data()
+    
+    def _get_default_price_data(self) -> Dict[str, Any]:
+        """Retorna dados de preço padrão em caso de erro"""
+        return {
+            'symbol': 'BTCUSDT',
+            'price': 50000.0,
+            'change_24h': 0.0,
+            'high_24h': 50000.0,
+            'low_24h': 50000.0,
+            'volume_24h': 0.0,
+            'last_updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        }
+    
     def get_btc_analysis(self, timeframe: str = '4h') -> Optional[Dict[str, Any]]:
         """
         Obtém análise técnica completa do Bitcoin
@@ -387,9 +430,9 @@ class BTCCorrelationAnalyzer:
             
             return {
                 'trend': trend,
-                'strength': strength,
-                'pivot_broken': pivot_broken,
-                'ema_alignment': current_price > current_ema20 > current_ema50
+                'strength': float(strength),
+                'pivot_broken': bool(pivot_broken),
+                'ema_alignment': bool(current_price > current_ema20 > current_ema50)
             }
             
         except Exception as e:
@@ -423,9 +466,9 @@ class BTCCorrelationAnalyzer:
             
             return {
                 'rsi_condition': rsi_condition,
-                'macd_bullish': macd_bullish,
-                'macd_bearish': macd_bearish,
-                'momentum_aligned': momentum_aligned
+                'macd_bullish': bool(macd_bullish),
+                'macd_bearish': bool(macd_bearish),
+                'momentum_aligned': bool(momentum_aligned)
             }
             
         except Exception as e:
@@ -476,10 +519,10 @@ class BTCCorrelationAnalyzer:
             
             return {
                 'trend': main_trend,
-                'strength': trend_strength,
-                'momentum_aligned': momentum_aligned,
-                'volatility': volatility,
-                'pivot_broken': btc_4h['pivot_broken'] or btc_1h['pivot_broken'],
+                'strength': float(trend_strength),
+                'momentum_aligned': bool(momentum_aligned),
+                'volatility': float(volatility),
+                'pivot_broken': bool(btc_4h['pivot_broken'] or btc_1h['pivot_broken']),
                 'timeframes': {
                     '4h': btc_4h,
                     '1h': btc_1h
@@ -570,7 +613,7 @@ class BTCCorrelationAnalyzer:
         """Retorna análise BTC padrão em caso de erro"""
         return {
             'trend': 'NEUTRAL',
-            'strength': 50,
+            'strength': 50.0,
             'momentum_aligned': False,
             'volatility': 2.0,
             'pivot_broken': False,

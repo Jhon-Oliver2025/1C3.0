@@ -8,6 +8,8 @@ interface SignalCardProps {
   targetPrice: string;
   projectionPercentage: string;
   date: string;
+  createdAt?: string;
+  confirmedAt?: string;
   signalClass: 'PREMIUM' | 'PREMIUM+' | 'ELITE' | 'ELITE+' | 'PADRÃO';
   onToggleFavorite?: () => void;
   isFavorite?: boolean;
@@ -20,19 +22,57 @@ const SignalCard: React.FC<SignalCardProps> = ({
   targetPrice,
   projectionPercentage,
   date,
+  createdAt,
+  confirmedAt,
   signalClass,
   onToggleFavorite,
   isFavorite,
 }) => {
-  const dateObj = new Date(date);
-  const formattedDate = date && !isNaN(dateObj.getTime()) ? dateObj.toLocaleString('pt-BR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  }) : '';
+  // Função para formatar data
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    
+    try {
+      // Verificar se já está no formato brasileiro
+      const brazilianDateRegex = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/;
+      if (brazilianDateRegex.test(dateString)) {
+        return dateString;
+      }
+      
+      // Tentar converter formato ISO
+      const dateObj = new Date(dateString);
+      if (!isNaN(dateObj.getTime())) {
+        return dateObj.toLocaleString('pt-BR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao formatar data:', error);
+    }
+    
+    return '';
+  };
+
+  // Determinar qual data exibir
+  const getDisplayDate = () => {
+    if (confirmedAt) {
+      return `Confirmado: ${formatDate(confirmedAt)}`;
+    }
+    if (createdAt) {
+      return `Criado: ${formatDate(createdAt)}`;
+    }
+    if (date) {
+      return formatDate(date);
+    }
+    return 'Data não disponível';
+  };
+
+  const formattedDate = getDisplayDate();
 
   // Função para formatar preços com as mesmas casas decimais
   const formatPrice = (price: string, referencePrice: string): string => {

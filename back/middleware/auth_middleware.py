@@ -43,6 +43,10 @@ def jwt_required(f):
             
             current_app.logger.debug(f"Token validado com sucesso para usuário: {user_data.get('username')}")
             
+            # Debug: imprimir dados do usuário
+            print(f"DEBUG AUTH: user_data = {user_data}")
+            print(f"DEBUG AUTH: is_admin = {user_data.get('is_admin')} (type: {type(user_data.get('is_admin'))})")
+            
             # Armazenar os dados do usuário no objeto 'g' do Flask
             g.user_data = user_data
             

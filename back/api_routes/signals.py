@@ -8,6 +8,69 @@ from datetime import datetime
 from flask import Blueprint, jsonify, g, current_app
 from middleware.auth_middleware import jwt_required
 
+def get_btc_confirmed_signals():
+    """Função para obter sinais confirmados do sistema BTC e converter para o formato dos cards"""
+    current_app.logger.debug("🔍 Iniciando get_btc_confirmed_signals()")
+    try:
+        # Obter instância do BTCSignalManager do app
+        bot_instance = getattr(current_app, 'bot_instance', None)
+        current_app.logger.debug(f"Bot instance: {bot_instance}")
+        
+        if not bot_instance:
+            current_app.logger.debug("Bot instance não encontrada")
+            return []
+            
+        current_app.logger.debug(f"Bot instance attributes: {dir(bot_instance)}")
+        
+        if not hasattr(bot_instance, 'btc_signal_manager'):
+            current_app.logger.debug("BTCSignalManager attribute não encontrado")
+            return []
+        
+        btc_signal_manager = bot_instance.btc_signal_manager
+        current_app.logger.debug(f"BTCSignalManager: {btc_signal_manager}")
+        
+        if not btc_signal_manager:
+            current_app.logger.debug("BTCSignalManager não inicializado")
+            return []
+        
+        # Obter sinais confirmados do sistema BTC
+        confirmed_signals = btc_signal_manager.get_confirmed_signals(limit=20)
+        
+        # Converter para o formato esperado pelos cards do dashboard
+        btc_signals = []
+        for signal in confirmed_signals:
+            # Converter tipo de COMPRA/VENDA para LONG/SHORT
+            signal_type = "LONG" if signal.get('type') == 'COMPRA' else "SHORT"
+            
+            # Converter sinal para formato dos cards
+            btc_signal = {
+                "symbol": signal.get('symbol', ''),
+                "type": signal_type,
+                "entry_price": float(signal.get('entry_price', 0)),
+                "entry_time": signal.get('confirmed_at', signal.get('created_at', '')),
+                "created_at": signal.get('created_at', ''),
+                "confirmed_at": signal.get('confirmed_at', ''),
+                "target_price": float(signal.get('target_price', 0)),
+                "projection_percentage": round(float(signal.get('projection_percentage', 0)), 2),
+                "status": "CONFIRMADO",
+                "quality_score": round(float(signal.get('quality_score', 0)), 1),
+                "signal_class": "BTC_CONFIRMED"
+            }
+            
+            # Garantir que não há valores None
+            for key, value in btc_signal.items():
+                if value is None:
+                    btc_signal[key] = '' if isinstance(value, str) else 0
+            
+            btc_signals.append(btc_signal)
+        
+        current_app.logger.debug(f"Sinais BTC confirmados convertidos: {len(btc_signals)}")
+        return btc_signals
+        
+    except Exception as e:
+        current_app.logger.error(f"Erro ao obter sinais BTC confirmados: {e}")
+        return []
+
 signals_bp = Blueprint('signals', __name__)
 
 # Variável global para status da análise
@@ -96,27 +159,24 @@ def handle_options():
 @signals_bp.route('/', methods=['GET'])
 @jwt_required
 def get_signals():
-    """Endpoint para obter a lista de sinais do arquivo CSV"""
+    """Endpoint para obter APENAS os sinais confirmados do sistema BTC"""
     current_app.logger.debug("Rota /api/signals foi acessada!")
     try:
         # Acessa os dados do usuário do objeto g
         user_data = g.user_data
         
-        # Verificar se o usuário é admin para ver sinais premium
-        is_admin = user_data.get('isAdmin', False)
-
-        # Obter sinais do CSV
-        all_signals = get_signals_from_csv()
+        # Obter APENAS sinais confirmados do sistema BTC
+        btc_confirmed_signals = get_btc_confirmed_signals()
         
-        # Retornar todos os sinais (temporariamente para depuração)
-        signals_to_return = all_signals
-
-        current_app.logger.debug(f"DEBUG: Sinais antes de jsonify: {len(signals_to_return)}")
-        return jsonify(signals_to_return), 200
+        # Ordenar por data de confirmação (mais recentes primeiro)
+        btc_confirmed_signals.sort(key=lambda x: x.get('entry_time', ''), reverse=True)
+        
+        current_app.logger.debug(f"DEBUG: Retornando apenas sinais BTC confirmados: {len(btc_confirmed_signals)}")
+        return jsonify(btc_confirmed_signals), 200
 
     except Exception as e:
-        current_app.logger.error(f"Erro ao obter sinais: {e}", exc_info=True)
-        return jsonify({"error": "Erro interno do servidor ao obter sinais"}), 500
+        current_app.logger.error(f"Erro ao obter sinais confirmados: {e}", exc_info=True)
+        return jsonify({"error": "Erro interno do servidor ao obter sinais confirmados"}), 500
 
 @signals_bp.route('/start-analysis', methods=['POST'])
 @jwt_required

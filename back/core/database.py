@@ -443,6 +443,9 @@ class Database:
             df = pd.read_csv(self.users_file)
             # Garante que a coluna 'id' é tratada como string para evitar problemas com UUIDs
             df['id'] = df['id'].astype(str)
+            # Converte is_admin para boolean explicitamente
+            if 'is_admin' in df.columns:
+                df['is_admin'] = df['is_admin'].map(lambda x: str(x).lower() == 'true' if pd.notna(x) else False)
             return df.replace({np.nan: None}).to_dict(orient='records')
         except Exception as e:
             print(f"❌ Erro ao carregar usuários: {e}")

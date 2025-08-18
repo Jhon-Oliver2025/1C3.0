@@ -64,11 +64,12 @@ class TechnicalAnalysis:
         # Configurar notificações (opcional)
         self.notifier = self._setup_telegram_notifier()
         
-        # Inicializar analisador de correlação BTC
-        self.btc_analyzer = BTCCorrelationAnalyzer(self.binance)
-        
         # Inicializar sistema de cache
         self.cache_manager = CacheManager()
+        
+        # Inicializar sistema de confirmação BTC
+        from .btc_signal_manager import BTCSignalManager
+        self.btc_signal_manager = BTCSignalManager(db_instance)
         
         print("✅ TechnicalAnalysis inicializado com sucesso!")
     
@@ -99,6 +100,9 @@ class TechnicalAnalysis:
         print("🚀 Iniciando monitoramento de mercado...")
         self.is_monitoring = True
         
+        # Iniciar monitoramento do BTCSignalManager
+        self.btc_signal_manager.start_monitoring()
+        
         # Pular inicialização de pares para permitir Flask iniciar rapidamente
         # Os pares serão carregados no primeiro ciclo do monitoring_loop
         
@@ -118,6 +122,9 @@ class TechnicalAnalysis:
         """Para o monitoramento"""
         print("🛑 Parando monitoramento...")
         self.is_monitoring = False
+        
+        # Parar monitoramento do BTCSignalManager
+        self.btc_signal_manager.stop_monitoring()
         
         if self.monitoring_thread and self.monitoring_thread.is_alive():
             self.monitoring_thread.join(timeout=5)
@@ -353,10 +360,9 @@ class TechnicalAnalysis:
                         analyzed_pairs.append(symbol)
                         
                         if signal:
-                            # Salvar sinal no banco
-                            if self.gerenciador.save_signal(signal):
-                                signals.append(signal)
-                                print(f"✨ SINAL ENCONTRADO: {symbol} - {signal['type']} - Score: {signal['quality_score']:.1f} - Classe: {signal['signal_class']}")
+                            # Sinal foi enviado para confirmação BTC
+                            print(f"⏳ PRÉ-SINAL DETECTADO: {symbol} - {signal['type']} - Score: {signal['quality_score']:.1f} - Classe: {signal['signal_class']} (Aguardando confirmação BTC)")
+                            # Não adicionar à lista de sinais - será processado pelo BTCSignalManager
                         else:
                             rejected_pairs.append(symbol)
                         
@@ -385,12 +391,16 @@ class TechnicalAnalysis:
             print(f"💾 API Calls Saved: {cache_stats['api_calls_saved']}")
             print(f"🚀 Performance: {len(self.top_pairs)/scan_duration:.1f} pares/segundo")
             
-            if signals:
-                print(f"\n🎯 SINAIS DETECTADOS:")
-                for signal in signals:
-                    print(f"   • {signal['symbol']}: {signal['type']} - {signal['signal_class']} (Score: {signal['quality_score']:.1f})")
-            else:
-                print(f"\n📭 Nenhum sinal de qualidade encontrado neste ciclo")
+            # Obter estatísticas do BTCSignalManager
+            btc_stats = self.btc_signal_manager.get_confirmation_metrics()
+            
+            print(f"\n🎯 ESTATÍSTICAS BTC:")
+            print(f"   ⏳ Sinais Pendentes: {btc_stats['pending_signals']}")
+            print(f"   ✅ Taxa Confirmação: {btc_stats['confirmation_rate']}%")
+            print(f"   ⏱️ Tempo Médio: {btc_stats['average_confirmation_time_minutes']:.1f}min")
+            
+            if not signals:
+                print(f"\n📭 Nenhum pré-sinal detectado neste ciclo")
             
             print(f"{'='*80}\n")
             
@@ -432,58 +442,45 @@ class TechnicalAnalysis:
             signal_type = 'COMPRA' if trend_analysis['is_uptrend'] else 'VENDA'
             entry_price = float(entry_df['close'].iloc[-1])
             
-            # 4. Filtro BTC (verificar se deve rejeitar por correlação)
-            if self.btc_analyzer.should_filter_signal_by_btc(symbol, signal_type):
-                return None
-            
-            # 5. Sistema de Pontuação (130 pontos total)
+            # 4. Sistema de Pontuação (100 pontos total - sem BTC)
             scores = self._calculate_signal_scores(
                 trend_analysis, entry_analysis, signal_type, entry_df
             )
             
-            # 6. Pontuação BTC (30 pontos adicionais)
-            try:
-                btc_score = self.btc_analyzer.calculate_btc_correlation_score(symbol, signal_type)
-                if btc_score is None or btc_score < 0:
-                    btc_score = 15.0  # Score neutro se BTC analyzer falhar
-            except Exception as e:
-                print(f"⚠️ Erro no BTC analyzer para {symbol}: {e}")
-                btc_score = 15.0  # Score neutro em caso de erro
-            
-            scores['btc_correlation'] = btc_score
-            
             quality_score = sum(scores.values())
             
-            # 7. Filtro de qualidade (ajustado para nova escala)
-            if quality_score < self.config['quality_score_minimum']:
+            # 5. Filtro de qualidade básico (ajustado para nova escala)
+            if quality_score < 60.0:  # Threshold mais baixo para pré-sinais
                 return None
             
-            # 8. Classificação (ajustada para nova escala)
-            if quality_score >= 110:
-                signal_class = 'ELITE+'
-            elif quality_score >= 95:
+            # 6. Classificação (ajustada para nova escala)
+            if quality_score >= 85:
                 signal_class = 'ELITE'
-            elif quality_score >= 85:
+            elif quality_score >= 75:
                 signal_class = 'PREMIUM+'
-            else:
+            elif quality_score >= 65:
                 signal_class = 'PREMIUM'
+            else:
+                signal_class = 'STANDARD'
             
-            # 9. Obter dados de correlação BTC
-            btc_correlation = self.btc_analyzer.calculate_symbol_btc_correlation(symbol)
-            btc_analysis = self.btc_analyzer.get_current_btc_analysis()
-            
-            # 10. Calcular alvo
+            # 7. Calcular alvo
             target_price = self.calculate_target_price(
                 entry_price, signal_type, trend_analysis, entry_analysis, quality_score
             )
             
-            # 11. Calcular projeção
+            # 8. Calcular projeção
             if signal_type == 'COMPRA':
                 projection = ((target_price - entry_price) / entry_price) * 100
             else:
                 projection = ((entry_price - target_price) / entry_price) * 100
             
-            # 12. Montar sinal final
+            # 9. Calcular correlação e tendência BTC
+            btc_analyzer = self.btc_signal_manager.btc_analyzer
+            btc_correlation = btc_analyzer.calculate_symbol_btc_correlation(symbol)
+            btc_analysis = btc_analyzer.get_current_btc_analysis()
+            btc_trend = btc_analysis.get('trend', 'NEUTRAL')
+            
+            # 10. Montar sinal para confirmação BTC
             signal = {
                 'symbol': symbol,
                 'type': signal_type,
@@ -497,16 +494,20 @@ class TechnicalAnalysis:
                 'entry_score': scores['entry'],
                 'rsi_score': scores['rsi'],
                 'pattern_score': scores['pattern'],
-                'btc_correlation_score': scores['btc_correlation'],
-                'btc_correlation': btc_correlation,
-                'btc_trend': btc_analysis['trend'],
-                'btc_strength': btc_analysis['strength'],
                 'timestamp': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
                 'trend_timeframe': self.config['trend_timeframe'],
-                'entry_timeframe': self.config['entry_timeframe']
+                'entry_timeframe': self.config['entry_timeframe'],
+                'trend_analysis': trend_analysis,
+                'entry_analysis': entry_analysis,
+                'btc_correlation': btc_correlation,
+                'btc_trend': btc_trend
             }
             
-            return signal
+            # 11. Enviar para sistema de confirmação BTC
+            signal_id = self.btc_signal_manager.add_pending_signal(signal)
+            
+            # Não retornar sinal diretamente - será confirmado pelo BTCSignalManager
+            return None
             
         except Exception as e:
             print(f"❌ Erro ao analisar {symbol}: {e}")
@@ -514,7 +515,7 @@ class TechnicalAnalysis:
     
     def _calculate_signal_scores(self, trend_analysis: Dict, entry_analysis: Dict, 
                            signal_type: str, entry_df: pd.DataFrame) -> Dict[str, float]:
-        """Calcula pontuação detalhada do sinal (100 pontos total)"""
+        """Calcula pontuação detalhada do sinal (100 pontos total - sem BTC)"""
         scores = {'trend': 0.0, 'entry': 0.0, 'rsi': 0.0, 'pattern': 0.0}  # Usar float
         
         # 1. TENDÊNCIA 4H (35 pontos)

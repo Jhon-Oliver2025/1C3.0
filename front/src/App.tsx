@@ -29,6 +29,7 @@ import CheckoutDespertarCryptoPage from './pages/CheckoutDespertarCrypto/Checkou
 import SalesPage from './pages/SalesPage/SalesPage';
 import SalesAdminPage from './pages/SalesAdmin/SalesAdminPage';
 import CRMPage from './pages/CRM/CRMPage';
+import BTCAnalysisPage from './pages/BTCAnalysis/BTCAnalysisPage';
 
 import MainLayout from './components/MainLayout/MainLayout';
 import UpdateNotification from './components/UpdateNotification/UpdateNotification';
@@ -170,6 +171,14 @@ function App() {
         <ProtectedRoute>
           <MainLayout>
             <CRMPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/btc-analysis" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <BTCAnalysisPage />
           </MainLayout>
         </ProtectedRoute>
       } />

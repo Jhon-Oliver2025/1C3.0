@@ -32,6 +32,8 @@ from api_routes.market_status import market_status_bp
 from api_routes.cleanup_status import cleanup_status_bp
 from api_routes.debug import debug_bp
 from api_routes.payments import payments_bp
+from api_routes.btc_signals import btc_signals_bp, init_btc_signals_routes
+from api_routes.restart_system import restart_system_bp
 
 # Configurar CORS
 CORS(server, resources={
@@ -87,9 +89,18 @@ class KryptonBotSupabase:
             # Inicializar análise técnica com instância do banco
             try:
                 self.technical_analysis = TechnicalAnalysis(self.db)
+                
+                # Inicializar sistema BTC após TechnicalAnalysis
+                if hasattr(self.technical_analysis, 'btc_signal_manager'):
+                    self.btc_signal_manager = self.technical_analysis.btc_signal_manager
+                    print("✅ Sistema BTC inicializado com TechnicalAnalysis")
+                else:
+                    print("⚠️ Sistema BTC não encontrado em TechnicalAnalysis")
+                    
             except TypeError:
                 # Fallback se TechnicalAnalysis não aceitar db_instance
                 self.technical_analysis = TechnicalAnalysis()
+                self.btc_signal_manager = None
             
             # Inicializar gerenciador de sinais
             if self.is_supabase_configured and self.database_url:
@@ -226,6 +237,18 @@ def create_app():
     server.register_blueprint(cleanup_status_bp, url_prefix='/api')
     server.register_blueprint(debug_bp, url_prefix='/api/debug')
     server.register_blueprint(payments_bp, url_prefix='/api/payments')
+    server.register_blueprint(restart_system_bp)
+    
+    # Registrar rotas BTC (apenas se o sistema estiver inicializado)
+    try:
+        if hasattr(bot, 'btc_signal_manager') and bot.btc_signal_manager:
+            init_btc_signals_routes(bot.db, bot.btc_signal_manager)
+            server.register_blueprint(btc_signals_bp)
+            print("✅ Rotas BTC registradas com sucesso")
+        else:
+            print("⚠️ Sistema BTC não disponível - rotas BTC não registradas")
+    except Exception as e:
+        print(f"⚠️ Erro ao registrar rotas BTC: {e}")
     
     # Registrar rotas básicas
     @server.route('/api/health')
