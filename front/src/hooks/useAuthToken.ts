@@ -42,7 +42,7 @@ export const useAuthToken = () => {
     }
 
     try {
-      const response = await fetch('https://1crypten.space/api/auth/verify-token', {
+      const response = await fetch('/api/auth/verify-token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
