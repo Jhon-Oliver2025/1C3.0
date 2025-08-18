@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { Save, Eye, BarChart3, Settings, Clock, Palette, Type, Target } from 'lucide-react';
 import StandardFooter from '../../components/StandardFooter/StandardFooter';
 import logo3 from '/logo3.png';
+import MotivationalHeader from '../../components/MotivationalHeader/MotivationalHeader';
 
 /**
  * Página de Administração da Página de Vendas
@@ -488,6 +489,7 @@ const SalesAdminPage: React.FC = () => {
 
   return (
     <AdminContainer>
+      <MotivationalHeader text="Configure sua estratégia de vendas e transforme visitantes em clientes." />
       <AdminHeader>
         <HeaderContent>
           <Title>Admin - Página de Vendas</Title>

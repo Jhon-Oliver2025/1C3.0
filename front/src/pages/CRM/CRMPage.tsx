@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { FaUsers, FaShoppingCart, FaDollarSign, FaEye, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import logo3 from '/logo3.png';
+import MotivationalHeader from '../../components/MotivationalHeader/MotivationalHeader';
 
 // Interfaces
 interface User {
@@ -547,6 +548,7 @@ const CRMPage: React.FC = () => {
 
   return (
     <CRMContainer>
+      <MotivationalHeader text="Gerencie seu ecossistema com precisão e transforme dados em resultados." />
       <Header>
         <LogoContainer>
           <Title>CRM - Gestão Completa</Title>

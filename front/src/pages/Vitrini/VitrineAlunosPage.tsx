@@ -4,6 +4,7 @@ import logo1Crypten from '../../assets/members1cT.png'; // Importa o logo da 1cr
 import mainBanner from '../../assets/Bannerprincipal.png'; // Importa o banner principal
 import { useCourseAccess } from '../../hooks/useCourseAccess'; // Hook para controle de acesso
 import { useAdminCheck } from '../../hooks/useAdminCheck'; // Hook para verificar se é admin
+import MotivationalHeader from '../../components/MotivationalHeader/MotivationalHeader';
 
 import thumb01 from '../../assets/Tamb/01.png';
 import thumb02 from '../../assets/Tamb/02.png';
@@ -75,13 +76,6 @@ const VitrineAlunosPage: React.FC = () => {
 
   const vitrineData = {
     sections: [
-      {
-        type: 'banner',
-        image: mainBanner,
-        title: 'Bem-vindo à 1Crypten!',
-        subtitle: 'Sua jornada de aprendizado começa aqui.'
-      },
-
       {
         type: 'course_list',
         title: 'Despertar Crypto - 10 Aulas',
@@ -326,6 +320,7 @@ const VitrineAlunosPage: React.FC = () => {
    // Renderizar a vitrine com os cursos que o usuário tem acesso
    return (
      <div className="vitrine-alunos-page" style={{ backgroundColor: '#000000', padding: '20px' }}>
+       <MotivationalHeader text="Bem-vindo à 1Crypten! Sua jornada de aprendizado começa aqui." />
        <CourseShowcase data={vitrineData} userAccess={userAccessInfo} isAdmin={isAdmin} />
        <StandardFooter /> {/* Renderiza o componente StandardFooter */}
      </div>

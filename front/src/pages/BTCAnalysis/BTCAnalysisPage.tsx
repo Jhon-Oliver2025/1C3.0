@@ -15,6 +15,7 @@ import {
   FaSync
 } from 'react-icons/fa';
 import logo3 from '/logo3.png';
+import MotivationalHeader from '../../components/MotivationalHeader/MotivationalHeader';
 
 // Interfaces
 interface PendingSignal {
@@ -1318,6 +1319,7 @@ const BTCAnalysisPage: React.FC = () => {
 
   return (
     <BTCContainer>
+      <MotivationalHeader text="Analise o Bitcoin com precisão e confirme sinais que geram resultados." />
       <Header>
         <Title>
           <BTCIcon />

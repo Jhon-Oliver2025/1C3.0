@@ -4,14 +4,14 @@
 
 /* Container principal de motivação e cabeçalho */
 .mobile-motivation-header-container {
-  position: relative;
-  top: 0;
+  position: absolute;
+  top: 4px;
   left: 0;
   right: 0;
-  z-index: 1001; /* Z-index maior que a header */
+  z-index: 1001; /* Z-index menor que a navbar (1004) */
   background: transparent;
   padding: 2px;
-  margin-top: 62px; /* Altura da navbar + 2px de segurança mínima */
+  margin: 0;
 }
 
 /* Seção motivacional */
@@ -21,12 +21,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 8px 0 0 0;
+  margin: 0;
   text-align: center;
   transition: opacity 0.8s ease-in-out;
   overflow: hidden;
   border-radius: 12px;
-  z-index: 1001; /* Z-index maior que a header para ficar acima */
+  z-index: 1001; /* Z-index consistente com container */
   background: url('/terra2.png');
   background-size: cover;
   background-position: center;
