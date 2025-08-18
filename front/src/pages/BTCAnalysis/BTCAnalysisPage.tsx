@@ -764,7 +764,7 @@ const BTCAnalysisPage: React.FC = () => {
 
       try {
         // Verificar se o usuário é admin
-        const response = await fetch('http://localhost:5000/api/auth/check-admin', {
+        const response = await fetch('/api/auth/check-admin', {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -877,7 +877,7 @@ const BTCAnalysisPage: React.FC = () => {
   const loadRestartSystemInfo = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/restart-system/status', {
+      const response = await fetch('/api/restart-system/status', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -896,7 +896,7 @@ const BTCAnalysisPage: React.FC = () => {
   const loadPendingSignals = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/btc-signals/pending', {
+      const response = await fetch('/api/btc-signals/pending', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -915,7 +915,7 @@ const BTCAnalysisPage: React.FC = () => {
   const loadRejectedSignals = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/btc-signals/rejected?limit=20', {
+      const response = await fetch('/api/btc-signals/rejected?limit=20', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -934,7 +934,7 @@ const BTCAnalysisPage: React.FC = () => {
   const loadConfirmedSignals = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/btc-signals/confirmed?limit=20', {
+      const response = await fetch('/api/btc-signals/confirmed?limit=20', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -953,7 +953,7 @@ const BTCAnalysisPage: React.FC = () => {
   const loadBTCMetrics = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/btc-signals/metrics', {
+      const response = await fetch('/api/btc-signals/metrics', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -1032,7 +1032,7 @@ const BTCAnalysisPage: React.FC = () => {
   const handleConfirmSignal = async (signalId: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/btc-signals/confirm/${signalId}`, {
+      const response = await fetch(`/api/btc-signals/confirm/${signalId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -1058,7 +1058,7 @@ const BTCAnalysisPage: React.FC = () => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/btc-signals/reject/${signalId}`, {
+      const response = await fetch(`/api/btc-signals/reject/${signalId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
