@@ -144,6 +144,19 @@ class BTCSignalManager:
         if self.is_monitoring:
             print("⚠️ Monitoramento de confirmações já está ativo")
             return False
+        
+        print("🚀 Iniciando monitoramento de confirmações BTC...")
+        self.is_monitoring = True
+        
+        # Iniciar thread de monitoramento
+        self.monitoring_thread = threading.Thread(
+            target=self._confirmation_loop,
+            daemon=True
+        )
+        self.monitoring_thread.start()
+        
+        print("✅ Monitoramento de confirmações iniciado!")
+        return True
     
     def reset_daily_confirmed_signals(self) -> None:
         """Reseta o controle de sinais confirmados diários (chamado no restart às 21:00)"""
@@ -193,19 +206,6 @@ class BTCSignalManager:
     def get_daily_confirmed_list(self) -> List[tuple]:
         """Retorna a lista de sinais confirmados hoje"""
         return list(self.daily_confirmed_signals)
-        
-        print("🚀 Iniciando monitoramento de confirmações BTC...")
-        self.is_monitoring = True
-        
-        # Iniciar thread de monitoramento
-        self.monitoring_thread = threading.Thread(
-            target=self._confirmation_loop,
-            daemon=True
-        )
-        self.monitoring_thread.start()
-        
-        print("✅ Monitoramento de confirmações iniciado!")
-        return True
     
     def stop_monitoring(self) -> None:
         """Para o monitoramento de confirmações"""

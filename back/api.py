@@ -9,6 +9,7 @@ from config import server
 # Importar blueprints
 from api_routes.auth import auth_bp
 from api_routes.signals import signals_bp
+from api_routes.btc_signals import btc_signals_bp
 from api_routes.trading import trading_bp
 from api_routes.users import users_bp
 from api_routes.notifications import notifications_bp
@@ -42,9 +43,18 @@ def register_api_routes(app_instance, bot_instance):
     """Registra todas as rotas da API"""
     print("DEBUG: register_api_routes foi chamada!")
     
+    # Inicializar rotas BTC Signals com o btc_signal_manager do bot
+    if hasattr(bot_instance, 'analyzer') and hasattr(bot_instance.analyzer, 'btc_signal_manager'):
+        from api_routes.btc_signals import init_btc_signals_routes
+        init_btc_signals_routes(bot_instance.db, bot_instance.analyzer.btc_signal_manager)
+        print("✅ Rotas BTC Signals inicializadas com btc_signal_manager!")
+    else:
+        print("⚠️ btc_signal_manager não encontrado no bot_instance")
+    
     # Registrar blueprints
     app_instance.register_blueprint(auth_bp, url_prefix='/api/auth')
     app_instance.register_blueprint(signals_bp, url_prefix='/api/signals')
+    app_instance.register_blueprint(btc_signals_bp)  # Já tem url_prefix='/api/btc-signals' definido no blueprint
     app_instance.register_blueprint(trading_bp, url_prefix='/api/trading')
     app_instance.register_blueprint(users_bp, url_prefix='/api/users')
     app_instance.register_blueprint(notifications_bp, url_prefix='/api/notifications')

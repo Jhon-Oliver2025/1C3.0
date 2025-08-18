@@ -157,54 +157,45 @@ const DashboardPage: React.FC = () => {
       
       if (response.ok) {
         const data = await response.json();
-        // Buscar também dados de análise BTC se disponível
-        try {
-          const btcAnalysisResponse = await authenticatedFetch(`${apiUrl}/api/btc-signals/analysis`);
-          if (btcAnalysisResponse.ok) {
-            const analysisData = await btcAnalysisResponse.json();
-            setBtcData({
-              price: analysisData.data?.price || 0,
-              change_24h: analysisData.data?.change_24h || 0,
-              strength: analysisData.data?.strength || 0,
-              loading: false
-            });
-          } else {
-            // Fallback para dados básicos - usar dados atualizados do BTC
-             setBtcData({
-               price: 115582.90,
-               change_24h: 0.15,
-               strength: 50,
-               loading: false
-             });
-          }
-        } catch (error) {
-          console.error('Erro ao buscar análise BTC:', error);
-          // Usar dados atualizados do BTC em caso de erro
-           setBtcData({
-             price: 115582.90,
-             change_24h: 0.15,
-             strength: 50,
-             loading: false
-           });
+        
+        // Usar dados reais da API metrics que contém btc_price_data e btc_analysis
+        const btcPriceData = data.data?.btc_price_data;
+        const btcAnalysisData = data.data?.btc_analysis;
+        
+        if (btcPriceData && btcAnalysisData) {
+          setBtcData({
+            price: btcPriceData.price || 0,
+            change_24h: btcPriceData.change_24h || 0,
+            strength: btcAnalysisData.strength || 50,
+            loading: false
+          });
+        } else {
+          // Fallback apenas se não houver dados na API
+          setBtcData({
+            price: 50000,
+            change_24h: 0,
+            strength: 50,
+            loading: false
+          });
         }
       } else {
-        // Usar dados atualizados do BTC se a API não estiver disponível
-         setBtcData({
-           price: 115582.90,
-           change_24h: 0.15,
-           strength: 50,
-           loading: false
-         });
+        // Fallback se a API não estiver disponível
+        setBtcData({
+          price: 50000,
+          change_24h: 0,
+          strength: 50,
+          loading: false
+        });
       }
     } catch (error) {
       console.error('Erro ao buscar dados do BTC:', error);
-      // Usar dados atualizados do BTC em caso de erro
-       setBtcData({
-         price: 115582.90,
-         change_24h: 0.15,
-         strength: 50,
-         loading: false
-       });
+      // Fallback em caso de erro
+      setBtcData({
+        price: 50000,
+        change_24h: 0,
+        strength: 50,
+        loading: false
+      });
     }
   };
 

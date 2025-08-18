@@ -8,8 +8,11 @@
   transition: all 0.3s ease;
   position: relative;
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .signalCard.compra {
@@ -264,4 +267,150 @@
   background-color: rgba(100, 255, 218, 0.1);
   border-radius: 6px;
   font-size: 0.85em;
+}
+
+/* ========================================
+   📱 MEDIA QUERIES PARA RESPONSIVIDADE
+======================================== */
+
+/* Mobile pequeno (até 375px) */
+@media (max-width: 375px) {
+  .signalCard {
+    margin-bottom: 8px;
+    border-radius: 8px;
+  }
+  
+  .cardHeader {
+    padding: 8px 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .symbol {
+    font-size: 13px;
+  }
+  
+  .typeButton {
+    padding: 4px 8px;
+    font-size: 9px;
+    align-self: flex-end;
+  }
+  
+  .cardContent {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .priceRow {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .priceValue {
+    font-size: 13px;
+  }
+  
+  .label {
+    font-size: 9px;
+  }
+  
+  .bottomRow {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+  
+  .date {
+    font-size: 8px;
+  }
+  
+  .changePercentage {
+    font-size: 11px;
+  }
+}
+
+/* Mobile médio (376px - 414px) */
+@media (min-width: 376px) and (max-width: 414px) {
+  .cardHeader {
+    padding: 10px 12px;
+  }
+  
+  .symbol {
+    font-size: 14px;
+  }
+  
+  .typeButton {
+    font-size: 10px;
+  }
+  
+  .cardContent {
+    padding: 12px;
+  }
+  
+  .priceValue {
+    font-size: 14px;
+  }
+}
+
+/* Mobile grande (415px - 480px) */
+@media (min-width: 415px) and (max-width: 480px) {
+  .priceRow {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .bottomRow {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+/* Tablet pequeno (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+  .signalCard {
+    margin-bottom: 12px;
+  }
+  
+  .cardHeader {
+    padding: 12px 14px;
+  }
+  
+  .symbol {
+    font-size: 15px;
+  }
+  
+  .cardContent {
+    padding: 14px;
+  }
+  
+  .priceValue {
+    font-size: 15px;
+  }
+}
+
+/* Força aplicação em dispositivos móveis */
+@media (max-width: 768px) {
+  .signalCard {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  .cardHeader,
+  .cardContent,
+  .priceRow,
+  .bottomRow {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+  
+  .symbol,
+  .priceValue,
+  .date,
+  .changePercentage {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
 }
