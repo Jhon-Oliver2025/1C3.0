@@ -11,19 +11,17 @@ def jwt_required(f):
         if request.method == 'OPTIONS':
             return f(*args, **kwargs)
 
-        # Adicionar logs para debug
-        print("Headers recebidos:", request.headers)
-        print("Authorization header:", request.headers.get('Authorization'))
+        # Adicionar logs para debug (apenas em desenvolvimento)
+        auth_header = request.headers.get('Authorization')
         
         token = None
-        if 'Authorization' in request.headers:
-            auth_header = request.headers['Authorization']
-            print("Auth header encontrado:", auth_header)
-            if auth_header.startswith('Bearer '):
-                token = auth_header.split(' ')[1]
-                print("Token extraído:", token[:10], "...")
-        else:
-            print("Header 'Authorization' não encontrado")
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+            
+            # Verificar se o token não é 'null', vazio ou inválido
+            if not token or token.lower() == 'null' or token.strip() == '':
+                current_app.logger.debug(f"Token inválido recebido: {token}")
+                return jsonify({'message': 'Token de autenticação inválido.'}), 401
         
         if not token:
             return jsonify({'message': 'Token de autenticação ausente.'}), 401
@@ -42,10 +40,6 @@ def jwt_required(f):
                 return jsonify({'message': 'Token inválido ou expirado.'}), 403
             
             current_app.logger.debug(f"Token validado com sucesso para usuário: {user_data.get('username')}")
-            
-            # Debug: imprimir dados do usuário
-            print(f"DEBUG AUTH: user_data = {user_data}")
-            print(f"DEBUG AUTH: is_admin = {user_data.get('is_admin')} (type: {type(user_data.get('is_admin'))})")
             
             # Armazenar os dados do usuário no objeto 'g' do Flask
             g.user_data = user_data

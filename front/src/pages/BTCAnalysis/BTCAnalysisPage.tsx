@@ -146,6 +146,10 @@ const BTCContainer = styled.div`
   min-height: 100vh;
   color: white;
   padding: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 `;
 
 const Header = styled.div`
@@ -158,6 +162,13 @@ const Header = styled.div`
   border-radius: 12px;
   border: 1px solid #f59e0b;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
 `;
 
 const LogoContainer = styled.div`
@@ -178,6 +189,18 @@ const Title = styled.h1`
   display: flex;
   align-items: center;
   gap: 15px;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5em;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.2em;
+    flex-direction: column;
+    gap: 5px;
+  }
 `;
 
 const BTCIcon = styled(FaBitcoin)`
@@ -201,6 +224,17 @@ const RefreshButton = styled.button`
   border: 1px solid #f59e0b;
   position: relative;
   overflow: hidden;
+  
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+    font-size: 0.9em;
+    gap: 5px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+    font-size: 0.8em;
+  }
 
   &::before {
     content: '';
@@ -244,6 +278,17 @@ const StatsContainer = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 `;
 
 const StatCard = styled.div`
@@ -253,6 +298,14 @@ const StatCard = styled.div`
   border: 1px solid #f59e0b;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease;
+  
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 
   &:hover {
     transform: translateY(-2px);
@@ -263,6 +316,16 @@ const StatIcon = styled.div`
   font-size: 2em;
   color: #f59e0b;
   margin-bottom: 10px;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5em;
+    margin-bottom: 8px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.3em;
+    margin-bottom: 6px;
+  }
 `;
 
 const StatValue = styled.div`
@@ -270,11 +333,27 @@ const StatValue = styled.div`
   font-weight: bold;
   color: white;
   margin-bottom: 5px;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5em;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.3em;
+  }
 `;
 
 const StatLabel = styled.div`
   color: #94a3b8;
   font-size: 0.9em;
+  
+  @media (max-width: 768px) {
+    font-size: 0.8em;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.75em;
+  }
 `;
 
 const BTCOverviewCard = styled.div`
@@ -284,6 +363,15 @@ const BTCOverviewCard = styled.div`
   border: 1px solid #f59e0b;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   margin-bottom: 30px;
+  
+  @media (max-width: 768px) {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 15px;
+  }
 `;
 
 const BTCPrice = styled.div`
@@ -291,6 +379,15 @@ const BTCPrice = styled.div`
   font-weight: bold;
   color: #f59e0b;
   margin-bottom: 10px;
+  
+  @media (max-width: 768px) {
+    font-size: 2em;
+    text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.5em;
+  }
 `;
 
 const BTCChange = styled.div<{ $positive: boolean }>`
@@ -298,6 +395,15 @@ const BTCChange = styled.div<{ $positive: boolean }>`
   font-weight: 600;
   color: ${props => props.$positive ? '#10b981' : '#ef4444'};
   margin-bottom: 15px;
+  
+  @media (max-width: 768px) {
+    font-size: 1.2em;
+    text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1em;
+  }
 `;
 
 const BTCTrend = styled.div<{ $trend: string }>`
@@ -319,6 +425,16 @@ const TabContainer = styled.div`
   display: flex;
   margin-bottom: 20px;
   border-bottom: 2px solid #1e293b;
+  
+  @media (max-width: 768px) {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 `;
 
 const Tab = styled.button<{ $active: boolean }>`
@@ -331,6 +447,17 @@ const Tab = styled.button<{ $active: boolean }>`
   font-weight: 600;
   border-radius: 8px 8px 0 0;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  
+  @media (max-width: 768px) {
+    padding: 12px 20px;
+    font-size: 0.9em;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px 15px;
+    font-size: 0.8em;
+  }
 
   &:hover {
     background: ${props => props.$active ? '#f59e0b' : '#1e293b'};
@@ -353,6 +480,16 @@ const SignalCard = styled.div`
   border-radius: 12px;
   border: 1px solid #374151;
   transition: all 0.2s ease;
+  
+  @media (max-width: 768px) {
+    margin: 10px;
+    padding: 15px;
+  }
+  
+  @media (max-width: 480px) {
+    margin: 8px;
+    padding: 12px;
+  }
 
   &:hover {
     border-color: #f59e0b;
@@ -365,12 +502,26 @@ const SignalHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
 `;
 
 const SignalSymbol = styled.h3`
   color: #f59e0b;
   margin: 0;
   font-size: 1.5em;
+  
+  @media (max-width: 768px) {
+    font-size: 1.3em;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.1em;
+  }
 `;
 
 const SignalType = styled.span<{ $type: string }>`
@@ -387,6 +538,16 @@ const SignalDetails = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
   margin-bottom: 15px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
 `;
 
 const SignalDetail = styled.div`
@@ -430,6 +591,18 @@ const ActionButton = styled.button<{ $variant?: 'success' | 'danger' | 'info' }>
   align-items: center;
   gap: 8px;
   transition: all 0.2s ease;
+  
+  @media (max-width: 768px) {
+    padding: 6px 12px;
+    font-size: 0.9em;
+    gap: 5px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 5px 10px;
+    font-size: 0.8em;
+    gap: 3px;
+  }
 
   &:hover {
     transform: translateY(-1px);
@@ -500,6 +673,17 @@ const TechnicalGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 `;
 
 const TechnicalCard = styled.div`
@@ -509,6 +693,14 @@ const TechnicalCard = styled.div`
   border: 1px solid #f59e0b;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease;
+  
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 
   &:hover {
     transform: translateY(-2px);
@@ -522,6 +714,16 @@ const TechnicalTitle = styled.h3`
   display: flex;
   align-items: center;
   gap: 8px;
+  
+  @media (max-width: 768px) {
+    font-size: 1em;
+    margin-bottom: 10px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.9em;
+    gap: 5px;
+  }
 `;
 
 const TechnicalValue = styled.div<{ $color?: string }>`
@@ -529,12 +731,28 @@ const TechnicalValue = styled.div<{ $color?: string }>`
   font-weight: bold;
   color: ${props => props.$color || 'white'};
   margin-bottom: 8px;
+  
+  @media (max-width: 768px) {
+    font-size: 1.2em;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1em;
+  }
 `;
 
 const TechnicalSubtext = styled.div`
   color: #94a3b8;
   font-size: 0.9em;
   margin-bottom: 10px;
+  
+  @media (max-width: 768px) {
+    font-size: 0.8em;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.75em;
+  }
 `;
 
 const RSIBar = styled.div<{ $rsi: number }>`
@@ -611,6 +829,19 @@ const RefreshControls = styled.div`
   align-items: center;
   gap: 15px;
   margin-left: auto;
+  
+  @media (max-width: 768px) {
+    gap: 10px;
+    margin-left: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 8px;
+    flex-direction: column;
+    width: 100%;
+  }
 `;
 
 const AutoRefreshToggle = styled.button<{ $active: boolean }>`
@@ -632,6 +863,19 @@ const AutoRefreshToggle = styled.button<{ $active: boolean }>`
   border: 1px solid ${props => props.$active ? '#10b981' : '#6b7280'};
   position: relative;
   overflow: hidden;
+  
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+    font-size: 0.8em;
+    gap: 5px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+    font-size: 0.75em;
+    width: 100%;
+    justify-content: center;
+  }
 
   &::before {
     content: '';

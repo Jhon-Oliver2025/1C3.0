@@ -1272,6 +1272,10 @@ const AdminContainer = styled.div`
   min-height: 100vh;
   background: #000000;
   color: white;
+  
+  @media (max-width: 768px) {
+    padding: 0 10px;
+  }
 `;
 
 const AdminHeader = styled.header`
@@ -1284,6 +1288,13 @@ const AdminHeader = styled.header`
   border-radius: 12px;
   border: 1px solid #3b82f6;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
 `;
 
 const HeaderContent = styled.div`
@@ -1305,12 +1316,30 @@ const Title = styled.h1`
   color: #64FFDA;
   font-size: 2.5em;
   margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1.8em;
+    text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.5em;
+  }
 `;
 
 const Subtitle = styled.p`
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const ActionButtons = styled.div`
@@ -1318,6 +1347,16 @@ const ActionButtons = styled.div`
   gap: 1rem;
   margin-bottom: 2rem;
   justify-content: flex-start;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 0.5rem;
+  }
 `;
 
 const PreviewButton = styled.a`
@@ -1332,6 +1371,17 @@ const PreviewButton = styled.a`
   border-radius: 8px;
   font-weight: 600;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    justify-content: center;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
   
   &:hover {
     background: #2196f3;
@@ -1352,6 +1402,17 @@ const SaveButton = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
   
+  @media (max-width: 768px) {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    justify-content: center;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+  
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
@@ -1363,6 +1424,15 @@ const TabNavigation = styled.nav`
   background: rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid #333;
   overflow-x: auto;
+  
+  @media (max-width: 768px) {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 `;
 
 const TabButton = styled.button.withConfig({
@@ -1380,6 +1450,17 @@ const TabButton = styled.button.withConfig({
   transition: all 0.3s ease;
   white-space: nowrap;
   
+  @media (max-width: 768px) {
+    padding: 0.8rem 1.2rem;
+    font-size: 0.9rem;
+    gap: 0.3rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.6rem 1rem;
+    font-size: 0.8rem;
+  }
+  
   &:hover {
     background: rgba(33, 150, 243, 0.1);
     color: #2196f3;
@@ -1390,10 +1471,26 @@ const AdminContent = styled.main`
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
 `;
 
 const Section = styled.section`
   margin-bottom: 3rem;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 2rem;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -1401,24 +1498,62 @@ const SectionTitle = styled.h2`
   font-weight: 600;
   margin: 0 0 0.5rem 0;
   color: white;
+  
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.3rem;
+  }
 `;
 
 const SectionDescription = styled.p`
   font-size: 1.1rem;
   color: rgba(255, 255, 255, 0.7);
   margin: 0 0 2rem 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const HeadlinesGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 `;
 
 const ButtonsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
 `;
 
 const HeadlineCard = styled.div.withConfig({
@@ -1429,6 +1564,14 @@ const HeadlineCard = styled.div.withConfig({
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 1.2rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
 `;
 
 const ButtonCard = styled.div.withConfig({
@@ -1439,6 +1582,14 @@ const ButtonCard = styled.div.withConfig({
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 1.2rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
 `;
 
 const DelayCard = styled.div`
@@ -1447,6 +1598,15 @@ const DelayCard = styled.div`
   border-radius: 12px;
   padding: 2rem;
   max-width: 600px;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1.2rem;
+  }
 `;
 
 const CardHeader = styled.div`
@@ -1454,6 +1614,12 @@ const CardHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
 `;
 
 const CardTitle = styled.h3`
@@ -1461,6 +1627,14 @@ const CardTitle = styled.h3`
   font-weight: 600;
   margin: 0;
   color: white;
+  
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const ActiveToggle = styled.button.withConfig({
@@ -1476,6 +1650,16 @@ const ActiveToggle = styled.button.withConfig({
   cursor: pointer;
   transition: all 0.3s ease;
   
+  @media (max-width: 768px) {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+  
   &:hover {
     transform: scale(1.05);
   }
@@ -1483,6 +1667,14 @@ const ActiveToggle = styled.button.withConfig({
 
 const InputGroup = styled.div`
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 1.2rem;
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 1rem;
+  }
 `;
 
 const Label = styled.label`
@@ -1491,6 +1683,14 @@ const Label = styled.label`
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const TextInput = styled.input`
@@ -1501,6 +1701,16 @@ const TextInput = styled.input`
   border-radius: 6px;
   color: white;
   font-size: 1rem;
+  
+  @media (max-width: 768px) {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
   
   &:focus {
     outline: none;
@@ -1523,6 +1733,16 @@ const TextArea = styled.textarea`
   font-size: 1rem;
   resize: vertical;
   
+  @media (max-width: 768px) {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
   &:focus {
     outline: none;
     border-color: #2196f3;
@@ -1538,6 +1758,11 @@ const ColorRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
 `;
 
 const ColorInput = styled.input`
@@ -1548,6 +1773,14 @@ const ColorInput = styled.input`
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 6px;
   cursor: pointer;
+  
+  @media (max-width: 768px) {
+    height: 45px;
+  }
+  
+  @media (max-width: 480px) {
+    height: 40px;
+  }
   
   &:focus {
     outline: none;
@@ -1564,6 +1797,16 @@ const NumberInput = styled.input`
   color: white;
   font-size: 1rem;
   
+  @media (max-width: 768px) {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+  }
+  
   &:focus {
     outline: none;
     border-color: #2196f3;
@@ -1575,6 +1818,14 @@ const DelayInfo = styled.div`
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.6);
   margin-top: 0.5rem;
+  
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const ModernButtonPreview = styled.div.withConfig({
@@ -1691,6 +1942,16 @@ const ColorPalette = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0.75rem;
   margin-bottom: 1rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
 `;
 
 const ColorPaletteButton = styled.button.withConfig({
@@ -1871,6 +2132,18 @@ const ColorResultsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
   margin-top: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
 `;
 
 const ColorResultCard = styled.div<{ color: string }>`
@@ -1881,6 +2154,14 @@ const ColorResultCard = styled.div<{ color: string }>`
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 1.2rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
   
   &:hover {
     transform: translateY(-5px);
@@ -1893,6 +2174,11 @@ const ColorResultHeader = styled.div`
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
+  
+  @media (max-width: 480px) {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const ColorDot = styled.div<{ color: string }>`
@@ -1908,12 +2194,25 @@ const ColorResultTitle = styled.h3`
   font-weight: 600;
   color: white;
   margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
 `;
 
 const ColorResultStats = styled.div`
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 `;
 
 const StatItem = styled.div`
@@ -1927,6 +2226,14 @@ const StatValue = styled.div`
   font-size: 1.5rem;
   font-weight: 700;
   color: #2196f3;
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.2rem;
+  }
 `;
 
 const StatLabel = styled.div`
@@ -1934,6 +2241,14 @@ const StatLabel = styled.div`
   color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  
+  @media (max-width: 768px) {
+    font-size: 0.75rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 0.7rem;
+  }
 `;
 
 const CombinationWinner = styled.div`
@@ -1969,6 +2284,18 @@ const CombinationResultsGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 1.5rem;
   margin-top: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.2rem;
+    margin-top: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
 `;
 
 const CombinationResultCard = styled.div<{ isWinner: boolean }>`
@@ -2078,6 +2405,18 @@ const VideoOverlayGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const VideoOverlayCard = styled.div.withConfig({
@@ -2088,6 +2427,14 @@ const VideoOverlayCard = styled.div.withConfig({
   border-radius: 12px;
   padding: 1.5rem;
   transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 1.2rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+  }
 `;
 
 const VideoOverlayPreview = styled.div.withConfig({

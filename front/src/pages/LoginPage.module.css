@@ -88,20 +88,66 @@
 .loginButton {
   width: 100%;
   padding: 12px;
-  background-color: #00BCD4; /* Um tom de azul/ciano para o botão */
+  background-color: #00BCD4;
   color: white;
   border: none;
   border-radius: 5px;
   font-size: 1.1em;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 0 5px rgba(0, 188, 212, 0.5); /* Sombra sutil para o botão */
+  transition: all 0.3s ease;
+  box-shadow: 0 0 5px rgba(0, 188, 212, 0.5);
+  position: relative;
+  overflow: hidden;
 }
 
-.loginButton:hover {
-  background-color: #00ACC1; /* Tom mais escuro no hover */
-  box-shadow: 0 0 10px rgba(0, 188, 212, 0.8); /* Sombra mais intensa no hover */
+.loginButton:hover:not(:disabled) {
+  background-color: #00ACC1;
+  box-shadow: 0 0 10px rgba(0, 188, 212, 0.8);
+  transform: translateY(-1px);
+}
+
+.loginButton:disabled {
+  background-color: #4A5568;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.loginButton:disabled::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorMessage {
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  padding: 12px;
+  border-radius: 5px;
+  margin: 15px 0;
+  font-size: 0.9em;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .registerLink {

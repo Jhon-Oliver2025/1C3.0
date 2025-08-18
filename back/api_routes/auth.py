@@ -8,69 +8,85 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    """Endpoint para login de usuários"""
-    current_app.logger.info('Recebida requisição de login')
+    """Endpoint para login de usuários - Otimizado para performance"""
     try:
         data = request.get_json()
-        current_app.logger.info(f'Dados recebidos: {data}')
         if not data:
             return jsonify({'error': 'Dados não fornecidos'}), 400
             
-        username = data.get('username')
-        password = data.get('password')
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
         
-        if not all([username, password]):
+        # Validação rápida no backend
+        if not username or not password:
             return jsonify({'error': 'Username e senha são obrigatórios'}), 400
             
         bot_instance = getattr(current_app, 'bot_instance', None)
         if not bot_instance:
             return jsonify({'error': 'Sistema não inicializado'}), 500
             
-        # Tentar encontrar usuário por username ou email
+        # Otimização: Buscar usuário de forma mais eficiente
+        # Primeiro por username (mais comum), depois por email
         user = bot_instance.db.get_user_by_username(username)
-        if not user:
+        if not user and '@' in username:
             user = bot_instance.db.get_user_by_email(username)
             
         if not user:
-            return jsonify({'error': 'Usuário não encontrado'}), 401
+            # Delay mínimo para prevenir ataques de timing
+            import time
+            time.sleep(0.1)
+            return jsonify({'error': 'Credenciais inválidas'}), 401
             
-        # Verificar se o usuário está ativo
-        if user.get('status') != 'active':
-            if user.get('status') == 'pending':
-                return jsonify({'error': 'Conta pendente de aprovação pelo administrador'}), 401
-            elif user.get('status') == 'suspended':
-                return jsonify({'error': 'Conta suspensa. Entre em contato com o administrador'}), 401
-            else:
-                return jsonify({'error': 'Conta inativa'}), 401
+        # Verificação rápida de status
+        user_status = user.get('status', 'inactive')
+        if user_status != 'active':
+            status_messages = {
+                'pending': 'Conta pendente de aprovação pelo administrador',
+                'suspended': 'Conta suspensa. Entre em contato com o administrador',
+                'inactive': 'Conta inativa'
+            }
+            return jsonify({'error': status_messages.get(user_status, 'Conta inativa')}), 401
                 
-        # Verificar senha
+        # Verificação otimizada de senha
         stored_password = user.get('password', '')
+        password_valid = False
+        
         if stored_password.startswith('$2b$'):
-            # Senha com hash bcrypt
-            if not bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
-                return jsonify({'error': 'Senha incorreta'}), 401
+            # Hash bcrypt - verificação segura
+            password_valid = bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8'))
         else:
-            # Senha em texto plano (para compatibilidade)
-            if password != stored_password:
-                return jsonify({'error': 'Senha incorreta'}), 401
+            # Texto plano (compatibilidade) - deve ser migrado para hash
+            password_valid = (password == stored_password)
+            
+        if not password_valid:
+            # Delay mínimo para prevenir ataques de timing
+            import time
+            time.sleep(0.1)
+            return jsonify({'error': 'Credenciais inválidas'}), 401
                 
-        # Gerar token de autenticação
+        # Gerar token otimizado
         token = str(uuid.uuid4())
         expires_at = datetime.now() + timedelta(hours=24)
         
-        # Salvar token no banco
+        # Salvar token no banco de forma assíncrona se possível
         bot_instance.db.save_auth_token(token, user['id'], expires_at)
+        
+        # Resposta otimizada com dados essenciais
+        user_data = {
+            'id': user['id'],
+            'username': user['username'],
+            'email': user['email'],
+            'is_admin': bool(user.get('is_admin', False))
+        }
+        
+        # Log apenas em caso de sucesso (reduzir spam de logs)
+        current_app.logger.info(f"Login bem-sucedido para usuário: {user['username']}")
         
         return jsonify({
             'success': True,
             'message': 'Login realizado com sucesso',
             'token': token,
-            'user': {
-                'id': user['id'],
-                'username': user['username'],
-                'email': user['email'],
-                'is_admin': user.get('is_admin', False)
-            }
+            'user': user_data
         }), 200
         
     except Exception as e:

@@ -1,54 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './LoginPage.module.css';
 import logo from '../assets/logo.png';
-import { Link } from 'react-router-dom'; // Importe o componente Link
+import { Link } from 'react-router-dom';
+import { useOptimizedAuth } from '../hooks/useOptimizedAuth';
 
 function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null); // Estado para mensagens de erro
-  const [loading, setLoading] = useState(false); // Estado para indicar carregamento
+  const { login, isLoading, error, isAuthenticated, clearError } = useOptimizedAuth();
+
+  // Redirecionar se já estiver autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
+    clearError(); // Limpar erros anteriores
 
-    try {
-      console.log('Enviando requisição de login para:', '/api/auth/login');
-      console.log('Dados enviados:', { username: email, password: '***' });
-      
-      // Usar proxy do nginx em vez de conectar diretamente na porta 5000
-      const response = await fetch('/api/auth/login', { 
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // CORRIGIDO: O backend espera 'username' e 'password', não 'email'
-        body: JSON.stringify({ username: email, password }),
-      });
-
-      console.log('Status da resposta:', response.status);
-      console.log('Headers da resposta:', response.headers);
-      console.log('Response OK:', response.ok);
-      
-      const data = await response.json();
-      console.log('Resposta do backend (data):', data);
-
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        navigate('/dashboard');
-      } else {
-        setError(data.message || 'Erro ao fazer login. Verifique suas credenciais.');
-      }
-    } catch (err) {
-      console.error('Erro de rede ou servidor:', err);
-      setError('Não foi possível conectar ao servidor. Tente novamente mais tarde.');
-    } finally {
-      setLoading(false);
+    const success = await login(email, password);
+    if (success) {
+      navigate('/dashboard', { replace: true });
     }
+  };
+
+  // Limpar erro quando o usuário começar a digitar
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (error) clearError();
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (error) clearError();
   };
 
   return (
@@ -72,8 +60,9 @@ function LoginPage() {
               id="email"
               placeholder="seuemail@exemplo.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleEmailChange}
               autoComplete="username"
+              disabled={isLoading}
               required
             />
           </div>
@@ -84,14 +73,15 @@ function LoginPage() {
               id="password"
               placeholder="********"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               autoComplete="current-password"
+              disabled={isLoading}
               required
             />
           </div>
           {error && <p className={styles.errorMessage}>{error}</p>} {/* Exibe a mensagem de erro */}
-          <button type="submit" className={styles.loginButton} disabled={loading}>
-            {loading ? 'Entrando...' : 'Entrar'} {/* Altera o texto do botão durante o carregamento */}
+          <button type="submit" className={styles.loginButton} disabled={isLoading}>
+            {isLoading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
         {/* Adiciona o link para a página de registro */}
