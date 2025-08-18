@@ -274,6 +274,37 @@
   .navbar {
     padding: 0.8rem 1rem; /* Ajusta o padding para telas menores */
   }
+  
+  /* Controla o tamanho do logo em mobile */
+  .crypTenLogo {
+    height: 28px !important; /* Reduz o tamanho do logo em mobile */
+    max-height: 28px !important;
+    width: auto !important;
+  }
+  
+  .logoWrapper {
+    padding: 2px !important; /* Reduz o padding do wrapper */
+  }
+}
+
+/* Para telas muito pequenas */
+@media (max-width: 480px) {
+  .crypTenLogo {
+    height: 24px !important; /* Logo ainda menor em telas muito pequenas */
+    max-height: 24px !important;
+  }
+  
+  .navbar {
+    padding: 0.6rem 0.8rem; /* Padding ainda menor */
+  }
+}
+
+/* Para telas médias (tablets) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .crypTenLogo {
+    height: 35px; /* Tamanho intermediário para tablets */
+    max-height: 35px;
+  }
 }
 
 /* NEW: Animações para o brilho da borda */

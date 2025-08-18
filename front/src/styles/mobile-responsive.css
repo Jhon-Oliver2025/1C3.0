@@ -3,111 +3,117 @@
    Otimizado para 98% dos usuários mobile
 ======================================== */
 
-/* Reset e configurações base para mobile */
-* {
-  box-sizing: border-box;
-}
+/* Reset e configurações base para mobile - APENAS EM MOBILE */
+@media (max-width: 768px) {
+  * {
+    box-sizing: border-box;
+  }
 
-html, body {
-  overflow-x: hidden;
-  width: 100%;
-  max-width: 100vw;
-}
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
 
-/* Container principal - previne vazamento */
-.container, .main-content, [class*="container"] {
-  max-width: 100vw;
-  overflow-x: hidden;
-  padding-left: clamp(8px, 2vw, 16px);
-  padding-right: clamp(8px, 2vw, 16px);
+  /* Container principal - previne vazamento - APENAS EM MOBILE */
+  .container, .main-content {
+    max-width: 100vw;
+    overflow-x: hidden;
+    padding-left: clamp(8px, 2vw, 16px);
+    padding-right: clamp(8px, 2vw, 16px);
+  }
 }
 
 /* ========================================
    📱 CORREÇÕES PARA SIGNAL CARDS
 ======================================== */
 
-/* SignalCard - Responsividade Mobile */
-.signalCard {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 0 0 12px 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  box-sizing: border-box !important;
+/* SignalCard - Responsividade Mobile - APENAS EM MOBILE */
+@media (max-width: 768px) {
+  .signalCard {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
 }
 
-/* Header do card - mobile */
-.cardHeader {
-  padding: 8px 12px !important;
-  flex-wrap: wrap !important;
-  gap: 8px !important;
-}
+@media (max-width: 768px) {
+  /* Header do card - mobile */
+  .cardHeader {
+    padding: 8px 12px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
 
-/* Símbolo - tamanho mobile */
-.symbol {
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  line-height: 1.2 !important;
-}
+  /* Símbolo - tamanho mobile */
+  .symbol {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+  }
 
-/* Botão de tipo - mobile */
-.typeButton {
-  padding: 4px 8px !important;
-  font-size: 10px !important;
-  min-width: auto !important;
-  white-space: nowrap !important;
-}
+  /* Botão de tipo - mobile */
+  .typeButton {
+    padding: 4px 8px !important;
+    font-size: 10px !important;
+    min-width: auto !important;
+    white-space: nowrap !important;
+  }
 
-/* Conteúdo do card - mobile */
-.cardContent {
-  padding: 12px !important;
-  gap: 8px !important;
-}
+  /* Conteúdo do card - mobile */
+  .cardContent {
+    padding: 12px !important;
+    gap: 8px !important;
+  }
 
-/* Linha de preços - mobile */
-.priceRow {
-  flex-direction: column !important;
-  gap: 8px !important;
-  align-items: stretch !important;
-}
+  /* Linha de preços - mobile */
+  .priceRow {
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: stretch !important;
+  }
 
-/* Item de preço - mobile */
-.priceItem {
-  width: 100% !important;
-  align-items: flex-start !important;
-}
+  /* Item de preço - mobile */
+  .priceItem {
+    width: 100% !important;
+    align-items: flex-start !important;
+  }
 
-/* Labels - mobile */
-.label {
-  font-size: 10px !important;
-  margin-bottom: 2px !important;
-}
+  /* Labels - mobile */
+  .label {
+    font-size: 10px !important;
+    margin-bottom: 2px !important;
+  }
 
-/* Valores de preço - mobile */
-.priceValue {
-  font-size: 14px !important;
-  font-weight: 600 !important;
-  word-break: break-all !important;
-}
+  /* Valores de preço - mobile */
+  .priceValue {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    word-break: break-all !important;
+  }
 
-/* Linha inferior - mobile */
-.bottomRow {
-  flex-direction: column !important;
-  gap: 6px !important;
-  align-items: stretch !important;
-  padding-top: 6px !important;
-}
+  /* Linha inferior - mobile */
+  .bottomRow {
+    flex-direction: column !important;
+    gap: 6px !important;
+    align-items: stretch !important;
+    padding-top: 6px !important;
+  }
 
-/* Data - mobile */
-.date {
-  font-size: 9px !important;
-  line-height: 1.2 !important;
-}
+  /* Data - mobile */
+  .date {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
 
-/* Projeção - mobile */
-.changePercentage {
-  font-size: 12px !important;
-  font-weight: 600 !important;
+  /* Projeção - mobile */
+  .changePercentage {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+  }
 }
 
 /* ========================================
@@ -202,29 +208,31 @@ html, body {
    📱 CORREÇÕES PARA NAVBAR
 ======================================== */
 
-/* Navbar mobile */
-.navbar {
-  padding: 8px 12px !important;
-  height: auto !important;
-  min-height: 60px !important;
-}
+@media (max-width: 768px) {
+  /* Navbar mobile */
+  .navbar {
+    padding: 8px 12px !important;
+    height: auto !important;
+    min-height: 60px !important;
+  }
 
-/* Logo navbar - mobile */
-.navbarLogo {
-  height: 40px !important;
-  width: auto !important;
-}
+  /* Logo navbar - mobile */
+  .navbarLogo {
+    height: 40px !important;
+    width: auto !important;
+  }
 
-/* Menu mobile */
-.mobileMenu {
-  max-width: 100vw !important;
-  overflow-x: hidden !important;
-}
+  /* Menu mobile */
+  .mobileMenu {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
 
-.mobileNavLink {
-  padding: 12px 16px !important;
-  font-size: 14px !important;
-  border-bottom: 1px solid rgba(100, 255, 218, 0.1) !important;
+  .mobileNavLink {
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    border-bottom: 1px solid rgba(100, 255, 218, 0.1) !important;
+  }
 }
 
 /* ========================================
@@ -276,75 +284,81 @@ html, body {
    📱 CORREÇÕES PARA IMAGENS E MÍDIA
 ======================================== */
 
-/* Imagens responsivas */
-img {
-  max-width: 100% !important;
-  height: auto !important;
-  object-fit: contain !important;
-}
+@media (max-width: 768px) {
+  /* Imagens responsivas */
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
 
-/* Logos e ícones */
-.logo, [class*="logo"], [class*="icon"] {
-  max-width: 100% !important;
-  height: auto !important;
+  /* Logos e ícones */
+  .logo, [class*="logo"], [class*="icon"] {
+    max-width: 100% !important;
+    height: auto !important;
+  }
 }
 
 /* ========================================
    📱 CORREÇÕES PARA TEXTOS
 ======================================== */
 
-/* Títulos responsivos */
-h1 {
-  font-size: clamp(1.5rem, 4vw, 2.5rem) !important;
-  line-height: 1.2 !important;
-  margin-bottom: 0.5rem !important;
-}
+@media (max-width: 768px) {
+  /* Títulos responsivos */
+  h1 {
+    font-size: clamp(1.5rem, 4vw, 2.5rem) !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.5rem !important;
+  }
 
-h2 {
-  font-size: clamp(1.2rem, 3vw, 2rem) !important;
-  line-height: 1.3 !important;
-  margin-bottom: 0.5rem !important;
-}
+  h2 {
+    font-size: clamp(1.2rem, 3vw, 2rem) !important;
+    line-height: 1.3 !important;
+    margin-bottom: 0.5rem !important;
+  }
 
-h3 {
-  font-size: clamp(1rem, 2.5vw, 1.5rem) !important;
-  line-height: 1.3 !important;
-  margin-bottom: 0.5rem !important;
-}
+  h3 {
+    font-size: clamp(1rem, 2.5vw, 1.5rem) !important;
+    line-height: 1.3 !important;
+    margin-bottom: 0.5rem !important;
+  }
 
-/* Parágrafos responsivos */
-p {
-  font-size: clamp(0.9rem, 2vw, 1.1rem) !important;
-  line-height: 1.4 !important;
-  margin-bottom: 0.5rem !important;
-}
+  /* Parágrafos responsivos */
+  p {
+    font-size: clamp(0.9rem, 2vw, 1.1rem) !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.5rem !important;
+  }
 
-/* Texto pequeno */
-small, .small-text {
-  font-size: clamp(0.7rem, 1.5vw, 0.9rem) !important;
+  /* Texto pequeno */
+  small, .small-text {
+    font-size: clamp(0.7rem, 1.5vw, 0.9rem) !important;
+  }
 }
 
 /* ========================================
    📱 CORREÇÕES PARA BOTÕES
 ======================================== */
 
-/* Botões responsivos */
-button, .button, [class*="button"] {
-  min-height: 44px !important; /* Touch target mínimo */
-  padding: 12px 16px !important;
-  font-size: 14px !important;
-  border-radius: 6px !important;
-  width: auto !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
+@media (max-width: 768px) {
+  /* Botões responsivos */
+  button, .button, [class*="button"] {
+    min-height: 44px !important; /* Touch target mínimo */
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    border-radius: 6px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
 
-/* Botões de ação */
-.enterButton, .loginButton, .submitButton {
-  width: 100% !important;
-  max-width: 300px !important;
-  margin: 8px auto !important;
-  display: block !important;
+  /* Botões de ação */
+  .enterButton, .loginButton, .submitButton {
+    width: 100% !important;
+    max-width: 300px !important;
+    margin: 8px auto !important;
+    display: block !important;
+  }
 }
 
 /* ========================================
@@ -434,57 +448,61 @@ button, .button, [class*="button"] {
    📱 CORREÇÕES PARA SCROLL E OVERFLOW
 ======================================== */
 
-/* Prevenir scroll horizontal em todos os elementos */
-* {
-  max-width: 100vw !important;
-}
+@media (max-width: 768px) {
+  /* Prevenir scroll horizontal em todos os elementos */
+  * {
+    max-width: 100vw !important;
+  }
 
-/* Containers scrolláveis */
-.scrollable, [class*="scroll"] {
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-}
+  /* Containers scrolláveis */
+  .scrollable, [class*="scroll"] {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
 
-/* Barra de rolagem customizada para mobile */
-::-webkit-scrollbar {
-  width: 4px !important;
-}
+  /* Barra de rolagem customizada para mobile */
+  ::-webkit-scrollbar {
+    width: 4px !important;
+  }
 
-::-webkit-scrollbar-track {
-  background: rgba(100, 255, 218, 0.1) !important;
-}
+  ::-webkit-scrollbar-track {
+    background: rgba(100, 255, 218, 0.1) !important;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(100, 255, 218, 0.3) !important;
-  border-radius: 2px !important;
-}
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 255, 218, 0.3) !important;
+    border-radius: 2px !important;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 255, 218, 0.5) !important;
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 255, 218, 0.5) !important;
+  }
 }
 
 /* ========================================
    📱 CORREÇÕES PARA PERFORMANCE MOBILE
 ======================================== */
 
-/* Otimizações de performance */
-* {
-  -webkit-tap-highlight-color: transparent !important;
-  -webkit-touch-callout: none !important;
-  -webkit-user-select: none !important;
-  user-select: none !important;
-}
+@media (max-width: 768px) {
+  /* Otimizações de performance */
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
 
-/* Permitir seleção em inputs e textos */
-input, textarea, [contenteditable] {
-  -webkit-user-select: text !important;
-  user-select: text !important;
-}
+  /* Permitir seleção em inputs e textos */
+  input, textarea, [contenteditable] {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
 
-/* Aceleração de hardware para animações */
-.signalCard, .mobile-motivational, [class*="card"] {
-  transform: translateZ(0) !important;
-  will-change: transform !important;
+  /* Aceleração de hardware para animações */
+  .signalCard, .mobile-motivational, [class*="card"] {
+    transform: translateZ(0) !important;
+    will-change: transform !important;
+  }
 }
 
 /* ========================================
@@ -500,7 +518,7 @@ input, textarea, [contenteditable] {
   }
   
   /* Remove margens e paddings problemáticos */
-  .container, .main-content, [class*="container"] {
+  .container, .main-content {
     margin-left: 0 !important;
     margin-right: 0 !important;
   }
@@ -514,11 +532,11 @@ input, textarea, [contenteditable] {
   input, select, textarea {
     font-size: 16px !important;
   }
-}
-
-/* Regra final para garantir que nada vaze */
-* {
-  max-width: 100% !important;
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
+  
+  /* Regra final para garantir que nada vaze - APENAS MOBILE */
+  * {
+    max-width: 100% !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
 }
