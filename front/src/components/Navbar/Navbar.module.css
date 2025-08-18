@@ -9,7 +9,7 @@
   position: fixed;
   top: 0;
   left: 0; /* IMPORTANTE: Garante que comece do lado esquerdo */
-  z-index: 1000;
+  z-index: 1004;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
 }
