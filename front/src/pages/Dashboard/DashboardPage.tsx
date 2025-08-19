@@ -393,9 +393,26 @@ const DashboardPage: React.FC = () => {
       console.log('✅ Sinais carregados da API:', data);
       
       // Verificar se a resposta tem a estrutura esperada
-      const signalsArray = data.signals || data;
+      let signalsArray;
+      
+      // Tratar diferentes formatos de resposta da API
+      if (Array.isArray(data)) {
+        // Formato direto (novo endpoint público)
+        signalsArray = data;
+      } else if (data.data && Array.isArray(data.data.confirmed_signals)) {
+        // Formato admin com wrapper
+        signalsArray = data.data.confirmed_signals;
+      } else if (data.signals && Array.isArray(data.signals)) {
+        // Formato antigo
+        signalsArray = data.signals;
+      } else {
+        console.warn('⚠️ Formato de resposta não reconhecido:', data);
+        signalsArray = [];
+      }
+      
       if (!Array.isArray(signalsArray)) {
-        throw new Error('Formato de dados inválido da API');
+        console.error('❌ Dados não são um array:', signalsArray);
+        signalsArray = [];
       }
       
       // Debug: verificar tipos de sinais recebidos
@@ -418,17 +435,17 @@ const DashboardPage: React.FC = () => {
         }
         
         return {
-          id: signal.id || `${signal.symbol}-${signal.entry_time}`,
-          symbol: signal.symbol,
-          type: normalizedType,
-          entry_price: parseFloat(signal.entry_price) || 0,
-          entry_time: signal.entry_time,
-          target_price: parseFloat(signal.target_price) || 0,
-          projection_percentage: parseFloat(signal.projection_percentage) || 0,
-          signal_class: signal.signal_class,
-          status: signal.status,
-          is_favorite: false
-        };
+            id: signal.id || `${signal.symbol}-${signal.entry_time}`,
+            symbol: signal.symbol,
+            type: normalizedType,
+            entry_price: parseFloat(signal.entry_price) || 0,
+            entry_time: signal.entry_time,
+            target_price: parseFloat(signal.target_price) || 0,
+            projection_percentage: parseFloat(signal.projection_percentage) || 0,
+            signal_class: signal.signal_class || 'PADRÃO',
+            status: signal.status || 'CONFIRMED',
+            is_favorite: false
+          };
       });
       
       // Remover duplicatas baseado em símbolo e entry_time
@@ -518,7 +535,23 @@ const DashboardPage: React.FC = () => {
       }
       
       const data = await response.json();
-      const signalsArray = data.signals || data;
+      
+      // Tratar diferentes formatos de resposta da API (igual à função fetchSignals)
+      let signalsArray;
+      
+      if (Array.isArray(data)) {
+        // Formato direto (novo endpoint público)
+        signalsArray = data;
+      } else if (data.data && Array.isArray(data.data.confirmed_signals)) {
+        // Formato admin com wrapper
+        signalsArray = data.data.confirmed_signals;
+      } else if (data.signals && Array.isArray(data.signals)) {
+        // Formato antigo
+        signalsArray = data.signals;
+      } else {
+        console.warn('⚠️ Formato de resposta não reconhecido na atualização:', data);
+        signalsArray = [];
+      }
       
       if (Array.isArray(signalsArray)) {
         // Mapear novos sinais com normalização de tipo
@@ -537,17 +570,17 @@ const DashboardPage: React.FC = () => {
           }
           
           return {
-            id: signal.id || `${signal.symbol}-${signal.entry_time}`,
-            symbol: signal.symbol,
-            type: normalizedType,
-            entry_price: parseFloat(signal.entry_price),
-            target_price: parseFloat(signal.target_price),
-            projection_percentage: parseFloat(signal.projection_percentage),
-            signal_class: signal.signal_class,
-            entry_time: signal.entry_time,
-            status: signal.status || 'OPEN',
-            is_favorite: false
-          };
+          id: signal.id || `${signal.symbol}-${signal.entry_time}`,
+          symbol: signal.symbol,
+          type: normalizedType,
+          entry_price: parseFloat(signal.entry_price) || 0,
+          entry_time: signal.entry_time,
+          target_price: parseFloat(signal.target_price) || 0,
+          projection_percentage: parseFloat(signal.projection_percentage) || 0,
+          signal_class: signal.signal_class || 'PADRÃO',
+          status: signal.status || 'CONFIRMED',
+          is_favorite: false
+        };
         });
         
         // Remover duplicatas dos novos sinais
