@@ -419,14 +419,21 @@ const DashboardPage: React.FC = () => {
         };
       });
       
+      // Remover duplicatas baseado em símbolo e entry_time
+      const uniqueSignals = mappedSignals.filter((signal, index, self) => 
+        index === self.findIndex(s => s.symbol === signal.symbol && s.entry_time === signal.entry_time)
+      );
+      
       // Ordenar sinais por data/hora mais recente primeiro
-      const sortedSignals = mappedSignals.sort((a, b) => {
+      const sortedSignals = uniqueSignals.sort((a, b) => {
         const dateA = new Date(a.entry_time).getTime();
         const dateB = new Date(b.entry_time).getTime();
         return dateB - dateA; // Mais recente primeiro
       });
       
       setSignals(sortedSignals);
+      
+      console.log(`🔍 Sinais únicos após remoção de duplicatas: ${uniqueSignals.length}/${mappedSignals.length}`);
       
       // Debug: verificar contagem após mapeamento
       const debugBuyCount = sortedSignals.filter(s => s.type === 'COMPRA').length;
@@ -490,19 +497,34 @@ const DashboardPage: React.FC = () => {
       const signalsArray = data.signals || data;
       
       if (Array.isArray(signalsArray)) {
-        // Mapear novos sinais
-        const newSignals: Signal[] = signalsArray.map((signal: any) => ({
-          id: signal.id || `${signal.symbol}-${signal.entry_time}`,
-          symbol: signal.symbol,
-          type: signal.type as 'COMPRA' | 'VENDA',
-          entry_price: parseFloat(signal.entry_price),
-          target_price: parseFloat(signal.target_price),
-          projection_percentage: parseFloat(signal.projection_percentage),
-          signal_class: signal.signal_class,
-          entry_time: signal.entry_time,
-          status: signal.status || 'OPEN',
-          is_favorite: false
-        }));
+        // Mapear novos sinais com normalização de tipo
+        const newSignals: Signal[] = signalsArray.map((signal: any) => {
+          // Normalizar o tipo do sinal (igual à função fetchSignals)
+          let normalizedType: 'COMPRA' | 'VENDA';
+          const originalType = signal.type?.toUpperCase();
+          
+          if (originalType === 'LONG' || originalType === 'COMPRA' || originalType === 'BUY') {
+            normalizedType = 'COMPRA';
+          } else if (originalType === 'SHORT' || originalType === 'VENDA' || originalType === 'SELL') {
+            normalizedType = 'VENDA';
+          } else {
+            console.warn(`⚠️ Tipo de sinal desconhecido: ${signal.type} para ${signal.symbol}`);
+            normalizedType = 'COMPRA'; // Default para COMPRA em caso de tipo desconhecido
+          }
+          
+          return {
+            id: signal.id || `${signal.symbol}-${signal.entry_time}`,
+            symbol: signal.symbol,
+            type: normalizedType,
+            entry_price: parseFloat(signal.entry_price),
+            target_price: parseFloat(signal.target_price),
+            projection_percentage: parseFloat(signal.projection_percentage),
+            signal_class: signal.signal_class,
+            entry_time: signal.entry_time,
+            status: signal.status || 'OPEN',
+            is_favorite: false
+          };
+        });
         
         // Verificar se há novos sinais (comparar por ID ou símbolo+tempo)
         const currentSignalIds = signals.map(s => s.id);
