@@ -7,6 +7,7 @@ import BannerChe01 from '../../assets/Checkouts/BannerChe01.png';
 import Selo1 from '../../assets/Checkouts/selo 1.png';
 import Selo2 from '../../assets/Checkouts/selo 2.png';
 import Selo3 from '../../assets/Checkouts/selo 3 .png';
+import './CheckoutMobile.css';
 
 // Styled Components
 const CheckoutContainer = styled.div`
@@ -58,6 +59,17 @@ const MainContent = styled.div`
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
     gap: 2rem;
+    padding: 0 1.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0 0.5rem;
+    gap: 1rem;
   }
 `;
 
@@ -68,6 +80,17 @@ const CheckoutSection = styled.div`
   padding: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   height: fit-content;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+    margin: 0;
+  }
 `;
 
 const GuaranteesSection = styled.div`
@@ -93,6 +116,11 @@ const SelosVerticalBanner = styled.div`
     margin-bottom: 1rem;
     text-align: center;
     font-weight: 600;
+    
+    @media (max-width: 480px) {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
   }
   
   .selos-container {
@@ -100,16 +128,24 @@ const SelosVerticalBanner = styled.div`
     flex-direction: column;
     gap: 1rem;
     width: 100%;
+    
+    @media (max-width: 480px) {
+      gap: 0.75rem;
+    }
   }
   
   .selo-item {
     width: 100%;
-    height: 180px;
+    height: 220px;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
     
     &:hover {
       transform: translateY(-2px);
@@ -117,16 +153,64 @@ const SelosVerticalBanner = styled.div`
     }
     
     img {
-      width: 100%;
-      height: 100%;
+      width: 95%;
+      height: 95%;
       object-fit: contain;
+      object-position: center;
       background: white;
+      max-width: 95%;
+      max-height: 95%;
     }
   }
   
   @media (max-width: 768px) {
+    padding: 1rem;
+    border-radius: 12px;
+    
     .selo-item {
-      height: 120px;
+      height: 180px;
+      padding: 0.5rem;
+      
+      img {
+        object-fit: contain;
+        width: 90%;
+        height: 90%;
+        max-width: 90%;
+        max-height: 90%;
+      }
+    }
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0.75rem;
+    
+    .selo-item {
+      height: 160px;
+      border-radius: 6px;
+      padding: 0.5rem;
+      
+      img {
+        object-fit: contain;
+        width: 85%;
+        height: 85%;
+        max-width: 85%;
+        max-height: 85%;
+      }
+    }
+  }
+  
+  @media (max-width: 360px) {
+    .selo-item {
+      height: 140px;
+      padding: 0.5rem;
+      
+      img {
+        object-fit: contain;
+        width: 80%;
+        height: 80%;
+        max-width: 80%;
+        max-height: 80%;
+      }
     }
   }
 `;
@@ -175,6 +259,16 @@ const TestimonialsSection = styled.div`
   margin-left: auto;
   margin-right: auto;
   
+  @media (max-width: 768px) {
+    margin-top: 3rem;
+    padding: 0 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    margin-top: 2rem;
+    padding: 0 0.5rem;
+  }
+  
   h2 {
     text-align: center;
     font-size: 2.5rem;
@@ -183,6 +277,16 @@ const TestimonialsSection = styled.div`
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    
+    @media (max-width: 768px) {
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+    }
   }
 `;
 
@@ -191,6 +295,17 @@ const TestimonialsGrid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
   margin-bottom: 4rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
 `;
 
 const TestimonialCard = styled.div`
@@ -201,6 +316,16 @@ const TestimonialCard = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: transform 0.3s ease;
   
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 10px;
+  }
+  
   &:hover {
     transform: translateY(-5px);
   }
@@ -209,6 +334,10 @@ const TestimonialCard = styled.div`
     display: flex;
     gap: 0.25rem;
     margin-bottom: 1rem;
+    
+    @media (max-width: 480px) {
+      margin-bottom: 0.75rem;
+    }
     
     svg {
       color: #ffc107;
@@ -220,12 +349,27 @@ const TestimonialCard = styled.div`
     line-height: 1.6;
     margin-bottom: 1.5rem;
     color: rgba(255, 255, 255, 0.9);
+    
+    @media (max-width: 768px) {
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
   }
   
   .author {
     display: flex;
     align-items: center;
     gap: 1rem;
+    
+    @media (max-width: 480px) {
+      gap: 0.75rem;
+    }
     
     .avatar {
       width: 50px;
@@ -237,6 +381,12 @@ const TestimonialCard = styled.div`
       justify-content: center;
       font-weight: bold;
       font-size: 1.2rem;
+      
+      @media (max-width: 480px) {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
     }
     
     .info {
@@ -244,11 +394,19 @@ const TestimonialCard = styled.div`
         font-weight: 600;
         color: #ffffff;
         margin-bottom: 0.25rem;
+        
+        @media (max-width: 480px) {
+          font-size: 0.9rem;
+        }
       }
       
       .location {
         font-size: 0.9rem;
         color: rgba(255, 255, 255, 0.6);
+        
+        @media (max-width: 480px) {
+          font-size: 0.8rem;
+        }
       }
     }
   }
@@ -262,6 +420,19 @@ const CourseTitle = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    padding: 0 1rem;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+    padding: 0 0.5rem;
+    line-height: 1.2;
+  }
 `;
 
 const CourseSubtitle = styled.p`
@@ -272,6 +443,20 @@ const CourseSubtitle = styled.p`
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;
+    line-height: 1.5;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    padding: 0 0.5rem;
+    line-height: 1.4;
+  }
 `;
 
 /**

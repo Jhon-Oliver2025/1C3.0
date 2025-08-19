@@ -354,18 +354,30 @@ const DashboardPage: React.FC = () => {
       
       console.log('🔄 Carregando sinais da API...');
       
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Token não encontrado');
-      }
-      
-      const response = await fetch('/api/signals/', {
+      // Tentar primeiro o endpoint de sinais confirmados sem autenticação
+      let response = await fetch('/api/btc-signals/confirmed', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
+      
+      // Se falhar, tentar o endpoint antigo com autenticação
+      if (!response.ok) {
+        console.log('🔄 Tentando endpoint antigo com autenticação...');
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Token não encontrado');
+        }
+        
+        response = await fetch('/api/signals/', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
       
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
@@ -471,19 +483,31 @@ const DashboardPage: React.FC = () => {
     try {
       console.log('🔄 Verificando novos sinais...');
       
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.warn('Token não encontrado para atualizar sinais');
-        return;
-      }
-      
-      const response = await fetch('/api/signals/', {
+      // Tentar primeiro o endpoint de sinais confirmados sem autenticação
+      let response = await fetch('/api/btc-signals/confirmed', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
+      
+      // Se falhar, tentar o endpoint antigo com autenticação
+      if (!response.ok) {
+        console.log('🔄 Tentando endpoint antigo para atualização...');
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn('Token não encontrado para atualizar sinais');
+          return;
+        }
+        
+        response = await fetch('/api/signals/', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+      }
       
       if (!response.ok) {
         if (response.status === 403) {

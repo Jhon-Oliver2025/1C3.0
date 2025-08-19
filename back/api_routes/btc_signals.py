@@ -284,17 +284,33 @@ def get_rejected_signals():
         }), 500
 
 @btc_signals_bp.route('/confirmed', methods=['GET'])
-@jwt_required
 def get_confirmed_signals():
-    """Retorna lista de sinais confirmados"""
+    """Retorna lista de sinais confirmados (Público para dashboard, Admin para painel)"""
     try:
-        # Verificar se usuário é admin
-        user_data = get_current_user()
-        if not user_data or not user_data.get('is_admin'):
-            return jsonify({
-                'success': False,
-                'message': 'Acesso negado. Apenas administradores podem acessar esta funcionalidade.'
-            }), 403
+        # Verificar se há token de autenticação
+        auth_header = request.headers.get('Authorization')
+        
+        # Se há token, verificar se é admin (para painel admin)
+        if auth_header and auth_header.startswith('Bearer '):
+            try:
+                from middleware.auth_middleware import verify_token
+                token = auth_header.split(' ')[1]
+                user_data = verify_token(token)
+                
+                if not user_data or not user_data.get('is_admin'):
+                    return jsonify({
+                        'success': False,
+                        'message': 'Acesso negado. Apenas administradores podem acessar esta funcionalidade.'
+                    }), 403
+                    
+                # Usuário admin autenticado - retornar formato completo
+                admin_format = True
+            except:
+                # Token inválido - tratar como acesso público
+                admin_format = False
+        else:
+            # Sem token - acesso público para dashboard
+            admin_format = False
         
         if not btc_signal_manager:
             return jsonify({
@@ -310,15 +326,32 @@ def get_confirmed_signals():
         # Obter sinais confirmados (todos se não especificado limite)
         confirmed_signals = btc_signal_manager.get_confirmed_signals(limit=limit)
         
-        return jsonify({
-            'success': True,
-            'data': {
-                'confirmed_signals': confirmed_signals,
-                'count': len(confirmed_signals),
-                'limit': limit,
-                'last_updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S')
-            }
-        })
+        if admin_format:
+            # Formato completo para admin
+            return jsonify({
+                'success': True,
+                'data': {
+                    'confirmed_signals': confirmed_signals,
+                    'count': len(confirmed_signals),
+                    'limit': limit,
+                    'last_updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+                }
+            })
+        else:
+            # Formato simplificado para dashboard público
+            formatted_signals = []
+            for signal in confirmed_signals:
+                formatted_signals.append({
+                    'id': signal.get('id'),
+                    'symbol': signal.get('symbol'),
+                    'type': signal.get('type'),
+                    'entry_time': signal.get('entry_time'),
+                    'entry_price': signal.get('entry_price'),
+                    'status': signal.get('status', 'CONFIRMED'),
+                    'created_at': signal.get('created_at')
+                })
+            
+            return jsonify(formatted_signals)
         
     except Exception as e:
         print(f"❌ Erro ao obter sinais confirmados: {e}")
@@ -327,6 +360,8 @@ def get_confirmed_signals():
             'success': False,
             'message': f'Erro interno: {str(e)}'
         }), 500
+
+
 
 @btc_signals_bp.route('/metrics', methods=['GET'])
 @jwt_required

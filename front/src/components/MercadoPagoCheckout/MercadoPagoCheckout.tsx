@@ -16,6 +16,20 @@ const CheckoutContainer = styled.div`
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    margin: 1rem;
+    max-width: calc(100% - 2rem);
+    border-radius: 12px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+    gap: 1rem;
+  }
 `;
 
 const CourseInfo = styled.div`
@@ -47,6 +61,10 @@ const PriceSection = styled.div`
     color: rgba(255, 255, 255, 0.6);
     text-decoration: line-through;
     margin-bottom: 0.5rem;
+    
+    @media (max-width: 480px) {
+      font-size: 0.9rem;
+    }
   }
   
   .current-price {
@@ -57,15 +75,28 @@ const PriceSection = styled.div`
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: 0.5rem;
+    
+    @media (max-width: 768px) {
+      font-size: 2.2rem;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: 1.8rem;
+    }
   }
   
   .installments {
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.8);
+    
+    @media (max-width: 480px) {
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
   }
 `;
 
-const CheckoutButton = styled.button<{ loading?: boolean; disabled?: boolean }>`
+const CheckoutButton = styled.button<{ $loading?: boolean; disabled?: boolean }>`
   background: ${props => props.disabled ? 
     'rgba(255, 255, 255, 0.1)' : 
     'linear-gradient(135deg, #2196f3 0%, #1976d2 50%, #00bcd4 100%)'
@@ -76,16 +107,38 @@ const CheckoutButton = styled.button<{ loading?: boolean; disabled?: boolean }>`
   border-radius: 12px;
   font-size: 1.1rem;
   font-weight: bold;
-  cursor: ${props => (props.loading || props.disabled) ? 'not-allowed' : 'pointer'};
+  cursor: ${props => (props.$loading || props.disabled) ? 'not-allowed' : 'pointer'};
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
   transition: all 0.3s ease;
+  width: 100%;
+  min-height: 56px;
+  
+  @media (max-width: 768px) {
+    padding: 1.2rem 1.5rem;
+    font-size: 1rem;
+    min-height: 60px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    font-size: 0.95rem;
+    min-height: 52px;
+    gap: 0.5rem;
+  }
   
   &:hover {
-    transform: ${props => (props.loading || props.disabled) ? 'none' : 'translateY(-2px)'};
-    box-shadow: ${props => (props.loading || props.disabled) ? 'none' : '0 8px 25px rgba(33, 150, 243, 0.3)'};
+    transform: ${props => (props.$loading || props.disabled) ? 'none' : 'translateY(-2px)'};
+    box-shadow: ${props => (props.$loading || props.disabled) ? 'none' : '0 8px 25px rgba(33, 150, 243, 0.3)'};
+  }
+  
+  /* Melhor área de toque em mobile */
+  @media (max-width: 768px) {
+    &:active {
+      transform: ${props => (props.$loading || props.disabled) ? 'none' : 'scale(0.98)'};
+    }
   }
 `;
 
@@ -344,7 +397,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
       <CheckoutButton 
         onClick={handleCheckout} 
         disabled={isLoading || hasAccess}
-        loading={isLoading}
+        $loading={isLoading}
       >
         {isLoading ? (
           <>

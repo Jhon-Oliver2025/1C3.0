@@ -1,0 +1,268 @@
+/* Estilos específicos para mobile - Checkout Despertar Crypto */
+
+/* Otimizações gerais para mobile */
+@media (max-width: 768px) {
+  /* Melhor scroll em mobile */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Evitar zoom em inputs */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Melhor área de toque para botões */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Otimizações específicas para telas pequenas */
+@media (max-width: 480px) {
+  /* Container principal */
+  .checkout-mobile-container {
+    padding: 0.5rem;
+    margin: 0;
+  }
+  
+  /* Títulos responsivos */
+  .checkout-mobile-title {
+    font-size: 1.4rem !important;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+    padding: 0 0.5rem;
+  }
+  
+  /* Subtítulos responsivos */
+  .checkout-mobile-subtitle {
+    font-size: 0.9rem !important;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    padding: 0 0.5rem;
+  }
+  
+  /* Cards otimizados */
+  .checkout-mobile-card {
+    padding: 0.75rem !important;
+    margin: 0.5rem 0;
+    border-radius: 8px !important;
+  }
+  
+  /* Botões otimizados */
+  .checkout-mobile-button {
+    padding: 1rem 0.75rem !important;
+    font-size: 0.9rem !important;
+    min-height: 48px;
+    width: 100%;
+    border-radius: 8px !important;
+  }
+  
+  /* Preços otimizados */
+  .checkout-mobile-price {
+    font-size: 1.6rem !important;
+    line-height: 1.1;
+  }
+  
+  /* Imagens responsivas */
+  .checkout-mobile-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+  }
+  
+  /* Selos de qualidade otimizados para mobile */
+  .selos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .selo-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.5rem !important;
+    height: 160px !important;
+    background: white;
+    border-radius: 8px;
+    overflow: visible !important;
+  }
+  
+  .selo-item img {
+    object-fit: contain !important;
+    object-position: center !important;
+    width: 85% !important;
+    height: 85% !important;
+    max-width: 85% !important;
+    max-height: 85% !important;
+    background: transparent !important;
+  }
+  
+  /* Grid responsivo */
+  .checkout-mobile-grid {
+    display: block !important;
+    gap: 0.75rem;
+  }
+  
+  /* Espaçamentos reduzidos */
+  .checkout-mobile-spacing {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+  }
+}
+
+/* Otimizações para telas muito pequenas */
+@media (max-width: 360px) {
+  .checkout-mobile-container {
+    padding: 0.25rem;
+  }
+  
+  .checkout-mobile-title {
+    font-size: 1.2rem !important;
+  }
+  
+  .checkout-mobile-subtitle {
+    font-size: 0.85rem !important;
+  }
+  
+  .checkout-mobile-card {
+    padding: 0.5rem !important;
+  }
+  
+  .checkout-mobile-button {
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.85rem !important;
+  }
+  
+  .checkout-mobile-price {
+    font-size: 1.4rem !important;
+  }
+  
+  /* Selos ainda menores para telas muito pequenas */
+  .selo-item {
+    height: 140px !important;
+    padding: 0.5rem !important;
+  }
+  
+  .selo-item img {
+    width: 80% !important;
+    height: 80% !important;
+    max-width: 80% !important;
+    max-height: 80% !important;
+  }
+}
+
+/* Melhorias de performance para mobile */
+@media (max-width: 768px) {
+  /* Reduzir animações em dispositivos móveis */
+  *, *::before, *::after {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  /* Otimizar backdrop-filter para performance */
+  .checkout-mobile-blur {
+    backdrop-filter: blur(5px) !important;
+  }
+  
+  /* Reduzir sombras para melhor performance */
+  .checkout-mobile-shadow {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+/* Orientação landscape em mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .checkout-mobile-container {
+    padding: 0.5rem 1rem;
+  }
+  
+  .checkout-mobile-title {
+    font-size: 1.3rem !important;
+  }
+  
+  .checkout-mobile-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Melhorias de acessibilidade */
+@media (max-width: 768px) {
+  /* Melhor contraste para leitura */
+  .checkout-mobile-text {
+    color: rgba(255, 255, 255, 0.95) !important;
+  }
+  
+  /* Área de toque mínima */
+  .checkout-mobile-touch {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.5rem;
+  }
+  
+  /* Focus visível */
+  .checkout-mobile-focus:focus {
+    outline: 2px solid #2196f3;
+    outline-offset: 2px;
+  }
+}
+
+/* Otimizações específicas para o Mercado Pago */
+@media (max-width: 768px) {
+  .mercadopago-mobile {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+  
+  .mercadopago-mobile-button {
+    width: 100% !important;
+    padding: 1.2rem 1rem !important;
+    font-size: 1rem !important;
+    min-height: 56px;
+  }
+  
+  .mercadopago-mobile-price {
+    font-size: 2rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .mercadopago-mobile-button {
+    padding: 1rem 0.75rem !important;
+    font-size: 0.9rem !important;
+    min-height: 52px;
+  }
+  
+  .mercadopago-mobile-price {
+    font-size: 1.6rem !important;
+  }
+}
+
+/* Animações otimizadas para mobile */
+@media (max-width: 768px) {
+  .checkout-mobile-animate {
+    animation: fadeInUp 0.3s ease-out;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Hover effects adaptados para touch */
+  .checkout-mobile-hover:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
