@@ -287,10 +287,6 @@ async function clearAllCaches() {
 }
 
 console.log('🚀 Service Worker Otimizado carregado e pronto!');
-  '/api/trading',
-  '/api/market-status',
-  '/api/cleanup-status'
-];
 
 /**
  * Evento de instalação do Service Worker

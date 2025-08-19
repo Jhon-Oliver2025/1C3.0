@@ -21,6 +21,9 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       host: true,
+      fs: {
+        allow: ['..', './src/assets']
+      },
       proxy: {
         '/api': {
           target: apiTarget,
@@ -46,13 +49,20 @@ export default defineConfig(({ mode }) => {
       minify: 'esbuild', // Usar sempre esbuild para evitar problemas com terser no Docker
       sourcemap: false,
       chunkSizeWarningLimit: 1000,
-      assetsInlineLimit: 4096,
+      assetsInlineLimit: 0, // Não inlinear assets para evitar problemas com vídeos
       rollupOptions: {
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom'],
             styled: ['styled-components'],
             router: ['react-router-dom']
+          },
+          assetFileNames: (assetInfo) => {
+            // Manter estrutura de pastas para vídeos
+            if (assetInfo.name && assetInfo.name.endsWith('.mp4')) {
+              return 'assets/videos/[name]-[hash][extname]';
+            }
+            return 'assets/[name]-[hash][extname]';
           }
         }
       }

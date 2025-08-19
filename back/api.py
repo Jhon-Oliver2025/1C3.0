@@ -18,6 +18,7 @@ from api_routes.market_status import market_status_bp
 from api_routes.cleanup_status import cleanup_status_bp
 # from api_routes.analytics import analytics_bp  # Módulo não existe
 from api_routes.scheduler_management import scheduler_management_bp
+from api_routes.restart_system import restart_system_bp
 
 def create_app():
     """Factory function para criar a aplicação Flask"""
@@ -43,11 +44,16 @@ def register_api_routes(app_instance, bot_instance):
     """Registra todas as rotas da API"""
     print("DEBUG: register_api_routes foi chamada!")
     
+    # Definir bot_instance no contexto da aplicação para acesso global
+    app_instance.bot_instance = bot_instance
+    print(f"🔍 [DEBUG] bot_instance definido no app: {bot_instance}")
+    
     # Inicializar rotas BTC Signals com o btc_signal_manager do bot
     if hasattr(bot_instance, 'analyzer') and hasattr(bot_instance.analyzer, 'btc_signal_manager'):
         from api_routes.btc_signals import init_btc_signals_routes
         init_btc_signals_routes(bot_instance.db, bot_instance.analyzer.btc_signal_manager)
         print("✅ Rotas BTC Signals inicializadas com btc_signal_manager!")
+        print(f"🔍 [DEBUG] btc_signal_manager: {bot_instance.analyzer.btc_signal_manager}")
     else:
         print("⚠️ btc_signal_manager não encontrado no bot_instance")
     
@@ -63,6 +69,7 @@ def register_api_routes(app_instance, bot_instance):
     app_instance.register_blueprint(cleanup_status_bp, url_prefix='/api')
     # app_instance.register_blueprint(analytics_bp, url_prefix='/api/analytics')  # Módulo não existe
     app_instance.register_blueprint(scheduler_management_bp, url_prefix='/api')
+    app_instance.register_blueprint(restart_system_bp)  # Já tem url_prefix='/api/restart-system' definido no blueprint
     
     # Rota raiz
     @app_instance.route('/')

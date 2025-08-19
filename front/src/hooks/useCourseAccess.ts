@@ -44,7 +44,7 @@ export const useCourseAccess = (): UseCourseAccessReturn => {
       setIsLoading(true);
       setError(null);
       
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       if (!token) {
         setUserCourses([]);
         return;
@@ -65,7 +65,7 @@ export const useCourseAccess = (): UseCourseAccessReturn => {
         }
       } else if (response.status === 401) {
         // Token inválido, limpar dados
-        localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
         setUserCourses([]);
       }
     } catch (err) {
@@ -81,7 +81,7 @@ export const useCourseAccess = (): UseCourseAccessReturn => {
    */
   const fetchAvailableCourses = useCallback(async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       if (!token) return;
 
       const apiUrl = import.meta.env.VITE_API_URL || '';
@@ -108,7 +108,7 @@ export const useCourseAccess = (): UseCourseAccessReturn => {
    */
   const checkCourseAccess = useCallback(async (courseId: string): Promise<boolean> => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       if (!token) return false;
 
       const apiUrl = import.meta.env.VITE_API_URL || '';
@@ -136,7 +136,7 @@ export const useCourseAccess = (): UseCourseAccessReturn => {
    */
   const checkLessonAccess = useCallback(async (lessonId: string): Promise<boolean> => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       if (!token) return false;
 
       const apiUrl = import.meta.env.VITE_API_URL || '';
@@ -184,7 +184,7 @@ export const useCourseAccess = (): UseCourseAccessReturn => {
 
   // Carregar dados iniciais
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem('token');
     if (token) {
       fetchUserCourses();
       fetchAvailableCourses();
@@ -194,7 +194,7 @@ export const useCourseAccess = (): UseCourseAccessReturn => {
   // Escutar mudanças no token de autenticação
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'authToken') {
+      if (e.key === 'token') {
         if (e.newValue) {
           // Token adicionado/alterado
           fetchUserCourses();

@@ -237,7 +237,11 @@ def create_app():
     server.register_blueprint(cleanup_status_bp, url_prefix='/api')
     server.register_blueprint(debug_bp, url_prefix='/api/debug')
     server.register_blueprint(payments_bp, url_prefix='/api/payments')
-    server.register_blueprint(restart_system_bp)
+    try:
+        server.register_blueprint(restart_system_bp)
+        print("✅ Blueprint restart_system registrado com sucesso")
+    except Exception as e:
+        print(f"❌ Erro ao registrar restart_system blueprint: {e}")
     
     # Registrar rotas BTC (apenas se o sistema estiver inicializado)
     try:

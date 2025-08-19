@@ -77,9 +77,9 @@ const VitrineAlunosPage: React.FC = () => {
   const vitrineData = {
     sections: [
       {
-        type: 'course_list',
+        type: 'course_list' as const,
         title: 'Despertar Crypto - 10 Aulas',
-        filter: 'purchased',
+        filter: 'purchased' as const,
         courses: [
           {
             id: '1',
@@ -164,7 +164,7 @@ const VitrineAlunosPage: React.FC = () => {
           ]
       },
       {
-        type: 'promo_banners',
+        type: 'promo_banners' as const,
         banners: [
           {
             text: 'Toda grande jornada financeira começa com um propósito. O seu é a segurança de quem você ama.',
@@ -174,9 +174,9 @@ const VitrineAlunosPage: React.FC = () => {
         ]
       },
       {
-        type: 'course_list',
+        type: 'course_list' as const,
         title: 'Curso 2 - Masterclass com 10 Aulas',
-        filter: 'masterclass',
+        filter: 'masterclass' as const,
         courses: [
           {
             id: 'mc1',
@@ -213,7 +213,7 @@ const VitrineAlunosPage: React.FC = () => {
         ]
       },
       {
-        type: 'promo_banners',
+        type: 'promo_banners' as const,
         banners: [
           {
             text: 'Nós transformamos a complexidade do mercado em sinais claros. Sua missão é seguir o plano.',
@@ -223,9 +223,9 @@ const VitrineAlunosPage: React.FC = () => {
         ]
       },
       {
-        type: 'course_list',
+        type: 'course_list' as const,
         title: 'Curso 3 - App 1Crypten e Mentoria',
-        filter: 'app_mentoria',
+        filter: 'app_mentoria' as const,
         courses: [
           {
             id: 'app1',
@@ -262,7 +262,7 @@ const VitrineAlunosPage: React.FC = () => {
         ]
       },
       {
-        type: 'promo_banners',
+        type: 'promo_banners' as const,
         banners: [
           {
             text: 'Hoje, você investe em ativos. Amanhã, você colhe um legado. Continue firme.',
@@ -272,15 +272,11 @@ const VitrineAlunosPage: React.FC = () => {
         ]
       },
       {
-           type: 'community_text',
+           type: 'community_text' as const,
            text: 'Seja Bem Vindo ao nosso Ecosistema e a essa revolução Crypto.'
          },
 
-      {
-        type: 'footer_section',
-        title: 'Rodapé',
-        content: 'Informações adicionais e links importantes.'
-      }
+
       ]
     };
 

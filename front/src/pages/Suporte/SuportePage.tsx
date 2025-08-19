@@ -10,6 +10,7 @@ import '../Dashboard/DashboardMobile.css';
  */
 const SuportePage: React.FC = () => {
   const navigate = useNavigate();
+  const [isBackendOnline, setIsBackendOnline] = useState<boolean>(false);
 
   /**
    * Verifica o status do backend

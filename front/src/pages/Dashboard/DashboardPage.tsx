@@ -56,7 +56,7 @@ const DashboardPage: React.FC = () => {
   });
   
   const navigate = useNavigate();
-  const { isAuthenticated, authenticatedFetch, logout } = useAuthToken();
+  const { isAuthenticated, logout } = useAuthToken();
   const { isAdmin } = useAdminCheck();
   
   /**
@@ -130,8 +130,19 @@ const DashboardPage: React.FC = () => {
   // Função para buscar status das limpezas da API
   const fetchCleanupStatus = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('Token não encontrado para buscar status das limpezas');
+        return;
+      }
+      
       const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await authenticatedFetch(`${apiUrl}/api/cleanup-status`);
+      const response = await fetch(`${apiUrl}/api/cleanup-status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (response.ok) {
         const contentType = response.headers.get('content-type');
@@ -142,6 +153,12 @@ const DashboardPage: React.FC = () => {
           console.warn('API retornou HTML em vez de JSON, usando status padrão');
         }
       } else {
+        if (response.status === 401 || response.status === 403) {
+          console.warn('Token inválido para cleanup-status, redirecionando para login');
+          logout();
+          navigate('/login');
+          return;
+        }
         console.warn('API cleanup-status não disponível');
       }
     } catch (error) {
@@ -152,8 +169,19 @@ const DashboardPage: React.FC = () => {
   // Função para buscar dados do BTC
   const fetchBTCData = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('Token não encontrado para buscar dados do BTC');
+        return;
+      }
+      
       const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await authenticatedFetch(`${apiUrl}/api/btc-signals/metrics`);
+      const response = await fetch(`${apiUrl}/api/btc-signals/metrics`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -179,6 +207,12 @@ const DashboardPage: React.FC = () => {
           });
         }
       } else {
+        if (response.status === 401 || response.status === 403) {
+          console.warn('Token inválido para BTC data, redirecionando para login');
+          logout();
+          navigate('/login');
+          return;
+        }
         // Fallback se a API não estiver disponível
         setBtcData({
           price: 50000,
@@ -281,24 +315,26 @@ const DashboardPage: React.FC = () => {
   }, []);
 
   /**
-   * Formata a data para exibição
+   * Formata a data para exibição com timezone correto do Brasil
    */
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'America/Sao_Paulo'
     });
   };
 
   /**
-   * Formata o horário para exibição
+   * Formata o horário para exibição com timezone correto do Brasil
    */
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit'
+      second: '2-digit',
+      timeZone: 'America/Sao_Paulo'
     });
   };
 
@@ -318,11 +354,26 @@ const DashboardPage: React.FC = () => {
       
       console.log('🔄 Carregando sinais da API...');
       
-      const response = await authenticatedFetch('/api/signals/', {
-        method: 'GET'
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Token não encontrado');
+      }
+      
+      const response = await fetch('/api/signals/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          console.warn('Token inválido, redirecionando para login');
+          logout();
+          navigate('/login');
+          return;
+        }
         throw new Error(`Erro na API: ${response.status}`);
       }
       
@@ -413,8 +464,18 @@ const DashboardPage: React.FC = () => {
     try {
       console.log('🔄 Verificando novos sinais...');
       
-      const response = await authenticatedFetch('/api/signals/', {
-        method: 'GET'
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('Token não encontrado para atualizar sinais');
+        return;
+      }
+      
+      const response = await fetch('/api/signals/', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       
       if (!response.ok) {

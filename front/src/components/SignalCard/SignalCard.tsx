@@ -28,7 +28,7 @@ const SignalCard: React.FC<SignalCardProps> = ({
   onToggleFavorite,
   isFavorite,
 }) => {
-  // Função para formatar data
+  // Função para formatar data com timezone correto do Brasil
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     
@@ -39,17 +39,40 @@ const SignalCard: React.FC<SignalCardProps> = ({
         return dateString;
       }
       
-      // Tentar converter formato ISO
-      const dateObj = new Date(dateString);
-      if (!isNaN(dateObj.getTime())) {
-        return dateObj.toLocaleString('pt-BR', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false,
-        });
+      // Tentar converter formato ISO ou outros formatos
+      let dateObj: Date;
+      
+      // Se a string contém 'T' (formato ISO), processar como UTC e converter para horário local do Brasil
+      if (dateString.includes('T')) {
+        dateObj = new Date(dateString);
+        
+        if (!isNaN(dateObj.getTime())) {
+          // Converter para horário do Brasil usando timezone
+          return dateObj.toLocaleString('pt-BR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'America/Sao_Paulo'
+          });
+        }
+      } else {
+        // Para outros formatos, tentar conversão direta
+        dateObj = new Date(dateString);
+        
+        if (!isNaN(dateObj.getTime())) {
+          return dateObj.toLocaleString('pt-BR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'America/Sao_Paulo'
+          });
+        }
       }
     } catch (error) {
       console.error('Erro ao formatar data:', error);

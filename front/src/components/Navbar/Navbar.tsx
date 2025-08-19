@@ -85,10 +85,10 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout, isBackendOnl
                 <div className={styles.menuSection}>
                   <h3 className={styles.menuSectionTitle}>Navegação</h3>
                   <NavLink to="/dashboard" end className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
-                    <FaHome /> Dashboard
+                    Dashboard
                   </NavLink>
                   <NavLink to="/vitrine-alunos" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
-                    <img src={members1cT} alt="Members 1C Logo" className={styles.membersLogo} style={{width: '20px', height: '20px', marginRight: '8px'}} /> Área de Membros
+                    Área de Membros
                   </NavLink>
                 </div>
 
@@ -96,10 +96,10 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout, isBackendOnl
                 <div className={styles.menuSection}>
                   <h3 className={styles.menuSectionTitle}>Ajuda</h3>
                   <NavLink to="/suporte" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
-                    <FaQuestionCircle /> Suporte
+                    Suporte
                   </NavLink>
                   <NavLink to="/app" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
-                    📱 Baixar App
+                    Baixar App
                   </NavLink>
                 </div>
                 
@@ -108,13 +108,13 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout, isBackendOnl
                   <div className={styles.menuSection}>
                     <h3 className={styles.menuSectionTitle}>Administração</h3>
                     <NavLink to="/crm" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
-                      🔧 CRM
+                      CRM
                     </NavLink>
                     <NavLink to="/sales-admin" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
-                      🎬 Admin VSL
+                      Admin VSL
                     </NavLink>
                     <NavLink to="/btc-analysis" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
-                      ₿ BTC Analysis
+                      BTC Analysis
                     </NavLink>
                   </div>
                 )}
@@ -122,7 +122,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout, isBackendOnl
                 {/* Seção Logout */}
                 <div className={styles.menuSection}>
                   <Link to="/" className={`${styles.mobileNavLink} ${styles.logoutLink}`} onClick={() => { onLogout(); toggleMobileMenu(); }}>
-                    <FaSignOutAlt /> Sair
+                    Sair
                   </Link>
                 </div>
               </>
@@ -130,7 +130,7 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout, isBackendOnl
               <>
                 <div className={styles.menuSection}>
                   <NavLink to="/login" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
-                    <FaSignInAlt /> Login
+                    Login
                   </NavLink>
                 </div>
               </>

@@ -388,10 +388,26 @@ const CRMPage: React.FC = () => {
   };
 
   /**
-   * Formata data para exibição
+   * Formata data para exibição com timezone correto do Brasil
    */
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('pt-BR');
+    try {
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleString('pt-BR', {
+          timeZone: 'America/Sao_Paulo',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao formatar data:', error);
+    }
+    return 'Data inválida';
   };
 
   /**

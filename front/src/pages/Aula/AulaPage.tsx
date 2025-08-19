@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, CheckCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, CheckCircle, Maximize, Minimize } from 'lucide-react';
 import StandardFooter from '../../components/StandardFooter/StandardFooter';
 import ProtectedLesson from '../../components/ProtectedLesson/ProtectedLesson';
 
@@ -32,6 +32,7 @@ const Header = styled.header`
   align-items: center;
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
 `;
 
 const BackButton = styled.button`
@@ -108,15 +109,78 @@ const VideoPlayer = styled.div`
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 1.5rem;
+  
+  /* Estilos para fullscreen */
+  &:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    margin: 0;
+    
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+  
+  /* Suporte para webkit fullscreen */
+  &:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    margin: 0;
+    
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+  
+  /* Responsividade para dispositivos móveis */
+  @media (max-width: 768px) {
+    border-radius: 8px;
+    
+    &:fullscreen,
+    &:-webkit-full-screen {
+      border-radius: 0;
+    }
+  }
 `;
 
 const VideoElement = styled.video`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  cursor: pointer;
 `;
 
-const VideoControls = styled.div`
+const FullscreenButton = styled.button`
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+`;
+
+const VideoControls = styled.div<{ $visible: boolean }>`
   position: absolute;
   bottom: 0;
   left: 0;
@@ -126,6 +190,10 @@ const VideoControls = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
+  opacity: ${props => props.$visible ? 1 : 0};
+  visibility: ${props => props.$visible ? 'visible' : 'hidden'};
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 10;
 `;
 
 const PlayButton = styled.button`
@@ -404,6 +472,9 @@ const AulaPage: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
   const [videoDuration, setVideoDuration] = useState(0);
+  const [showControls, setShowControls] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [controlsTimeout, setControlsTimeout] = useState<NodeJS.Timeout | null>(null);
   
   // Sistema de progresso por vídeo com persistência no localStorage
   const [videoProgressData, setVideoProgressData] = useState<{[key: string]: {currentTime: number, duration: number}}>(() => {
@@ -429,6 +500,59 @@ const AulaPage: React.FC = () => {
       navigate('/aula/despertar-crypto-01');
     }
   }, [aulaId, lessons, navigate]);
+
+  // Gerencia eventos de fullscreen e orientação
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    const handleOrientationChange = () => {
+      // Detecta orientação landscape em dispositivos móveis
+      if (window.innerHeight < window.innerWidth && window.innerWidth <= 768) {
+        if (!document.fullscreenElement && videoRef.current) {
+          toggleFullscreen();
+        }
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener('resize', handleOrientationChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener('resize', handleOrientationChange);
+    };
+  }, []);
+
+  // Gerencia auto-hide dos controles quando o vídeo está tocando
+  useEffect(() => {
+    if (isPlaying) {
+      hideControlsAfterDelay();
+    } else {
+      setShowControls(true);
+      if (controlsTimeout) {
+        clearTimeout(controlsTimeout);
+      }
+    }
+
+    return () => {
+      if (controlsTimeout) {
+        clearTimeout(controlsTimeout);
+      }
+    };
+  }, [isPlaying]);
+
+  // Cleanup do timeout ao desmontar o componente
+  useEffect(() => {
+    return () => {
+      if (controlsTimeout) {
+        clearTimeout(controlsTimeout);
+      }
+    };
+  }, []);
   
   // Calcula o progresso real baseado no tempo assistido de cada vídeo
   const calculateCourseProgress = () => {
@@ -514,6 +638,64 @@ const AulaPage: React.FC = () => {
   const goBack = () => {
     navigate('/vitrine-alunos');
   };
+
+  /**
+   * Controla a visibilidade dos controles do vídeo
+   */
+  const hideControlsAfterDelay = () => {
+    if (controlsTimeout) {
+      clearTimeout(controlsTimeout);
+    }
+    
+    const timeout = setTimeout(() => {
+      if (isPlaying) {
+        setShowControls(false);
+      }
+    }, 3000); // Esconde após 3 segundos
+    
+    setControlsTimeout(timeout);
+  };
+
+  /**
+   * Mostra os controles temporariamente
+   */
+  const showControlsTemporarily = () => {
+    setShowControls(true);
+    hideControlsAfterDelay();
+  };
+
+  /**
+   * Alterna entre fullscreen e modo normal
+   */
+  const toggleFullscreen = () => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    if (!document.fullscreenElement) {
+      videoElement.requestFullscreen().then(() => {
+        setIsFullscreen(true);
+      }).catch(err => {
+        console.error('Erro ao entrar em fullscreen:', err);
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        setIsFullscreen(false);
+      }).catch(err => {
+        console.error('Erro ao sair do fullscreen:', err);
+      });
+    }
+  };
+
+  /**
+   * Manipula cliques no vídeo
+   */
+  const handleVideoClick = () => {
+    if (isPlaying) {
+      showControlsTemporarily();
+    } else {
+      togglePlayPause();
+    }
+  };
   
   if (!currentLesson) {
     return (
@@ -553,6 +735,7 @@ const AulaPage: React.FC = () => {
           <VideoPlayer>
             <VideoElement
               ref={videoRef}
+              onClick={handleVideoClick}
               onTimeUpdate={(e) => {
                 const currentTime = e.currentTarget.currentTime;
                 setVideoProgress(currentTime);
@@ -574,7 +757,7 @@ const AulaPage: React.FC = () => {
                 const duration = e.currentTarget.duration;
                 setVideoDuration(duration);
                 
-                // Restaura o progresso salvo do vídeo atual
+                // Restaura o progresso salvo
                 if (currentLesson) {
                   const savedProgress = videoProgressData[currentLesson.id];
                   if (savedProgress && videoRef.current) {
@@ -596,12 +779,24 @@ const AulaPage: React.FC = () => {
               }}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
+              onError={(e) => {
+                console.error('Erro ao carregar vídeo:', e.target.error);
+                console.log('Tentando carregar:', currentLesson ? videoMap[currentLesson.id] : v1);
+              }}
+              onLoadStart={() => {
+                console.log('Iniciando carregamento do vídeo:', currentLesson ? videoMap[currentLesson.id] : v1);
+              }}
+              onMouseMove={showControlsTemporarily}
             >
               <source src={currentLesson ? videoMap[currentLesson.id] : v1} type="video/mp4" />
-              Seu navegador não suporta o elemento de vídeo.
+              <p style={{ color: 'white', padding: '20px', textAlign: 'center' }}>
+                Seu navegador não suporta o elemento de vídeo ou o arquivo não foi encontrado.
+                <br />
+                <small>Vídeo: {currentLesson ? `Aula ${currentLesson.id}` : 'Aula 1'}</small>
+              </p>
             </VideoElement>
             
-            <VideoControls>
+            <VideoControls $visible={showControls}>
               <PlayButton onClick={togglePlayPause}>
                 {isPlaying ? <Pause size={20} /> : <Play size={20} />}
               </PlayButton>
@@ -617,8 +812,13 @@ const AulaPage: React.FC = () => {
                   if (videoRef.current) {
                     videoRef.current.currentTime = newTime;
                   }
+                  showControlsTemporarily();
                 }}
               />
+              
+              <FullscreenButton onClick={toggleFullscreen} title="Tela cheia">
+                {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+              </FullscreenButton>
               
               <button
                 onClick={markLessonAsCompleted}

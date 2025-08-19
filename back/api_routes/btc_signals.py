@@ -70,6 +70,118 @@ def get_pending_signals():
             'message': f'Erro interno: {str(e)}'
         }), 500
 
+@btc_signals_bp.route('/start-monitoring', methods=['POST'])
+@jwt_required
+def start_monitoring():
+    """Inicia o monitoramento do sistema BTC"""
+    try:
+        # Verificar se usuário é admin
+        user_data = get_current_user()
+        if not user_data or not user_data.get('is_admin'):
+            return jsonify({
+                'success': False,
+                'message': 'Acesso negado. Apenas administradores podem iniciar o monitoramento.'
+            }), 403
+        
+        if not btc_signal_manager:
+            return jsonify({
+                'success': False,
+                'message': 'Sistema BTC não inicializado'
+            }), 500
+        
+        # Verificar se já está monitorando
+        if btc_signal_manager.is_monitoring:
+            return jsonify({
+                'success': True,
+                'message': 'Monitoramento já está ativo',
+                'data': {
+                    'is_monitoring': True,
+                    'pending_signals': len(btc_signal_manager.pending_signals),
+                    'confirmed_signals': len(btc_signal_manager.confirmed_signals),
+                    'rejected_signals': len(btc_signal_manager.rejected_signals)
+                }
+            })
+        
+        # Iniciar monitoramento
+        success = btc_signal_manager.start_monitoring()
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Monitoramento iniciado com sucesso!',
+                'data': {
+                    'is_monitoring': btc_signal_manager.is_monitoring,
+                    'started_by': user_data.get('email', 'admin'),
+                    'started_at': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+                    'pending_signals': len(btc_signal_manager.pending_signals),
+                    'confirmed_signals': len(btc_signal_manager.confirmed_signals),
+                    'rejected_signals': len(btc_signal_manager.rejected_signals)
+                }
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Falha ao iniciar monitoramento'
+            }), 500
+        
+    except Exception as e:
+        print(f"❌ Erro ao iniciar monitoramento: {e}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': f'Erro interno: {str(e)}'
+        }), 500
+
+@btc_signals_bp.route('/stop-monitoring', methods=['POST'])
+@jwt_required
+def stop_monitoring():
+    """Para o monitoramento do sistema BTC"""
+    try:
+        # Verificar se usuário é admin
+        user_data = get_current_user()
+        if not user_data or not user_data.get('is_admin'):
+            return jsonify({
+                'success': False,
+                'message': 'Acesso negado. Apenas administradores podem parar o monitoramento.'
+            }), 403
+        
+        if not btc_signal_manager:
+            return jsonify({
+                'success': False,
+                'message': 'Sistema BTC não inicializado'
+            }), 500
+        
+        # Verificar se está monitorando
+        if not btc_signal_manager.is_monitoring:
+            return jsonify({
+                'success': True,
+                'message': 'Monitoramento já está parado',
+                'data': {
+                    'is_monitoring': False
+                }
+            })
+        
+        # Parar monitoramento
+        btc_signal_manager.stop_monitoring()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Monitoramento parado com sucesso!',
+            'data': {
+                'is_monitoring': btc_signal_manager.is_monitoring,
+                'stopped_by': user_data.get('email', 'admin'),
+                'stopped_at': datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+            }
+        })
+        
+    except Exception as e:
+        print(f"❌ Erro ao parar monitoramento: {e}")
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'message': f'Erro interno: {str(e)}'
+        }), 500
+
 @btc_signals_bp.route('/daily-status', methods=['GET'])
 @jwt_required
 def get_daily_signals_status():

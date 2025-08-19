@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import logo from '../assets/logo.png';
+import AccessIndicator from './AccessIndicator/AccessIndicator';
 
 interface Course {
   id: string;
@@ -13,17 +14,18 @@ interface Course {
 }
 
 interface Section {
-  type: 'banner' | 'course_list' | 'promo_banners';
+  type: 'banner' | 'course_list' | 'promo_banners' | 'community_text';
   image?: string;
   title?: string;
   subtitle?: string;
-  filter?: 'purchased' | 'recommended';
+  filter?: 'purchased' | 'recommended' | 'masterclass' | 'app_mentoria';
   courses?: Course[];
   banners?: {
     text: string;
     text_color: string;
     background_color: string;
   }[];
+  text?: string;
 }
 
 interface Layout {
@@ -256,6 +258,7 @@ const CourseCard = styled.div`
   cursor: pointer;
   min-width: 200px;
   flex-shrink: 0;
+  position: relative;
 
   &:hover {
     transform: scale(1.05);
@@ -400,6 +403,11 @@ const CourseShowcase: React.FC<CourseShowcaseProps> = ({ data, userAccess, isAdm
                   {section.courses.map(course => (
                     <CourseCard key={course.id} onClick={() => window.location.href = course.link}>
                       <CourseImage src={course.thumbnail} alt={course.title} />
+                      <AccessIndicator
+                        hasAccess={hasAccessToSection(section.filter)}
+                        isAdmin={isAdmin}
+                        courseName={section.title}
+                      />
                       <CourseInfo>
                         <CourseTitle>{course.title}</CourseTitle>
                         <CourseDescription>{course.description}</CourseDescription>

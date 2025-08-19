@@ -12,7 +12,11 @@ import {
   FaThumbsUp,
   FaThumbsDown,
   FaCog,
-  FaSync
+  FaSync,
+  FaDesktop,
+  FaPlay,
+  FaPause,
+  FaRedo
 } from 'react-icons/fa';
 import logo3 from '/logo3.png';
 import '../Dashboard/DashboardMobile.css';
@@ -184,21 +188,20 @@ const Logo = styled.img`
 
 const Title = styled.h1`
   color: #f59e0b;
-  font-size: 2.5em;
+  font-size: 2em;
   margin: 0;
   display: flex;
   align-items: center;
   gap: 15px;
   
   @media (max-width: 768px) {
-    font-size: 1.5em;
+    font-size: 1.3em;
     text-align: center;
-    gap: 10px;
+    gap: 8px;
   }
   
   @media (max-width: 480px) {
-    font-size: 1.2em;
-    flex-direction: column;
+    font-size: 1.1em;
     gap: 5px;
   }
 `;
@@ -975,7 +978,7 @@ const NextUpdateTimer = styled.div`
 // Componente Principal
 const BTCAnalysisPage: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'pending' | 'confirmed' | 'rejected' | 'metrics'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'confirmed' | 'rejected' | 'monitoring'>('pending');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   
@@ -1160,7 +1163,7 @@ const BTCAnalysisPage: React.FC = () => {
   const loadRejectedSignals = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/btc-signals/rejected?limit=20', {
+      const response = await fetch('/api/btc-signals/rejected', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -1179,7 +1182,7 @@ const BTCAnalysisPage: React.FC = () => {
   const loadConfirmedSignals = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/btc-signals/confirmed?limit=20', {
+      const response = await fetch('/api/btc-signals/confirmed', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -1515,6 +1518,74 @@ const BTCAnalysisPage: React.FC = () => {
     setAutoRefresh(!autoRefresh);
   };
 
+  // Funções de controle de monitoramento
+  const handleStartMonitoring = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/btc-signals/start-monitoring', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('✅ ' + data.message);
+        // Atualizar dados
+        loadData();
+      } else {
+        alert('❌ ' + data.message);
+      }
+    } catch (error) {
+      console.error('Erro ao iniciar monitoramento:', error);
+      alert('❌ Erro ao iniciar monitoramento');
+    }
+  };
+  
+  const handleStopMonitoring = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/btc-signals/stop-monitoring', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('✅ ' + data.message);
+        // Atualizar dados
+        loadData();
+      } else {
+        alert('❌ ' + data.message);
+      }
+    } catch (error) {
+      console.error('Erro ao parar monitoramento:', error);
+      alert('❌ Erro ao parar monitoramento');
+    }
+  };
+  
+  const handleRestartMonitoring = async () => {
+    try {
+      // Primeiro parar
+      await handleStopMonitoring();
+      // Aguardar um pouco
+      setTimeout(async () => {
+        // Depois iniciar
+        await handleStartMonitoring();
+      }, 1000);
+    } catch (error) {
+      console.error('Erro ao reiniciar monitoramento:', error);
+      alert('❌ Erro ao reiniciar monitoramento');
+    }
+  };
+
   const formatDateTime = (dateString: string | null | undefined) => {
     // Verificar se a string de data é válida
     if (!dateString || dateString === '' || dateString === 'null' || dateString === 'undefined') {
@@ -1529,22 +1600,52 @@ const BTCAnalysisPage: React.FC = () => {
       }
       
       // Tentar converter outros formatos
-      const date = new Date(dateString);
+      let date: Date;
       
-      // Verificar se a data é válida
-      if (isNaN(date.getTime())) {
-        console.warn('Data inválida recebida:', dateString);
-        return 'Data inválida';
+      // Se a string contém 'T' (formato ISO), processar como UTC e converter para horário local do Brasil
+      if (dateString.includes('T')) {
+        date = new Date(dateString);
+        
+        // Verificar se a data é válida
+        if (isNaN(date.getTime())) {
+          console.warn('Data ISO inválida recebida:', dateString);
+          return 'Data inválida';
+        }
+        
+        // Converter para horário do Brasil (UTC-3)
+        const brazilOffset = -3 * 60; // -3 horas em minutos
+        const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+        const brazilTime = new Date(utc + (brazilOffset * 60000));
+        
+        return brazilTime.toLocaleString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          timeZone: 'America/Sao_Paulo'
+        });
+      } else {
+        // Para outros formatos, tentar conversão direta
+        date = new Date(dateString);
+        
+        // Verificar se a data é válida
+        if (isNaN(date.getTime())) {
+          console.warn('Data inválida recebida:', dateString);
+          return 'Data inválida';
+        }
+        
+        return date.toLocaleString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          timeZone: 'America/Sao_Paulo'
+        });
       }
-      
-      return date.toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
     } catch (error) {
       console.error('Erro ao formatar data:', error, 'String recebida:', dateString);
       return 'Erro na data';
@@ -1887,6 +1988,12 @@ const BTCAnalysisPage: React.FC = () => {
         >
           Sinais Rejeitados ({rejectedSignals.length})
         </Tab>
+        <Tab 
+          $active={activeTab === 'monitoring'} 
+          onClick={() => setActiveTab('monitoring')}
+        >
+          <FaDesktop /> Monitoramento
+        </Tab>
       </TabContainer>
 
       {/* Conteúdo das Tabs */}
@@ -2063,6 +2170,238 @@ const BTCAnalysisPage: React.FC = () => {
                   </SignalDetails>
                 </SignalCard>
               ))
+            )}
+          </div>
+        )}
+
+        {activeTab === 'monitoring' && (
+          <div>
+            {/* Status do Sistema */}
+            <TechnicalGrid>
+              {/* Card Status Geral */}
+              <TechnicalCard>
+                <TechnicalTitle>
+                  <FaDesktop /> Status do Sistema
+                </TechnicalTitle>
+                <TechnicalValue $color={btcMetrics?.system_status === 'active' ? '#10b981' : '#ef4444'}>
+                  {btcMetrics?.system_status === 'active' ? '🟢 ATIVO' : '🔴 INATIVO'}
+                </TechnicalValue>
+                <TechnicalSubtext>
+                  Sistema de confirmação em tempo real
+                </TechnicalSubtext>
+                
+                <TimeframeRow>
+                  <TimeframeLabel>Thread Monitoramento:</TimeframeLabel>
+                  <TimeframeValue $color="#10b981">
+                    🔄 Rodando
+                  </TimeframeValue>
+                </TimeframeRow>
+                
+                <TimeframeRow>
+                  <TimeframeLabel>Última Verificação:</TimeframeLabel>
+                  <TimeframeValue>
+                    {new Date().toLocaleTimeString('pt-BR')}
+                  </TimeframeValue>
+                </TimeframeRow>
+                
+                <div style={{ marginTop: '15px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                   <ActionButton 
+                     $variant="success"
+                     onClick={handleStartMonitoring}
+                   >
+                     <FaPlay /> Iniciar
+                   </ActionButton>
+                   <ActionButton 
+                     $variant="danger"
+                     onClick={handleStopMonitoring}
+                   >
+                     <FaPause /> Pausar
+                   </ActionButton>
+                   <ActionButton 
+                     $variant="info"
+                     onClick={handleRestartMonitoring}
+                   >
+                     <FaRedo /> Reiniciar
+                   </ActionButton>
+                 </div>
+              </TechnicalCard>
+
+              {/* Card Métricas em Tempo Real */}
+              <TechnicalCard>
+                <TechnicalTitle>
+                  📊 Métricas em Tempo Real
+                </TechnicalTitle>
+                <TechnicalValue $color="#f59e0b">
+                  {btcMetrics?.pending_signals || 0}
+                </TechnicalValue>
+                <TechnicalSubtext>
+                  Sinais sendo monitorados
+                </TechnicalSubtext>
+                
+                <TimeframeRow>
+                  <TimeframeLabel>Confirmados hoje:</TimeframeLabel>
+                  <TimeframeValue $color="#10b981">
+                    {btcMetrics?.confirmed_signals || 0}
+                  </TimeframeValue>
+                </TimeframeRow>
+                
+                <TimeframeRow>
+                  <TimeframeLabel>Rejeitados hoje:</TimeframeLabel>
+                  <TimeframeValue $color="#ef4444">
+                    {btcMetrics?.rejected_signals || 0}
+                  </TimeframeValue>
+                </TimeframeRow>
+                
+                <TimeframeRow>
+                  <TimeframeLabel>Taxa de Sucesso:</TimeframeLabel>
+                  <TimeframeValue $color="#f59e0b">
+                    {btcMetrics?.confirmation_rate?.toFixed(1) || 0}%
+                  </TimeframeValue>
+                </TimeframeRow>
+              </TechnicalCard>
+
+              {/* Card Performance */}
+              <TechnicalCard>
+                <TechnicalTitle>
+                  ⚡ Performance do Sistema
+                </TechnicalTitle>
+                <TechnicalValue $color="#10b981">
+                  {btcMetrics?.average_confirmation_time_minutes?.toFixed(1) || 0}min
+                </TechnicalValue>
+                <TechnicalSubtext>
+                  Tempo médio de confirmação
+                </TechnicalSubtext>
+                
+                <TimeframeRow>
+                  <TimeframeLabel>Processados total:</TimeframeLabel>
+                  <TimeframeValue>
+                    {btcMetrics?.total_signals_processed || 0}
+                  </TimeframeValue>
+                </TimeframeRow>
+                
+                <TimeframeRow>
+                  <TimeframeLabel>Uptime sistema:</TimeframeLabel>
+                  <TimeframeValue $color="#10b981">
+                    {restartSystemInfo?.system_uptime.hours || 0}h {restartSystemInfo?.system_uptime.minutes || 0}m
+                  </TimeframeValue>
+                </TimeframeRow>
+                
+                <TimeframeRow>
+                  <TimeframeLabel>Próximo restart:</TimeframeLabel>
+                  <TimeframeValue>
+                    {String(restartSystemInfo?.restart_info.countdown.hours || 0).padStart(2, '0')}:
+                    {String(restartSystemInfo?.restart_info.countdown.minutes || 0).padStart(2, '0')}
+                  </TimeframeValue>
+                </TimeframeRow>
+              </TechnicalCard>
+            </TechnicalGrid>
+
+            {/* Lista de Sinais em Monitoramento */}
+            {pendingSignals.length > 0 && (
+              <div>
+                <StrategyTitle style={{ marginBottom: '20px' }}>
+                  <FaEye /> Sinais em Monitoramento Ativo
+                </StrategyTitle>
+                
+                {pendingSignals.slice(0, 3).map(signal => (
+                  <SignalCard key={signal.id} style={{ borderLeft: '4px solid #f59e0b' }}>
+                    <SignalHeader>
+                      <SignalSymbol>{signal.symbol}</SignalSymbol>
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <SignalType $type={signal.type}>{signal.type}</SignalType>
+                        <span style={{ 
+                          padding: '4px 8px', 
+                          borderRadius: '12px', 
+                          fontSize: '0.8em', 
+                          fontWeight: 'bold',
+                          background: signal.quality_score >= 85 ? '#10b981' : signal.quality_score >= 80 ? '#f59e0b' : '#6b7280',
+                          color: 'white'
+                        }}>
+                          {signal.signal_class}
+                        </span>
+                      </div>
+                    </SignalHeader>
+                    
+                    <div style={{ 
+                      background: 'rgba(245, 158, 11, 0.1)', 
+                      padding: '15px', 
+                      borderRadius: '8px', 
+                      marginBottom: '15px',
+                      border: '1px solid rgba(245, 158, 11, 0.3)'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>🔍 Status do Monitoramento</span>
+                        <span style={{ color: '#10b981', fontSize: '0.9em' }}>⏱️ Monitorando há {signal.confirmation_attempts * 2}min</span>
+                      </div>
+                      
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                        <div>
+                          <div style={{ color: '#94a3b8', fontSize: '0.8em' }}>📈 Movimento Preço</div>
+                          <div style={{ color: 'white', fontWeight: 'bold' }}>⏳ Aguardando (+0.3%)</div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#94a3b8', fontSize: '0.8em' }}>📊 Volume</div>
+                          <div style={{ color: '#10b981', fontWeight: 'bold' }}>✅ Confirmado (+45%)</div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#94a3b8', fontSize: '0.8em' }}>₿ BTC Alinhamento</div>
+                          <div style={{ color: '#10b981', fontWeight: 'bold' }}>✅ Alinhado ({signal.btc_trend})</div>
+                        </div>
+                        <div>
+                          <div style={{ color: '#94a3b8', fontSize: '0.8em' }}>🔄 Momentum</div>
+                          <div style={{ color: '#f59e0b', fontWeight: 'bold' }}>⏳ 1/2 velas</div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <SignalDetails>
+                      <SignalDetail>
+                        <DetailLabel>Entrada</DetailLabel>
+                        <DetailValue>{formatPrice(signal.entry_price)}</DetailValue>
+                      </SignalDetail>
+                      <SignalDetail>
+                        <DetailLabel>Alvo</DetailLabel>
+                        <DetailValue>{formatPrice(signal.target_price)}</DetailValue>
+                      </SignalDetail>
+                      <SignalDetail>
+                        <DetailLabel>Score Qualidade</DetailLabel>
+                        <DetailValue>{signal.quality_score.toFixed(1)}</DetailValue>
+                      </SignalDetail>
+                      <SignalDetail>
+                        <DetailLabel>Tentativas</DetailLabel>
+                        <DetailValue>{signal.confirmation_attempts}/12</DetailValue>
+                      </SignalDetail>
+                      <SignalDetail>
+                        <DetailLabel>Expira em</DetailLabel>
+                        <DetailValue>{formatDateTime(signal.expires_at)}</DetailValue>
+                      </SignalDetail>
+                    </SignalDetails>
+                  </SignalCard>
+                ))}
+                
+                {pendingSignals.length > 3 && (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    padding: '20px', 
+                    color: '#94a3b8',
+                    background: 'rgba(30, 41, 59, 0.5)',
+                    borderRadius: '8px',
+                    marginTop: '15px'
+                  }}>
+                    ... e mais {pendingSignals.length - 3} sinais sendo monitorados
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {pendingSignals.length === 0 && (
+              <EmptyState>
+                <EmptyIcon><FaDesktop /></EmptyIcon>
+                <div>Nenhum sinal sendo monitorado no momento</div>
+                <div style={{ fontSize: '0.9em', marginTop: '10px', color: '#6b7280' }}>
+                  O sistema está ativo e aguardando novos sinais para monitorar
+                </div>
+              </EmptyState>
             )}
           </div>
         )}

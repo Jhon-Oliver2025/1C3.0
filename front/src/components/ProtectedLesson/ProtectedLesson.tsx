@@ -132,6 +132,7 @@ interface ProtectedLessonProps {
 /**
  * Componente que protege o acesso às aulas
  * Verifica se o usuário tem permissão para acessar a aula específica
+ * Administradores têm acesso direto, usuários logados veem indicador visual
  */
 const ProtectedLesson: React.FC<ProtectedLessonProps> = ({
   lessonId,
@@ -149,6 +150,7 @@ const ProtectedLesson: React.FC<ProtectedLessonProps> = ({
   
   const [isChecking, setIsChecking] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [courseInfo, setCourseInfo] = useState<{
     courseId: string;
     name: string;
@@ -163,13 +165,14 @@ const ProtectedLesson: React.FC<ProtectedLessonProps> = ({
 
   /**
    * Verifica se o usuário tem acesso à aula
+   * Administradores têm acesso direto
    */
   const checkAccess = async () => {
     try {
       setIsChecking(true);
       
       // Verificar se está logado
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       if (!token) {
         if (redirectToLogin) {
           navigate('/login', { 
@@ -185,20 +188,36 @@ const ProtectedLesson: React.FC<ProtectedLessonProps> = ({
         return;
       }
 
-      // Verificar acesso local primeiro (mais rápido)
-      const localAccess = hasAccessToLesson(lessonId);
-      if (localAccess) {
-        setHasAccess(true);
-        setIsChecking(false);
-        return;
+      // Verificar se é admin primeiro
+      try {
+        const adminResponse = await fetch('/api/auth/check-admin', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (adminResponse.ok) {
+          const adminData = await adminResponse.json();
+          if (adminData.is_admin) {
+            setIsAdmin(true);
+            setHasAccess(true);
+            setIsChecking(false);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao verificar admin:', error);
       }
 
-      // Verificar acesso via API
-      const apiAccess = await checkLessonAccess(lessonId);
-      setHasAccess(apiAccess);
+      // Para usuários não-admin, verificar acesso ao curso
+      // Se está logado, sempre permitir acesso (mostrar indicador visual)
+      setHasAccess(true);
       
-      // Se não tem acesso, buscar informações do curso
-      if (!apiAccess) {
+      // Verificar se tem acesso real ao curso para mostrar indicador
+      const localAccess = hasAccessToLesson(lessonId);
+      if (!localAccess) {
+        // Buscar informações do curso para o indicador
         findCourseInfo();
       }
     } catch (error) {
@@ -284,7 +303,7 @@ const ProtectedLesson: React.FC<ProtectedLessonProps> = ({
       )}
 
       {/* Verificar se está logado */}
-      {!localStorage.getItem('authToken') ? (
+      {!localStorage.getItem('token') ? (
         <>
           <ActionButton onClick={handleLoginRedirect}>
             <AlertCircle size={20} />

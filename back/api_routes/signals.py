@@ -10,31 +10,43 @@ from middleware.auth_middleware import jwt_required
 
 def get_btc_confirmed_signals():
     """Função para obter sinais confirmados do sistema BTC e converter para o formato dos cards"""
-    current_app.logger.debug("🔍 Iniciando get_btc_confirmed_signals()")
+    print("🔍 [DEBUG] Iniciando get_btc_confirmed_signals()")
     try:
         # Obter instância do BTCSignalManager do app
         bot_instance = getattr(current_app, 'bot_instance', None)
-        current_app.logger.debug(f"Bot instance: {bot_instance}")
+        print(f"🔍 [DEBUG] Bot instance: {bot_instance}")
         
         if not bot_instance:
-            current_app.logger.debug("Bot instance não encontrada")
+            print("❌ [DEBUG] Bot instance não encontrada")
             return []
             
-        current_app.logger.debug(f"Bot instance attributes: {dir(bot_instance)}")
+        print(f"🔍 [DEBUG] Bot instance attributes: {[attr for attr in dir(bot_instance) if not attr.startswith('_')]}")
         
-        if not hasattr(bot_instance, 'btc_signal_manager'):
-            current_app.logger.debug("BTCSignalManager attribute não encontrado")
+        if not hasattr(bot_instance, 'analyzer'):
+            print("❌ [DEBUG] Analyzer attribute não encontrado")
             return []
         
-        btc_signal_manager = bot_instance.btc_signal_manager
-        current_app.logger.debug(f"BTCSignalManager: {btc_signal_manager}")
+        analyzer = bot_instance.analyzer
+        print(f"🔍 [DEBUG] Analyzer: {analyzer}")
+        
+        if not hasattr(analyzer, 'btc_signal_manager'):
+            print("❌ [DEBUG] BTCSignalManager attribute não encontrado no analyzer")
+            return []
+        
+        btc_signal_manager = analyzer.btc_signal_manager
+        print(f"🔍 [DEBUG] BTCSignalManager: {btc_signal_manager}")
         
         if not btc_signal_manager:
-            current_app.logger.debug("BTCSignalManager não inicializado")
+            print("❌ [DEBUG] BTCSignalManager não inicializado")
             return []
         
         # Obter sinais confirmados do sistema BTC
+        print("🔍 [DEBUG] Chamando get_confirmed_signals(limit=20)")
         confirmed_signals = btc_signal_manager.get_confirmed_signals(limit=20)
+        print(f"🔍 [DEBUG] Sinais confirmados retornados: {len(confirmed_signals) if confirmed_signals else 0}")
+        
+        if confirmed_signals:
+            print(f"🔍 [DEBUG] Primeiro sinal: {confirmed_signals[0] if confirmed_signals else 'None'}")
         
         # Converter para o formato esperado pelos cards do dashboard
         btc_signals = []
@@ -160,22 +172,27 @@ def handle_options():
 @jwt_required
 def get_signals():
     """Endpoint para obter APENAS os sinais confirmados do sistema BTC"""
-    current_app.logger.debug("Rota /api/signals foi acessada!")
+    print("🔍 [DEBUG] Rota /api/signals foi acessada!")
     try:
         # Acessa os dados do usuário do objeto g
         user_data = g.user_data
+        print(f"🔍 [DEBUG] User data: {user_data}")
         
         # Obter APENAS sinais confirmados do sistema BTC
+        print("🔍 [DEBUG] Chamando get_btc_confirmed_signals()")
         btc_confirmed_signals = get_btc_confirmed_signals()
+        print(f"🔍 [DEBUG] Sinais retornados: {len(btc_confirmed_signals) if btc_confirmed_signals else 0}")
         
         # Ordenar por data de confirmação (mais recentes primeiro)
         btc_confirmed_signals.sort(key=lambda x: x.get('entry_time', ''), reverse=True)
         
-        current_app.logger.debug(f"DEBUG: Retornando apenas sinais BTC confirmados: {len(btc_confirmed_signals)}")
+        print(f"🔍 [DEBUG] Retornando apenas sinais BTC confirmados: {len(btc_confirmed_signals)}")
         return jsonify(btc_confirmed_signals), 200
 
     except Exception as e:
-        current_app.logger.error(f"Erro ao obter sinais confirmados: {e}", exc_info=True)
+        print(f"❌ [DEBUG] Erro ao obter sinais confirmados: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": "Erro interno do servidor ao obter sinais confirmados"}), 500
 
 @signals_bp.route('/start-analysis', methods=['POST'])
