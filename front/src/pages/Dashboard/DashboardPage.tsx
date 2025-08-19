@@ -526,18 +526,16 @@ const DashboardPage: React.FC = () => {
           };
         });
         
-        // Verificar se há novos sinais (comparar por ID ou símbolo+tempo)
-        const currentSignalIds = signals.map(s => s.id);
-        const reallyNewSignals = newSignals.filter(newSignal => 
-          !currentSignalIds.includes(newSignal.id)
+        // Remover duplicatas dos novos sinais
+        const uniqueNewSignals = newSignals.filter((signal, index, self) => 
+          index === self.findIndex(s => s.symbol === signal.symbol && s.entry_time === signal.entry_time)
         );
         
-        if (reallyNewSignals.length > 0) {
-          console.log(`✨ ${reallyNewSignals.length} novos sinais encontrados!`);
-          setSignals(prevSignals => [...prevSignals, ...reallyNewSignals]);
-        } else {
-          console.log('📊 Nenhum sinal novo - mantendo sinais existentes');
-        }
+        // Substituir completamente os sinais para evitar duplicação
+        console.log(`🔄 Atualizando sinais: ${uniqueNewSignals.length} sinais únicos`);
+        setSignals(uniqueNewSignals);
+        
+        console.log('📊 Sinais atualizados com sucesso - evitando duplicação');
         
         setIsBackendOnline(true);
       }
