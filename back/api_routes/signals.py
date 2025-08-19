@@ -40,9 +40,9 @@ def get_btc_confirmed_signals():
             print("❌ [DEBUG] BTCSignalManager não inicializado")
             return []
         
-        # Obter sinais confirmados do sistema BTC
-        print("🔍 [DEBUG] Chamando get_confirmed_signals(limit=20)")
-        confirmed_signals = btc_signal_manager.get_confirmed_signals(limit=20)
+        # Obter sinais confirmados do sistema BTC (sem limite)
+        print("🔍 [DEBUG] Chamando get_confirmed_signals() - sem limite")
+        confirmed_signals = btc_signal_manager.get_confirmed_signals()
         print(f"🔍 [DEBUG] Sinais confirmados retornados: {len(confirmed_signals) if confirmed_signals else 0}")
         
         if confirmed_signals:

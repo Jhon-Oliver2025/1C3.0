@@ -718,11 +718,15 @@ class BTCSignalManager:
             'confirmation_attempts': signal['confirmation_attempts']
         } for signal in recent_rejected]
     
-    def get_confirmed_signals(self, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_confirmed_signals(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
         """Retorna lista de sinais confirmados para a API"""
         # Retornar os mais recentes primeiro
         recent_confirmed = sorted(self.confirmed_signals, 
-                                key=lambda x: x.get('confirmed_at', ''), reverse=True)[:limit]
+                                key=lambda x: x.get('confirmed_at', ''), reverse=True)
+        
+        # Aplicar limite apenas se especificado
+        if limit is not None:
+            recent_confirmed = recent_confirmed[:limit]
         
         return [{
             'id': signal.get('confirmation_id', signal.get('id', '')),

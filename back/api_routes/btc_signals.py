@@ -302,11 +302,12 @@ def get_confirmed_signals():
                 'message': 'Sistema BTC não inicializado'
             }), 500
         
-        # Obter parâmetros opcionais
-        limit = request.args.get('limit', 50, type=int)
-        limit = min(limit, 200)  # Máximo 200 registros
+        # Obter parâmetros opcionais (sem limite padrão)
+        limit = request.args.get('limit', type=int)
+        if limit is not None:
+            limit = min(limit, 500)  # Máximo 500 registros se especificado
         
-        # Obter sinais confirmados
+        # Obter sinais confirmados (todos se não especificado limite)
         confirmed_signals = btc_signal_manager.get_confirmed_signals(limit=limit)
         
         return jsonify({

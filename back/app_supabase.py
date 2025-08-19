@@ -458,7 +458,7 @@ def create_app():
                 
                 print(f"🔍 Buscando sinais desde: {last_cleanup.strftime('%d/%m/%Y %H:%M')} (SP) / {last_cleanup_utc} (UTC)")
                 
-                result = supabase.table('signals').select('*').eq('status', 'OPEN').gte('created_at', last_cleanup_utc).order('created_at', desc=True).limit(20).execute()
+                result = supabase.table('signals').select('*').eq('status', 'OPEN').gte('created_at', last_cleanup_utc).order('created_at', desc=True).execute()
             except Exception as e:
                 print(f"⚠️ Erro na consulta Supabase: {e}")
                 return jsonify({
