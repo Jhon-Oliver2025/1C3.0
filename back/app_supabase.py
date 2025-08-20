@@ -261,6 +261,14 @@ def create_app():
             init_btc_signals_routes(bot.db, bot.btc_signal_manager)
             server.register_blueprint(btc_signals_bp)
             print("✅ Rotas BTC registradas com sucesso")
+            
+            # Inicializar rotas Market Status com btc_analyzer
+            if hasattr(bot.btc_signal_manager, 'btc_analyzer'):
+                from api_routes.market_status import init_market_status_routes
+                init_market_status_routes(bot.btc_signal_manager.btc_analyzer)
+                print("✅ Rotas Market Status inicializadas com btc_analyzer!")
+            else:
+                print("⚠️ btc_analyzer não encontrado no btc_signal_manager")
         else:
             print("⚠️ Sistema BTC não disponível - rotas BTC não registradas")
     except Exception as e:
