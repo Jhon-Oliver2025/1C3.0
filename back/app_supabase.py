@@ -33,6 +33,7 @@ from api_routes.cleanup_status import cleanup_status_bp
 from api_routes.debug import debug_bp
 from api_routes.payments import payments_bp
 from api_routes.btc_signals import btc_signals_bp, init_btc_signals_routes
+from api_routes.signal_monitoring import signal_monitoring_bp, init_signal_monitoring_routes
 from api_routes.restart_system import restart_system_bp
 
 # Configurar CORS
@@ -242,6 +243,17 @@ def create_app():
         print("✅ Blueprint restart_system registrado com sucesso")
     except Exception as e:
         print(f"❌ Erro ao registrar restart_system blueprint: {e}")
+    
+    # Registrar rotas de Monitoramento de Sinais
+    try:
+        if hasattr(bot, 'binance_client') and hasattr(bot, 'db') and bot.binance_client and bot.db:
+            init_signal_monitoring_routes(bot.db, bot.binance_client)
+            server.register_blueprint(signal_monitoring_bp)
+            print("✅ Rotas de Monitoramento de Sinais registradas com sucesso")
+        else:
+            print("⚠️ Dependências para monitoramento não disponíveis - rotas não registradas")
+    except Exception as e:
+        print(f"❌ Erro ao registrar rotas de monitoramento: {e}")
     
     # Registrar rotas BTC (apenas se o sistema estiver inicializado)
     try:
