@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { 
@@ -16,7 +16,8 @@ import {
   FaDesktop,
   FaPlay,
   FaPause,
-  FaRedo
+  FaRedo,
+  FaDot
 } from 'react-icons/fa';
 import '../Dashboard/DashboardMobile.css';
 
@@ -265,6 +266,16 @@ const BTCIcon = styled(FaBitcoin)`
   font-size: 1.2em;
 `;
 
+const RefreshControls = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  @media (max-width: 768px) {
+    gap: 8px;
+  }
+`;
+
 const RefreshButton = styled.button`
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
@@ -328,6 +339,87 @@ const RefreshButton = styled.button`
       display: none;
     }
   }
+`;
+
+const AutoRefreshContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  
+  &:hover {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.5);
+  }
+`;
+
+const AutoRefreshButton = styled.button<{ $isActive: boolean }>`
+  background: ${props => props.$isActive ? '#10b981' : '#6b7280'};
+  color: white;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  width: 28px;
+  height: 28px;
+  
+  &:hover {
+    background: ${props => props.$isActive ? '#059669' : '#4b5563'};
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
+const RefreshIndicator = styled.div<{ $isRefreshing: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85em;
+  color: #94a3b8;
+  
+  .refresh-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: ${props => props.$isRefreshing ? '#10b981' : '#6b7280'};
+    animation: ${props => props.$isRefreshing ? 'pulse 1.5s infinite' : 'none'};
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(1.2);
+    }
+  }
+`;
+
+const CountdownText = styled.span<{ $timeLeft: number }>`
+  font-size: 0.8em;
+  color: ${props => props.$timeLeft <= 10 ? '#f59e0b' : '#94a3b8'};
+  font-weight: 500;
+  min-width: 25px;
+  text-align: center;
+  transition: color 0.3s ease;
 `;
 
 const TabContainer = styled.div`
@@ -740,6 +832,13 @@ const BTCAnalysisPage: React.FC = () => {
   const [btcMetrics, setBtcMetrics] = useState<BTCMetrics | null>(null);
   const [btcAnalysis, setBtcAnalysis] = useState<BTCAnalysis | null>(null);
   const [restartInfo, setRestartInfo] = useState<RestartSystemInfo | null>(null);
+  
+  // Estados para auto-refresh elegante
+  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshCountdown, setRefreshCountdown] = useState(30);
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Função para formatar preços
   const formatPrice = (price: number): string => {
@@ -1112,11 +1211,70 @@ const BTCAnalysisPage: React.FC = () => {
     }
   };
 
+  // Função para refresh manual
+  const handleManualRefresh = async () => {
+    if (isRefreshing) return;
+    
+    setIsRefreshing(true);
+    await loadData();
+    setIsRefreshing(false);
+    
+    // Resetar countdown
+    setRefreshCountdown(30);
+  };
+  
+  // Função para toggle do auto-refresh
+  const toggleAutoRefresh = () => {
+    setIsAutoRefreshEnabled(!isAutoRefreshEnabled);
+  };
+  
+  // Configurar auto-refresh
   useEffect(() => {
-    loadData();
-    const interval = setInterval(loadData, 30000); // Atualiza a cada 30 segundos
-    return () => clearInterval(interval);
-  }, []);
+    if (isAutoRefreshEnabled) {
+      // Iniciar countdown
+      countdownIntervalRef.current = setInterval(() => {
+        setRefreshCountdown(prev => {
+          if (prev <= 1) {
+            return 30; // Reset countdown
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      // Iniciar auto-refresh
+      refreshIntervalRef.current = setInterval(async () => {
+        if (!isRefreshing) {
+          setIsRefreshing(true);
+          await loadData();
+          setIsRefreshing(false);
+        }
+      }, 30000);
+    } else {
+      // Limpar intervalos
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+        refreshIntervalRef.current = null;
+      }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+      }
+    }
+    
+    return () => {
+      if (refreshIntervalRef.current) {
+        clearInterval(refreshIntervalRef.current);
+      }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+    };
+  }, [isAutoRefreshEnabled, isRefreshing]);
+  
+  // Carregar dados iniciais
+   useEffect(() => {
+     loadData();
+   }, []);
 
   if (loading) {
     return (
@@ -1157,9 +1315,32 @@ const BTCAnalysisPage: React.FC = () => {
             </div>
           </div>
         </div>
-        <RefreshButton onClick={loadData}>
-          <FaSync /> Atualizar
-        </RefreshButton>
+        <RefreshControls>
+          <AutoRefreshContainer>
+            <AutoRefreshButton 
+              $isActive={isAutoRefreshEnabled}
+              onClick={toggleAutoRefresh}
+              title={isAutoRefreshEnabled ? 'Pausar auto-refresh' : 'Ativar auto-refresh'}
+            >
+              {isAutoRefreshEnabled ? <FaPause size={12} /> : <FaPlay size={12} />}
+            </AutoRefreshButton>
+            
+            <RefreshIndicator $isRefreshing={isRefreshing}>
+              <div className="refresh-dot"></div>
+              <CountdownText $timeLeft={refreshCountdown}>
+                {isAutoRefreshEnabled ? `${refreshCountdown}s` : 'Off'}
+              </CountdownText>
+            </RefreshIndicator>
+          </AutoRefreshContainer>
+          
+          <RefreshButton 
+            onClick={handleManualRefresh}
+            disabled={isRefreshing}
+          >
+            <FaSync className={isRefreshing ? 'fa-spin' : ''} /> 
+            {isRefreshing ? 'Atualizando...' : 'Atualizar'}
+          </RefreshButton>
+        </RefreshControls>
       </Header>
 
       <TabContainer>

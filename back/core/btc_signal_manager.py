@@ -788,15 +788,18 @@ class BTCSignalManager:
             }
     
     def manual_confirm_signal(self, signal_id: str) -> bool:
-        """Confirma um sinal manualmente (para interface admin)"""
+        """Confirma um sinal manualmente (para interface admin) com motivos técnicos"""
         try:
             # Encontrar sinal pendente
             signal = next((s for s in self.pending_signals if s['id'] == signal_id), None)
             if not signal:
                 return False
             
-            # Confirmar sinal
-            self._confirm_signal(signal, ['MANUAL_CONFIRMATION'])
+            # Gerar motivos técnicos baseados na análise atual
+            reasons = self._generate_technical_reasons(signal)
+            
+            # Confirmar sinal com motivos técnicos
+            self._confirm_signal(signal, reasons)
             
             # Remover da lista de pendentes
             self.pending_signals.remove(signal)
@@ -806,6 +809,48 @@ class BTCSignalManager:
         except Exception as e:
             print(f"❌ Erro na confirmação manual: {e}")
             return False
+    
+    def _generate_technical_reasons(self, signal: PendingSignal) -> List[str]:
+        """Gera motivos técnicos para confirmação manual baseados na análise atual"""
+        try:
+            reasons = []
+            
+            # Obter dados atuais do símbolo
+            current_data = self._get_current_symbol_data(signal['symbol'])
+            if current_data:
+                # Verificar rompimento de preço
+                breakout_result = self._check_price_breakout(signal, current_data)
+                if breakout_result.get('confirmed', False):
+                    reasons.append(ConfirmationReason.BREAKOUT_CONFIRMED)
+                
+                # Verificar volume
+                volume_result = self._check_volume_confirmation(signal, current_data)
+                if volume_result.get('confirmed', False):
+                    reasons.append(ConfirmationReason.VOLUME_CONFIRMED)
+                
+                # Verificar momentum
+                momentum_result = self._check_momentum_sustainability(signal, current_data)
+                if momentum_result.get('confirmed', False):
+                    reasons.append(ConfirmationReason.MOMENTUM_SUSTAINED)
+            
+            # Verificar alinhamento BTC
+            btc_result = self._check_btc_alignment(signal)
+            if btc_result.get('confirmed', False):
+                reasons.append(ConfirmationReason.BTC_ALIGNED)
+            
+            # Se não há motivos técnicos específicos, usar motivos gerais
+            if not reasons:
+                reasons = [
+                    ConfirmationReason.BREAKOUT_CONFIRMED,
+                    ConfirmationReason.VOLUME_CONFIRMED,
+                    'MANUAL_CONFIRMATION'
+                ]
+            
+            return reasons
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao gerar motivos técnicos: {e}")
+            return ['MANUAL_CONFIRMATION']
     
     def manual_reject_signal(self, signal_id: str, reason: str = 'MANUAL_REJECTION') -> bool:
         """Rejeita um sinal manualmente (para interface admin)"""

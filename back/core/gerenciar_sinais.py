@@ -52,7 +52,7 @@ class GerenciadorSinais:
             else:  # VENDA
                 projection_percentage = ((entry_price - target_price) / entry_price) * 100
             
-            # Formatar o sinal simplificado
+            # Formatar o sinal com todos os dados incluindo motivos de confirmação
             formatted_signal = {
                 'symbol': signal_data['symbol'],
                 'type': signal_data['type'],
@@ -61,7 +61,14 @@ class GerenciadorSinais:
                 'target_price': target_price,
                 'projection_percentage': round(projection_percentage, 2),
                 'signal_class': self._get_signal_class(float(signal_data.get('quality_score', 0))),
-                'status': 'OPEN'
+                'status': 'OPEN',
+                # Adicionar campos de confirmação se existirem
+                'confirmed_at': signal_data.get('confirmed_at'),
+                'confirmation_reasons': signal_data.get('confirmation_reasons', []),
+                'confirmation_attempts': signal_data.get('confirmation_attempts', 0),
+                'quality_score': signal_data.get('quality_score', 0),
+                'btc_correlation': signal_data.get('btc_correlation'),
+                'btc_trend': signal_data.get('btc_trend')
             }
             
             result = self.db.add_signal(formatted_signal)
