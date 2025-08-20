@@ -645,11 +645,40 @@ const BTCAnalysisPage: React.FC = () => {
   const formatDateTime = (dateString: string): string => {
     try {
       const date = new Date(dateString);
-      return date.toLocaleString('pt-BR');
+      return date.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
     } catch {
       return dateString;
     }
   };
+
+  // Função para formatar horário asiático
+  const formatAsianTime = (): string => {
+    const now = new Date();
+    return now.toLocaleString('pt-BR', {
+      timeZone: 'Asia/Tokyo',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
+
+  // Estado para horário asiático
+  const [asianTime, setAsianTime] = useState(formatAsianTime());
+
+  // Atualizar horário asiático a cada segundo
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAsianTime(formatAsianTime());
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Função auxiliar para verificar autenticação
   const checkAuthAndRedirect = (response: Response) => {
@@ -836,17 +865,22 @@ const BTCAnalysisPage: React.FC = () => {
 
   const loadBtcMetrics = async () => {
     try {
+      console.log('🔄 Carregando métricas BTC...');
       const token = localStorage.getItem('token');
       if (!token) {
+        console.warn('❌ Token não encontrado, redirecionando para login');
         navigate('/login');
         return;
       }
       
       const response = await fetch('/api/btc-signals/metrics', {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+      
+      console.log('📊 Resposta métricas BTC:', response.status);
       
       if (checkAuthAndRedirect(response)) return;
       
@@ -861,42 +895,66 @@ const BTCAnalysisPage: React.FC = () => {
 
   const loadBtcAnalysis = async () => {
     try {
+      console.log('🔄 Carregando análise BTC...');
       const response = await fetch('/api/market-status');
+      console.log('📊 Resposta market-status:', response.status);
+      
       const data = await response.json();
+      console.log('✅ Dados market-status recebidos:', data);
+      
       if (data.success) {
         setBtcAnalysis(data.data || null);
+        console.log('✅ Análise BTC atualizada');
+      } else {
+        console.warn('⚠️ Resposta market-status sem sucesso:', data);
       }
     } catch (error) {
-      console.error('Erro ao carregar análise BTC:', error);
+      console.error('❌ Erro ao carregar análise BTC:', error);
     }
   };
 
   const loadRestartInfo = async () => {
     try {
+      console.log('🔄 Carregando informações de restart...');
       const response = await fetch('/api/restart-system/status');
+      console.log('📊 Resposta restart-system:', response.status);
+      
       const data = await response.json();
+      console.log('✅ Dados restart-system recebidos:', data);
+      
       if (data.success) {
         setRestartInfo(data.data || null);
+        console.log('✅ Informações de restart atualizadas');
+      } else {
+        console.warn('⚠️ Resposta restart-system sem sucesso:', data);
       }
     } catch (error) {
-      console.error('Erro ao carregar informações de restart:', error);
+      console.error('❌ Erro ao carregar informações de restart:', error);
     }
   };
 
   const loadData = async () => {
+    console.log('🚀 Iniciando carregamento de todos os dados...');
     setLoading(true);
-    await Promise.all([
-      loadPendingSignals(),
-      loadConfirmedSignals(),
-      loadRejectedSignals(),
-      loadMonitoredSignals(),
-      loadExpiredSignals(),
-      loadMonitoringStats(),
-      loadBtcMetrics(),
-      loadBtcAnalysis(),
-      loadRestartInfo()
-    ]);
-    setLoading(false);
+    
+    try {
+      await Promise.all([
+        loadPendingSignals(),
+        loadConfirmedSignals(),
+        loadRejectedSignals(),
+        loadMonitoredSignals(),
+        loadExpiredSignals(),
+        loadMonitoringStats(),
+        loadBtcMetrics(),
+        loadBtcAnalysis(),
+        loadRestartInfo()
+      ]);
+      console.log('✅ Todos os dados carregados com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro durante carregamento dos dados:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -918,9 +976,32 @@ const BTCAnalysisPage: React.FC = () => {
   return (
     <BTCContainer>
       <Header>
-        <Title>
-          <BTCIcon /> Análise BTC
-        </Title>
+        <div>
+          <Title>
+            <BTCIcon /> Análise BTC
+          </Title>
+          <div style={{ 
+            display: 'flex', 
+            gap: '20px', 
+            marginTop: '10px',
+            fontSize: '0.9em',
+            color: '#94a3b8'
+          }}>
+            <div>
+              <strong style={{ color: '#f59e0b' }}>Preço BTC:</strong> 
+              <span style={{ color: btcAnalysis?.change_24h >= 0 ? '#10b981' : '#ef4444', marginLeft: '5px' }}>
+                ${btcAnalysis?.price?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0'}
+              </span>
+              <span style={{ marginLeft: '5px' }}>
+                ({btcAnalysis?.change_24h >= 0 ? '+' : ''}{btcAnalysis?.change_24h?.toFixed(2) || '0'}%)
+              </span>
+            </div>
+            <div>
+              <strong style={{ color: '#f59e0b' }}>Horário Ásia:</strong> 
+              <span style={{ color: '#10b981', marginLeft: '5px' }}>{asianTime}</span>
+            </div>
+          </div>
+        </div>
         <RefreshButton onClick={loadData}>
           <FaSync /> Atualizar
         </RefreshButton>
