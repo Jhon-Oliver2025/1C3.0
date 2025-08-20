@@ -30,9 +30,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     const token = localStorage.getItem('token');
     setIsAuthenticated(!!token);
 
-    // Check backend status immediately and then every 5 seconds
+    // Check backend status immediately and then every 30 seconds
     checkBackendStatus();
-    const intervalId = setInterval(checkBackendStatus, 5000);
+    const intervalId = setInterval(checkBackendStatus, 30000);
 
     return () => clearInterval(intervalId);
   }, [checkBackendStatus]);

@@ -1191,7 +1191,25 @@ const BTCAnalysisPage: React.FC = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setConfirmedSignals(data.data.confirmed_signals || []);
+        
+        // Tratar diferentes formatos de resposta da API
+        let signalsArray;
+        if (Array.isArray(data)) {
+          // Formato direto (público)
+          signalsArray = data;
+        } else if (data.data && Array.isArray(data.data.confirmed_signals)) {
+          // Formato admin com wrapper
+          signalsArray = data.data.confirmed_signals;
+        } else if (data.success && Array.isArray(data.data)) {
+          // Formato alternativo
+          signalsArray = data.data;
+        } else {
+          console.warn('⚠️ Formato de resposta não reconhecido:', data);
+          signalsArray = [];
+        }
+        
+        console.log(`📊 Carregados ${signalsArray.length} sinais confirmados`);
+        setConfirmedSignals(signalsArray || []);
       }
     } catch (error) {
       console.error('Erro ao carregar sinais confirmados:', error);

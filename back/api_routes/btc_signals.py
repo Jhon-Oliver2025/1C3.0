@@ -338,7 +338,7 @@ def get_confirmed_signals():
                 }
             })
         else:
-            # Formato simplificado para dashboard público
+            # Formato completo para dashboard público (incluindo todos os campos necessários)
             formatted_signals = []
             for signal in confirmed_signals:
                 formatted_signals.append({
@@ -347,8 +347,13 @@ def get_confirmed_signals():
                     'type': signal.get('type'),
                     'entry_time': signal.get('entry_time'),
                     'entry_price': signal.get('entry_price'),
+                    'target_price': signal.get('target_price'),
+                    'projection_percentage': signal.get('projection_percentage'),
+                    'signal_class': signal.get('signal_class', 'PADRÃO'),
                     'status': signal.get('status', 'CONFIRMED'),
-                    'created_at': signal.get('created_at')
+                    'created_at': signal.get('created_at'),
+                    'confirmed_at': signal.get('confirmed_at'),
+                    'quality_score': signal.get('quality_score')
                 })
             
             return jsonify(formatted_signals)
