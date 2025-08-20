@@ -752,8 +752,31 @@ const BTCAnalysisPage: React.FC = () => {
 
   // Função para formatar data/hora
   const formatDateTime = (dateString: string): string => {
+    if (!dateString || dateString === 'null' || dateString === 'undefined') {
+      return 'N/A';
+    }
+    
     try {
-      const date = new Date(dateString);
+      // Tentar diferentes formatos de data
+      let date: Date;
+      
+      // Formato brasileiro: DD/MM/YYYY HH:MM:SS
+      if (dateString.includes('/')) {
+        const [datePart, timePart] = dateString.split(' ');
+        const [day, month, year] = datePart.split('/');
+        const [hour, minute, second] = (timePart || '00:00:00').split(':');
+        date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 
+                       parseInt(hour), parseInt(minute), parseInt(second));
+      } else {
+        // Formato ISO ou outros
+        date = new Date(dateString);
+      }
+      
+      // Verificar se a data é válida
+      if (isNaN(date.getTime())) {
+        return dateString; // Retornar string original se não conseguir parsear
+      }
+      
       return date.toLocaleString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
@@ -776,6 +799,30 @@ const BTCAnalysisPage: React.FC = () => {
       minute: '2-digit',
       second: '2-digit'
     });
+  };
+
+  // Função para traduzir motivos de rejeição
+  const translateRejectionReasons = (reasons: string[]) => {
+    const translations: { [key: string]: string } = {
+      'reversal_detected': '🔄 Reversão Detectada',
+      'volume_insufficient': '📉 Volume Insuficiente',
+      'btc_opposite': '₿ BTC em Direção Oposta',
+      'timeout_expired': '⏰ Tempo Esgotado',
+      'support_resistance_hold': '📊 Suporte/Resistência Mantido'
+    };
+    return reasons.map(reason => translations[reason] || reason);
+  };
+
+  // Função para traduzir motivos de confirmação
+  const translateConfirmationReasons = (reasons: string[]) => {
+    const translations: { [key: string]: string } = {
+      'breakout_confirmed': '🚀 Rompimento Confirmado',
+      'volume_confirmed': '📈 Volume Confirmado',
+      'btc_aligned': '₿ BTC Alinhado',
+      'momentum_sustained': '⚡ Momentum Sustentado',
+      'support_resistance_hold': '📊 Suporte/Resistência Confirmado'
+    };
+    return reasons.map(reason => translations[reason] || reason);
   };
 
   // Estado para horário asiático
@@ -809,84 +856,83 @@ const BTCAnalysisPage: React.FC = () => {
   // Funções para carregar dados
   const loadPendingSignals = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-      
-      const response = await fetch('/api/btc-signals/pending', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (checkAuthAndRedirect(response)) return;
+      console.log('🔄 Carregando sinais pendentes...');
+      const response = await fetch('/api/btc-signals/pending');
+      console.log('📊 Resposta pending signals:', response.status);
       
       const data = await response.json();
-      if (data.success && Array.isArray(data.data)) {
+      console.log('✅ Dados pending signals recebidos:', data);
+      
+      if (data.success && data.data && Array.isArray(data.data.pending_signals)) {
+        setPendingSignals(data.data.pending_signals);
+        console.log(`✅ ${data.data.pending_signals.length} sinais pendentes carregados`);
+      } else if (data.success && Array.isArray(data.data)) {
+        // Fallback para estrutura antiga
         setPendingSignals(data.data);
+        console.log(`✅ ${data.data.length} sinais pendentes carregados (estrutura antiga)`);
       } else {
+        console.warn('⚠️ Resposta pending signals sem dados válidos:', data);
         setPendingSignals([]);
       }
     } catch (error) {
-      console.error('Erro ao carregar sinais pendentes:', error);
+      console.error('❌ Erro ao carregar sinais pendentes:', error);
       setPendingSignals([]);
     }
   };
 
   const loadConfirmedSignals = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-      
-      const response = await fetch('/api/btc-signals/confirmed', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (checkAuthAndRedirect(response)) return;
+      console.log('🔄 Carregando sinais confirmados...');
+      const response = await fetch('/api/btc-signals/confirmed');
+      console.log('📊 Resposta confirmed signals:', response.status);
       
       const data = await response.json();
-      if (data.success && Array.isArray(data.data)) {
+      console.log('✅ Dados confirmed signals recebidos:', data);
+      
+      if (Array.isArray(data)) {
+        // API retorna array diretamente
+        setConfirmedSignals(data);
+        console.log(`✅ ${data.length} sinais confirmados carregados`);
+      } else if (data.success && data.data && Array.isArray(data.data.confirmed_signals)) {
+        // Estrutura com data.confirmed_signals
+        setConfirmedSignals(data.data.confirmed_signals);
+        console.log(`✅ ${data.data.confirmed_signals.length} sinais confirmados carregados`);
+      } else if (data.success && Array.isArray(data.data)) {
+        // Fallback para estrutura antiga
         setConfirmedSignals(data.data);
+        console.log(`✅ ${data.data.length} sinais confirmados carregados (estrutura antiga)`);
       } else {
+        console.warn('⚠️ Resposta confirmed signals sem dados válidos:', data);
         setConfirmedSignals([]);
       }
     } catch (error) {
-      console.error('Erro ao carregar sinais confirmados:', error);
+      console.error('❌ Erro ao carregar sinais confirmados:', error);
       setConfirmedSignals([]);
     }
   };
 
   const loadRejectedSignals = async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-      
-      const response = await fetch('/api/btc-signals/rejected', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (checkAuthAndRedirect(response)) return;
+      console.log('🔄 Carregando sinais rejeitados...');
+      const response = await fetch('/api/btc-signals/rejected');
+      console.log('📊 Resposta rejected signals:', response.status);
       
       const data = await response.json();
-      if (data.success && Array.isArray(data.data)) {
+      console.log('✅ Dados rejected signals recebidos:', data);
+      
+      if (data.success && data.data && Array.isArray(data.data.rejected_signals)) {
+        setRejectedSignals(data.data.rejected_signals);
+        console.log(`✅ ${data.data.rejected_signals.length} sinais rejeitados carregados`);
+      } else if (data.success && Array.isArray(data.data)) {
+        // Fallback para estrutura antiga
         setRejectedSignals(data.data);
+        console.log(`✅ ${data.data.length} sinais rejeitados carregados (estrutura antiga)`);
       } else {
+        console.warn('⚠️ Resposta rejected signals sem dados válidos:', data);
         setRejectedSignals([]);
       }
     } catch (error) {
-      console.error('Erro ao carregar sinais rejeitados:', error);
+      console.error('❌ Erro ao carregar sinais rejeitados:', error);
       setRejectedSignals([]);
     }
   };
@@ -1237,6 +1283,18 @@ const BTCAnalysisPage: React.FC = () => {
                       <DetailLabel>Tentativas</DetailLabel>
                       <DetailValue>{signal.confirmation_attempts || 0}</DetailValue>
                     </SignalDetail>
+                    {signal.confirmation_reasons && signal.confirmation_reasons.length > 0 && (
+                      <SignalDetail style={{gridColumn: '1 / -1'}}>
+                        <DetailLabel>Motivos da Confirmação</DetailLabel>
+                        <ReasonsList>
+                          {translateConfirmationReasons(signal.confirmation_reasons).map((reason, index) => (
+                            <ReasonTag key={index} style={{background: '#10b981'}}>
+                              {reason}
+                            </ReasonTag>
+                          ))}
+                        </ReasonsList>
+                      </SignalDetail>
+                    )}
                   </SignalDetails>
                 </SignalCard>
               ))
@@ -1281,8 +1339,14 @@ const BTCAnalysisPage: React.FC = () => {
                       <DetailValue>{signal.confirmation_attempts}</DetailValue>
                     </SignalDetail>
                     <SignalDetail>
-                      <DetailLabel>Motivos</DetailLabel>
-                      <DetailValue>{signal.rejection_reasons.join(', ')}</DetailValue>
+                      <DetailLabel>Motivos da Rejeição</DetailLabel>
+                      <ReasonsList>
+                        {translateRejectionReasons(signal.rejection_reasons).map((reason, index) => (
+                          <ReasonTag key={index} style={{background: '#ef4444'}}>
+                            {reason}
+                          </ReasonTag>
+                        ))}
+                      </ReasonsList>
                     </SignalDetail>
                   </SignalDetails>
                 </SignalCard>

@@ -307,6 +307,44 @@ def monitoring_expired():
         }
     }), 200
 
+# Rotas de Autenticação (temporárias)
+@app.route('/api/auth/login', methods=['POST'])
+def auth_login():
+    """Login temporário para desenvolvimento"""
+    return jsonify({
+        'success': True,
+        'message': 'Sistema principal inicializando - Login temporário',
+        'token': 'emergency-token-dev',
+        'user': {
+            'id': 'dev-user',
+            'username': 'developer',
+            'role': 'admin'
+        },
+        'note': 'Token temporário para desenvolvimento'
+    }), 200
+
+@app.route('/api/auth/verify', methods=['GET'])
+def auth_verify():
+    """Verificação de token temporária"""
+    return jsonify({
+        'success': True,
+        'valid': True,
+        'user': {
+            'id': 'dev-user',
+            'username': 'developer',
+            'role': 'admin'
+        },
+        'note': 'Verificação temporária para desenvolvimento'
+    }), 200
+
+@app.route('/api/auth/logout', methods=['POST'])
+def auth_logout():
+    """Logout temporário"""
+    return jsonify({
+        'success': True,
+        'message': 'Logout realizado com sucesso'
+    }), 200
+
 @app.route('/')
 def home():
     """Página inicial de emergência"""
@@ -319,6 +357,9 @@ def home():
         'endpoints': [
             '/api/health',
             '/api/status',
+            '/api/auth/login',
+            '/api/auth/verify',
+            '/api/auth/logout',
             '/api/market-status',
             '/api/restart-system/status',
             '/api/btc-signals/metrics',

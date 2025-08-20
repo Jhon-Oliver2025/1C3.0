@@ -109,21 +109,35 @@ const DashboardPage: React.FC = () => {
       if (response.ok) {
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          // Verificar se os dados têm a estrutura esperada
-          if (data && data.new_york && data.asia) {
-            setMarketStatus(data);
+          const responseData = await response.json();
+          console.log('📊 Dados recebidos da API market-status:', responseData);
+          
+          // Verificar se os dados têm a estrutura esperada (nova estrutura)
+          if (responseData && responseData.data && responseData.data.markets) {
+            const markets = responseData.data.markets;
+            setMarketStatus({
+              new_york: markets.new_york,
+              asia: markets.asia
+            });
+            console.log('✅ Status dos mercados atualizado:', {
+              new_york: markets.new_york,
+              asia: markets.asia
+            });
+          } else if (responseData && responseData.new_york && responseData.asia) {
+            // Estrutura antiga (fallback)
+            setMarketStatus(responseData);
+            console.log('✅ Status dos mercados atualizado (estrutura antiga):', responseData);
           } else {
-            console.warn('API market-status retornou dados com estrutura inválida:', data);
+            console.warn('⚠️ API market-status retornou dados com estrutura inválida:', responseData);
           }
         } else {
-          console.warn('API market-status retornou HTML em vez de JSON');
+          console.warn('⚠️ API market-status retornou HTML em vez de JSON');
         }
       } else {
-        console.warn(`API market-status não disponível: ${response.status}`);
+        console.warn(`⚠️ API market-status não disponível: ${response.status}`);
       }
     } catch (error) {
-      console.error('Erro ao buscar status dos mercados:', error);
+      console.error('❌ Erro ao buscar status dos mercados:', error);
     }
   };
 

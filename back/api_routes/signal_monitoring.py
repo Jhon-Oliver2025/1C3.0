@@ -82,19 +82,12 @@ def get_monitoring_status():
         }), 500
 
 @signal_monitoring_bp.route('/signals/active', methods=['GET'])
-@jwt_required
 def get_active_signals():
     """
-    Retorna lista de sinais sendo monitorados ativamente
+    Retorna lista de sinais sendo monitorados ativamente - Rota pública para dashboard
     """
     try:
-        # Verificar se usuário é admin
-        user_data = get_current_user()
-        if not user_data or not user_data.get('is_admin'):
-            return jsonify({
-                'success': False,
-                'message': 'Acesso negado. Apenas administradores podem acessar esta funcionalidade.'
-            }), 403
+        print('📊 Processando requisição para /api/signal-monitoring/signals/active')
         
         if not monitoring_system:
             return jsonify({
@@ -126,19 +119,12 @@ def get_active_signals():
         }), 500
 
 @signal_monitoring_bp.route('/signals/expired', methods=['GET'])
-@jwt_required
 def get_expired_signals():
     """
-    Retorna lista de sinais expirados (após 15 dias)
+    Retorna lista de sinais expirados/completados - Rota pública para dashboard
     """
     try:
-        # Verificar se usuário é admin
-        user_data = get_current_user()
-        if not user_data or not user_data.get('is_admin'):
-            return jsonify({
-                'success': False,
-                'message': 'Acesso negado. Apenas administradores podem acessar esta funcionalidade.'
-            }), 403
+        print('📊 Processando requisição para /api/signal-monitoring/signals/expired')
         
         if not monitoring_system:
             return jsonify({
@@ -388,19 +374,13 @@ def get_symbol_leverage(symbol):
         }), 500
 
 @signal_monitoring_bp.route('/stats', methods=['GET'])
-@jwt_required
 def get_monitoring_stats():
     """
-    Retorna estatísticas detalhadas do monitoramento
+    Retorna estatísticas do sistema de monitoramento
+    Rota pública para exibição nos cards do dashboard
     """
     try:
-        # Verificar se usuário é admin
-        user_data = get_current_user()
-        if not user_data or not user_data.get('is_admin'):
-            return jsonify({
-                'success': False,
-                'message': 'Acesso negado. Apenas administradores podem acessar esta funcionalidade.'
-            }), 403
+        print('📊 Processando requisição para /api/signal-monitoring/stats')
         
         if not monitoring_system:
             return jsonify({

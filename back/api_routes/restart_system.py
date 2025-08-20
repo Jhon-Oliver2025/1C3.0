@@ -16,20 +16,14 @@ import traceback
 restart_system_bp = Blueprint('restart_system', __name__, url_prefix='/api/restart-system')
 
 @restart_system_bp.route('/status', methods=['GET'])
-@jwt_required
 def get_restart_status():
     """
     Retorna informações sobre o sistema de restart
     Inclui contador, próximo restart e estatísticas
+    Rota pública para exibição nos cards do dashboard
     """
     try:
-        # Verificar se usuário é admin
-        user_data = get_current_user()
-        if not user_data or not user_data.get('is_admin'):
-            return jsonify({
-                'success': False,
-                'message': 'Acesso negado. Apenas administradores podem acessar informações do restart.'
-            }), 403
+        print('📊 Processando requisição para /api/restart-system/status')
         
         # Obter informações do sistema de restart
         time_until_restart = cleanup_system.get_time_until_restart()

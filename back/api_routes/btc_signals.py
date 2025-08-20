@@ -30,19 +30,10 @@ def init_btc_signals_routes(db_instance: Database, btc_manager: BTCSignalManager
     print("✅ Rotas BTC Signals inicializadas!")
 
 @btc_signals_bp.route('/pending', methods=['GET'])
-@jwt_required
 def get_pending_signals():
-    """Retorna lista de sinais aguardando confirmação"""
+    """Retorna lista de sinais aguardando confirmação - Rota pública para dashboard"""
     try:
-        # Verificar se usuário é admin
-        user_data = get_current_user()
-        print(f"DEBUG BTC: user_data = {user_data}")
-        print(f"DEBUG BTC: is_admin = {user_data.get('is_admin') if user_data else None} (type: {type(user_data.get('is_admin')) if user_data else None})")
-        if not user_data or not user_data.get('is_admin'):
-            return jsonify({
-                'success': False,
-                'message': 'Acesso negado. Apenas administradores podem acessar esta funcionalidade.'
-            }), 403
+        print('📊 Processando requisição para /api/btc-signals/pending')
         
         if not btc_signal_manager:
             return jsonify({
@@ -240,17 +231,10 @@ def get_daily_signals_status():
 # Função duplicada removida - já existe acima
 
 @btc_signals_bp.route('/rejected', methods=['GET'])
-@jwt_required
 def get_rejected_signals():
-    """Retorna lista de sinais rejeitados"""
+    """Retorna lista de sinais rejeitados - Rota pública para dashboard"""
     try:
-        # Verificar se usuário é admin
-        user_data = get_current_user()
-        if not user_data or not user_data.get('is_admin'):
-            return jsonify({
-                'success': False,
-                'message': 'Acesso negado. Apenas administradores podem acessar esta funcionalidade.'
-            }), 403
+        print('📊 Processando requisição para /api/btc-signals/rejected')
         
         if not btc_signal_manager:
             return jsonify({
@@ -369,17 +353,10 @@ def get_confirmed_signals():
 
 
 @btc_signals_bp.route('/metrics', methods=['GET'])
-@jwt_required
 def get_btc_metrics():
-    """Retorna métricas do sistema BTC"""
+    """Retorna métricas do sistema BTC - Rota pública para cards do dashboard"""
     try:
-        # Verificar se usuário é admin
-        user_data = get_current_user()
-        if not user_data or not user_data.get('is_admin'):
-            return jsonify({
-                'success': False,
-                'message': 'Acesso negado. Apenas administradores podem acessar esta funcionalidade.'
-            }), 403
+        print('📊 Processando requisição para /api/btc-signals/metrics')
         
         if not btc_signal_manager or not btc_analyzer:
             return jsonify({

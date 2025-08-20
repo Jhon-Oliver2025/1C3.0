@@ -8,6 +8,7 @@ Sistema de trading automatizado com análise técnica avançada
 import os
 import sys
 import time
+import threading
 import logging
 from datetime import datetime
 from flask import Flask, jsonify, request
