@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Correção Final - Token Atualizado</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #000; color: #fff; }
+        .container { max-width: 600px; margin: 0 auto; background: #1a1a1a; padding: 30px; border-radius: 15px; }
+        .status { padding: 15px; margin: 15px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #28a745; }
+        .info { background: #17a2b8; }
+        .token { font-family: monospace; background: #333; padding: 8px; border-radius: 5px; color: #ffc107; }
+        h1 { color: #ffc107; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Correção Final do Sistema</h1>
+        <div id="status">Aplicando correção...</div>
+        
+        <div class="info">
+            <h3>🔑 Novo Token:</h3>
+            <p><strong>Token:</strong> <span class="token">c73a53b3-9cd0-4ac9-9294-9812acac8d1f</span></p>
+            <p><strong>Problema:</strong> Token expirado (403 Forbidden)</p>
+            <p><strong>Solução:</strong> Aplicação de token válido</p>
+        </div>
+        
+        <div id="progress"></div>
+    </div>
+    
+    <script>
+        const VALID_TOKEN = 'c73a53b3-9cd0-4ac9-9294-9812acac8d1f';
+        const USER_DATA = {
+            "email": "jonatasprojetos2013@gmail.com",
+            "id": "86bab845-1921-43b8-bdf7-b13fb17efdc8",
+            "is_admin": true,
+            "username": "admin"
+        };
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = status +type;
+            console.log([CORREÇÃO] +message);
+        }
+        
+        function addProgress(message, success = true) {
+            const progressDiv = document.getElementById('progress');
+            const p = document.createElement('div');
+            p.style.padding = '10px';
+            p.style.margin = '5px 0';
+            p.style.borderRadius = '5px';
+            p.style.background = success ? '#28a745' : '#dc3545';
+            p.innerHTML = {success ? '✅' : '❌'} +message;
+            progressDiv.appendChild(p);
+        }
+        
+        async function applyFinalFix() {
+            try {
+                updateStatus('🧹 Limpando dados antigos...', 'info');
+                
+                // Limpeza completa
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                addProgress('Cache limpo');
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                updateStatus('🔑 Aplicando token válido...', 'info');
+                
+                // Aplicar novo token
+                localStorage.setItem('token', VALID_TOKEN);
+                localStorage.setItem('user', JSON.stringify(USER_DATA));
+                localStorage.setItem('authTimestamp', Date.now().toString());
+                localStorage.setItem('tokenUpdated', new Date().toISOString());
+                
+                addProgress('Token válido aplicado');
+                addProgress('Dados de usuário configurados');
+                addProgress('Autenticação atualizada');
+                
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                updateStatus('🔍 Verificando correção...', 'info');
+                
+                const savedToken = localStorage.getItem('token');
+                const savedUser = localStorage.getItem('user');
+                
+                if (savedToken === VALID_TOKEN && savedUser) {
+                    addProgress('Verificação de integridade OK');
+                    updateStatus('✅ Correção aplicada com sucesso!', 'success');
+                    
+                    console.log('=== CORREÇÃO FINAL APLICADA ===');
+                    console.log('Token válido:', savedToken);
+                    console.log('Usuário:', savedUser);
+                    
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    updateStatus('🔄 Redirecionando para BTC Analysis...', 'info');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'http://localhost:3001/btc-analysis?fixed=true&t=' + Date.now();
+                    }, 1000);
+                    
+                } else {
+                    updateStatus('❌ Erro na verificação', 'error');
+                    addProgress('Falha na aplicação', false);
+                }
+                
+            } catch (error) {
+                updateStatus(❌ Erro: +error.message, 'error');
+                addProgress(Erro: +error.message, false);
+                console.error('Erro:', error);
+            }
+        }
+        
+        window.addEventListener('load', () => {
+            setTimeout(applyFinalFix, 1500);
+        });
+        
+        console.log('=== CORREÇÃO FINAL ===');
+        console.log('Token válido:', VALID_TOKEN);
+        console.log('Problema: Token expirado (403)');
+        console.log('Solução: Aplicação de token válido');
+    </script>
+</body>
+</html>
