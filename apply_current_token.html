@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aplicar Token Atual - BTC Analysis</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: white; }
+        .container { max-width: 600px; margin: 0 auto; background: #2d2d2d; padding: 30px; border-radius: 15px; }
+        .status { padding: 15px; margin: 15px 0; border-radius: 8px; font-weight: bold; }
+        .success { background: #28a745; color: white; }
+        .error { background: #dc3545; color: white; }
+        .info { background: #17a2b8; color: white; }
+        .token { font-family: monospace; background: #343a40; padding: 8px; border-radius: 5px; color: #ffc107; }
+        h1 { color: #ffc107; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Aplicar Token Atual</h1>
+        <div id="status">Iniciando aplicação do token...</div>
+        
+        <div class="info">
+            <h3>🔍 Token Identificado:</h3>
+            <p><strong>Token:</strong> <span class="token">f13dd10c-b69d-4b64-9145-be20ef95aa70</span></p>
+            <p><strong>Usuário:</strong> admin (jonatasprojetos2013@gmail.com)</p>
+            <p><strong>Ação:</strong> Aplicar token no BTC Analysis</p>
+        </div>
+        
+        <div id="progress"></div>
+    </div>
+    
+    <script>
+        // Token fornecido pelo usuário
+        const USER_TOKEN = 'f13dd10c-b69d-4b64-9145-be20ef95aa70';
+        const USER_DATA = {
+            "email": "jonatasprojetos2013@gmail.com",
+            "id": "86bab845-1921-43b8-bdf7-b13fb17efdc8",
+            "is_admin": true,
+            "username": "admin"
+        };
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = `status ${type}`;
+            console.log(`[TOKEN] ${message}`);
+        }
+        
+        function addProgress(message, success = true) {
+            const progressDiv = document.getElementById('progress');
+            const p = document.createElement('div');
+            p.style.padding = '10px';
+            p.style.margin = '5px 0';
+            p.style.borderRadius = '5px';
+            p.style.background = success ? '#28a745' : '#dc3545';
+            p.innerHTML = `${success ? '✅' : '❌'} ${message}`;
+            progressDiv.appendChild(p);
+        }
+        
+        async function applyUserToken() {
+            try {
+                updateStatus('🧹 Limpando dados antigos...', 'info');
+                
+                // Limpar dados antigos
+                localStorage.clear();
+                sessionStorage.clear();
+                addProgress('Dados antigos removidos');
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateStatus('🔑 Aplicando token do usuário...', 'info');
+                
+                // Aplicar token e dados do usuário
+                localStorage.setItem('token', USER_TOKEN);
+                localStorage.setItem('user', JSON.stringify(USER_DATA));
+                localStorage.setItem('authTimestamp', Date.now().toString());
+                
+                addProgress('Token aplicado com sucesso');
+                addProgress('Dados de usuário configurados');
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateStatus('🔍 Verificando aplicação...', 'info');
+                
+                const savedToken = localStorage.getItem('token');
+                const savedUser = localStorage.getItem('user');
+                
+                if (savedToken === USER_TOKEN && savedUser) {
+                    addProgress('Verificação de integridade passou');
+                    updateStatus('✅ Token aplicado com sucesso!', 'success');
+                    
+                    console.log('=== TOKEN APLICADO ===');
+                    console.log('Token:', savedToken);
+                    console.log('User:', savedUser);
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    updateStatus('🔄 Redirecionando para BTC Analysis...', 'info');
+                    
+                    // Redirecionar para BTC Analysis
+                    setTimeout(() => {
+                        window.location.href = 'http://localhost:3000/btc-analysis?token=updated&t=' + Date.now();
+                    }, 1000);
+                    
+                } else {
+                    updateStatus('❌ Erro: Token não foi salvo corretamente', 'error');
+                    addProgress('Falha na verificação', false);
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Erro durante aplicação: ${error.message}`, 'error');
+                addProgress(`Erro: ${error.message}`, false);
+                console.error('Erro:', error);
+            }
+        }
+        
+        // Executar após carregamento
+        window.addEventListener('load', () => {
+            setTimeout(applyUserToken, 1000);
+        });
+        
+        // Log de debug
+        console.log('=== APLICAÇÃO DE TOKEN ===');
+        console.log('Token a ser aplicado:', USER_TOKEN);
+        console.log('Usuário:', USER_DATA.username);
+        console.log('Email:', USER_DATA.email);
+    </script>
+</body>
+</html>

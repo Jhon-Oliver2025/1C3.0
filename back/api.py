@@ -16,6 +16,7 @@ from api_routes.notifications import notifications_bp
 from api_routes.market_times import market_times_bp
 from api_routes.market_status import market_status_bp
 from api_routes.cleanup_status import cleanup_status_bp
+from api_routes.signal_monitoring import signal_monitoring_bp
 # from api_routes.analytics import analytics_bp  # Módulo não existe
 from api_routes.scheduler_management import scheduler_management_bp
 from api_routes.restart_system import restart_system_bp
@@ -54,13 +55,34 @@ def register_api_routes(app_instance, bot_instance):
         init_btc_signals_routes(bot_instance.db, bot_instance.analyzer.btc_signal_manager)
         print("✅ Rotas BTC Signals inicializadas com btc_signal_manager!")
         print(f"🔍 [DEBUG] btc_signal_manager: {bot_instance.analyzer.btc_signal_manager}")
+        
+        # Inicializar rotas Market Status com btc_analyzer
+        if hasattr(bot_instance.analyzer.btc_signal_manager, 'btc_analyzer'):
+            from api_routes.market_status import init_market_status_routes
+            init_market_status_routes(bot_instance.analyzer.btc_signal_manager.btc_analyzer)
+            print("✅ Rotas Market Status inicializadas com btc_analyzer!")
+        else:
+            print("⚠️ btc_analyzer não encontrado no btc_signal_manager")
     else:
         print("⚠️ btc_signal_manager não encontrado no bot_instance")
+    
+    # Inicializar rotas de Monitoramento de Sinais
+    if hasattr(bot_instance, 'analyzer') and hasattr(bot_instance.analyzer, 'binance') and hasattr(bot_instance, 'db'):
+        from api_routes.signal_monitoring import init_signal_monitoring_routes
+        init_signal_monitoring_routes(bot_instance.db, bot_instance.analyzer.binance)
+        print("✅ Rotas de Monitoramento de Sinais inicializadas!")
+        print(f"🔍 [DEBUG] binance_client: {bot_instance.analyzer.binance}")
+    else:
+        print("⚠️ Dependências para monitoramento não encontradas no bot_instance")
+        print(f"🔍 [DEBUG] bot_instance.analyzer: {getattr(bot_instance, 'analyzer', 'NOT_FOUND')}")
+        print(f"🔍 [DEBUG] analyzer.binance: {getattr(getattr(bot_instance, 'analyzer', None), 'binance', 'NOT_FOUND')}")
+        print(f"🔍 [DEBUG] bot_instance.db: {getattr(bot_instance, 'db', 'NOT_FOUND')}")
     
     # Registrar blueprints
     app_instance.register_blueprint(auth_bp, url_prefix='/api/auth')
     app_instance.register_blueprint(signals_bp, url_prefix='/api/signals')
     app_instance.register_blueprint(btc_signals_bp)  # Já tem url_prefix='/api/btc-signals' definido no blueprint
+    app_instance.register_blueprint(signal_monitoring_bp)  # Já tem url_prefix='/api/signal-monitoring' definido no blueprint
     app_instance.register_blueprint(trading_bp, url_prefix='/api/trading')
     app_instance.register_blueprint(users_bp, url_prefix='/api/users')
     app_instance.register_blueprint(notifications_bp, url_prefix='/api/notifications')

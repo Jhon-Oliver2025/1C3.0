@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Atualizar Token e Recarregar</title>
+</head>
+<body>
+    <h1>Atualizando Token...</h1>
+    <script>
+        // Token válido obtido do backend
+        const validToken = '766c8ad5-b63a-40a9-a5b4-f32efb7a6451';
+        const userData = {
+            "email": "jonatasprojetos2013@gmail.com",
+            "id": "86bab845-1921-43b8-bdf7-b13fb17efdc8",
+            "is_admin": true,
+            "username": "admin"
+        };
+        
+        // Limpar dados antigos primeiro
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        
+        // Aguardar um pouco e definir novos dados
+        setTimeout(() => {
+            localStorage.setItem('token', validToken);
+            localStorage.setItem('user', JSON.stringify(userData));
+            
+            console.log('Token atualizado:', validToken);
+            console.log('Usuário atualizado:', userData);
+            console.log('LocalStorage atual:', {
+                token: localStorage.getItem('token'),
+                user: localStorage.getItem('user')
+            });
+            
+            // Redirecionar e forçar reload
+            setTimeout(() => {
+                window.location.href = 'http://localhost:3000/btc-analysis';
+                // Forçar reload da página após redirecionamento
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 1000);
+            }, 1000);
+        }, 500);
+    </script>
+    <p>Token sendo atualizado... Redirecionando e recarregando em 2 segundos...</p>
+    <p><strong>Novo Token:</strong> 766c8ad5-b63a-40a9-a5b4-f32efb7a6451</p>
+</body>
+</html>

@@ -580,6 +580,9 @@ class BTCSignalManager:
             gerenciador = GerenciadorSinais(self.db)
             gerenciador.save_signal(confirmed_signal)
             
+            # NOVO: Adicionar automaticamente ao sistema de monitoramento
+            self._add_to_monitoring_system(confirmed_signal)
+            
             # Enviar notificação se configurado
             if self.notifier:
                 try:
@@ -598,6 +601,7 @@ class BTCSignalManager:
             self._save_confirmed_signal_to_db(signal, confirmed_signal, reasons)
             
             print(f"✅ Sinal {signal['symbol']} confirmado e enviado para dashboard!")
+            print(f"📊 Sinal adicionado ao sistema de monitoramento para avaliação quantitativa")
             
         except Exception as e:
             print(f"❌ Erro ao confirmar sinal: {e}")
@@ -822,3 +826,59 @@ class BTCSignalManager:
         except Exception as e:
             print(f"❌ Erro na rejeição manual: {e}")
             return False
+    
+    def _add_to_monitoring_system(self, confirmed_signal: Dict[str, Any]) -> None:
+        """Adiciona sinal confirmado ao sistema de monitoramento para avaliação quantitativa"""
+        try:
+            # Importar o sistema de monitoramento
+            from .signal_monitoring_system import SignalMonitoringSystem
+            
+            # Obter instância do sistema de monitoramento
+            monitoring_system = SignalMonitoringSystem.get_instance(self.db)
+            
+            # Adicionar sinal ao monitoramento
+            monitoring_system.add_signal_to_monitoring(
+                signal_id=confirmed_signal.get('confirmation_id', confirmed_signal.get('id', '')),
+                symbol=confirmed_signal['symbol'],
+                signal_type=confirmed_signal['type'],
+                entry_price=confirmed_signal['entry_price'],
+                target_price=confirmed_signal['target_price'],
+                quality_score=confirmed_signal['quality_score'],
+                signal_class=confirmed_signal['signal_class'],
+                confirmation_reasons=confirmed_signal.get('confirmation_reasons', []),
+                btc_correlation=confirmed_signal.get('btc_correlation', 0),
+                btc_trend=confirmed_signal.get('btc_trend', 'NEUTRAL')
+            )
+            
+            print(f"📊 Sinal {confirmed_signal['symbol']} adicionado ao monitoramento quantitativo")
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao adicionar sinal ao monitoramento: {e}")
+            # Não falhar a confirmação por causa disso
+            pass
+    
+    def get_monitoring_integration_status(self) -> Dict[str, Any]:
+        """Retorna status da integração com o sistema de monitoramento"""
+        try:
+            from .signal_monitoring_system import SignalMonitoringSystem
+            
+            # Verificar se o sistema de monitoramento está ativo
+            monitoring_system = SignalMonitoringSystem.get_instance(self.db)
+            monitoring_stats = monitoring_system.get_system_statistics()
+            
+            return {
+                'integration_active': True,
+                'monitoring_system_status': 'active',
+                'total_signals_monitored': monitoring_stats.get('total_active_signals', 0),
+                'successful_signals': monitoring_stats.get('successful_signals', 0),
+                'failed_signals': monitoring_stats.get('failed_signals', 0),
+                'success_rate': monitoring_stats.get('success_rate', 0)
+            }
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao verificar status do monitoramento: {e}")
+            return {
+                'integration_active': False,
+                'monitoring_system_status': 'error',
+                'error': str(e)
+            }

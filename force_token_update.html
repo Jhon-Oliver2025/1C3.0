@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Forçar Atualização de Token - SOLUÇÃO DEFINITIVA</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .token { font-family: monospace; background: #f8f9fa; padding: 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Forçar Atualização de Token</h1>
+        <div id="status">Iniciando processo...</div>
+        
+        <div class="info">
+            <h3>🔍 Diagnóstico:</h3>
+            <p><strong>Problema:</strong> Frontend não está usando token válido</p>
+            <p><strong>Token Válido:</strong> <span class="token">6ff35b97-6bdf-49b0-82d4-7a3f95df3e72</span></p>
+            <p><strong>Solução:</strong> Limpeza completa + Token novo + Reload forçado</p>
+        </div>
+        
+        <div id="progress"></div>
+    </div>
+    
+    <script>
+        // Token válido confirmado funcionando
+        const WORKING_TOKEN = '6ff35b97-6bdf-49b0-82d4-7a3f95df3e72';
+        const VALID_USER = {
+            "email": "jonatasprojetos2013@gmail.com",
+            "id": "86bab845-1921-43b8-bdf7-b13fb17efdc8",
+            "is_admin": true,
+            "username": "admin"
+        };
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = message;
+            statusDiv.className = `status ${type}`;
+            console.log(`[TOKEN UPDATE] ${message}`);
+        }
+        
+        function addProgress(message) {
+            const progressDiv = document.getElementById('progress');
+            const p = document.createElement('p');
+            p.innerHTML = `✓ ${message}`;
+            p.style.color = '#28a745';
+            progressDiv.appendChild(p);
+        }
+        
+        async function forceTokenUpdate() {
+            try {
+                updateStatus('🧹 Limpando TODOS os dados do localStorage...', 'info');
+                
+                // Limpar TUDO
+                localStorage.clear();
+                sessionStorage.clear();
+                addProgress('LocalStorage e SessionStorage limpos');
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateStatus('🔑 Definindo novo token válido...', 'info');
+                
+                // Definir token válido
+                localStorage.setItem('token', WORKING_TOKEN);
+                localStorage.setItem('user', JSON.stringify(VALID_USER));
+                addProgress('Token válido definido');
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateStatus('🔍 Verificando se token foi salvo...', 'info');
+                
+                const savedToken = localStorage.getItem('token');
+                const savedUser = localStorage.getItem('user');
+                
+                if (savedToken === WORKING_TOKEN) {
+                    addProgress('Token verificado e confirmado');
+                    updateStatus('✅ Token atualizado com sucesso!', 'success');
+                    
+                    console.log('=== VERIFICAÇÃO FINAL ===');
+                    console.log('Token salvo:', savedToken);
+                    console.log('User salvo:', savedUser);
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    updateStatus('🔄 Redirecionando para BTC Analysis com reload forçado...', 'info');
+                    
+                    // Redirecionar e forçar reload
+                    setTimeout(() => {
+                        window.location.href = 'http://localhost:3000/btc-analysis';
+                        
+                        // Forçar reload após redirecionamento
+                        setTimeout(() => {
+                            window.location.reload(true);
+                        }, 1000);
+                    }, 1000);
+                    
+                } else {
+                    updateStatus('❌ Erro: Token não foi salvo corretamente', 'error');
+                }
+                
+            } catch (error) {
+                updateStatus(`❌ Erro durante atualização: ${error.message}`, 'error');
+                console.error('Erro:', error);
+            }
+        }
+        
+        // Executar após carregamento da página
+        window.addEventListener('load', () => {
+            setTimeout(forceTokenUpdate, 1000);
+        });
+    </script>
+</body>
+</html>

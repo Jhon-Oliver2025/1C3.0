@@ -56,16 +56,66 @@ interface ConfirmedSignal {
   symbol: string;
   type: 'COMPRA' | 'VENDA';
   entry_price: number;
+  target_price?: number;
+  projection_percentage?: number;
+  quality_score?: number;
+  signal_class?: string;
+  created_at: string;
+  confirmed_at?: string;
+  confirmation_reasons?: string[];
+  confirmation_attempts?: number;
+  btc_correlation?: number;
+  btc_trend?: string;
+  status?: string;
+  entry_time?: string;
+}
+
+interface MonitoredSignal {
+  id: string;
+  symbol: string;
+  signal_type: 'COMPRA' | 'VENDA';
+  entry_price: number;
   target_price: number;
-  projection_percentage: number;
-  quality_score: number;
-  signal_class: string;
   created_at: string;
   confirmed_at: string;
-  confirmation_reasons: string[];
-  confirmation_attempts: number;
-  btc_correlation: number;
-  btc_trend: string;
+  max_leverage: number;
+  required_percentage: number;
+  current_price: number;
+  current_percentage: number;
+  current_profit: number;
+  max_profit_reached: number;
+  status: string;
+  last_updated: string;
+  days_monitored: number;
+}
+
+interface ExpiredSignal {
+  id: string;
+  symbol: string;
+  signal_type: 'COMPRA' | 'VENDA';
+  entry_price: number;
+  target_price: number;
+  created_at: string;
+  confirmed_at: string;
+  max_leverage: number;
+  required_percentage: number;
+  max_profit_reached: number;
+  status: 'COMPLETED' | 'EXPIRED';
+  days_monitored: number;
+}
+
+interface MonitoringStats {
+  total_monitored: number;
+  total_expired: number;
+  total_completed: number;
+  successful_signals: number;
+  failed_signals: number;
+  total_evaluated_signals: number;
+  success_rate: number;
+  average_successful_profit: number;
+  max_profit: number;
+  is_monitoring: boolean;
+  last_update: string;
 }
 
 interface BTCMetrics {
@@ -276,154 +326,6 @@ const RefreshButton = styled.button`
   }
 `;
 
-const StatsContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-  }
-  
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-`;
-
-const StatCard = styled.div`
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  padding: 20px;
-  border-radius: 12px;
-  border: 1px solid #f59e0b;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: transform 0.2s ease;
-  
-  @media (max-width: 768px) {
-    padding: 15px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 12px;
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-  }
-`;
-
-const StatIcon = styled.div`
-  font-size: 2em;
-  color: #f59e0b;
-  margin-bottom: 10px;
-  
-  @media (max-width: 768px) {
-    font-size: 1.5em;
-    margin-bottom: 8px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 1.3em;
-    margin-bottom: 6px;
-  }
-`;
-
-const StatValue = styled.div`
-  font-size: 2em;
-  font-weight: bold;
-  color: white;
-  margin-bottom: 5px;
-  
-  @media (max-width: 768px) {
-    font-size: 1.5em;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 1.3em;
-  }
-`;
-
-const StatLabel = styled.div`
-  color: #94a3b8;
-  font-size: 0.9em;
-  
-  @media (max-width: 768px) {
-    font-size: 0.8em;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 0.75em;
-  }
-`;
-
-const BTCOverviewCard = styled.div`
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  padding: 25px;
-  border-radius: 12px;
-  border: 1px solid #f59e0b;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  margin-bottom: 30px;
-  
-  @media (max-width: 768px) {
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 15px;
-  }
-`;
-
-const BTCPrice = styled.div`
-  font-size: 3em;
-  font-weight: bold;
-  color: #f59e0b;
-  margin-bottom: 10px;
-  
-  @media (max-width: 768px) {
-    font-size: 2em;
-    text-align: center;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 1.5em;
-  }
-`;
-
-const BTCChange = styled.div<{ $positive: boolean }>`
-  font-size: 1.5em;
-  font-weight: 600;
-  color: ${props => props.$positive ? '#10b981' : '#ef4444'};
-  margin-bottom: 15px;
-  
-  @media (max-width: 768px) {
-    font-size: 1.2em;
-    text-align: center;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 1em;
-  }
-`;
-
-const BTCTrend = styled.div<{ $trend: string }>`
-  display: inline-block;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: 600;
-  background: ${props => {
-    switch (props.$trend) {
-      case 'BULLISH': return '#10b981';
-      case 'BEARISH': return '#ef4444';
-      default: return '#6b7280';
-    }
-  }};
-  color: white;
-`;
-
 const TabContainer = styled.div`
   display: flex;
   margin-bottom: 20px;
@@ -433,10 +335,22 @@ const TabContainer = styled.div`
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    padding: 0 10px;
+    margin: 0 -10px 20px -10px;
     
     &::-webkit-scrollbar {
       display: none;
     }
+  }
+  
+  @media (max-width: 480px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    overflow-x: visible;
+    padding: 0;
+    margin: 0 0 15px 0;
+    border-bottom: none;
   }
 `;
 
@@ -451,26 +365,50 @@ const Tab = styled.button<{ $active: boolean }>`
   border-radius: 8px 8px 0 0;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-width: fit-content;
   
   @media (max-width: 768px) {
-    padding: 12px 20px;
-    font-size: 0.9em;
+    padding: 12px 16px;
+    font-size: 0.85em;
+    min-width: 120px;
   }
   
   @media (max-width: 480px) {
-    padding: 10px 15px;
-    font-size: 0.8em;
+    padding: 10px 8px;
+    font-size: 0.7em;
+    min-width: unset;
+    width: 100%;
+    border-radius: 8px;
+    text-align: center;
+    white-space: normal;
+    line-height: 1.2;
+    height: auto;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${props => props.$active ? '#f59e0b' : '#2d3748'};
+    border: 1px solid ${props => props.$active ? '#f59e0b' : '#374151'};
+    
+    &:last-child:nth-child(odd) {
+      grid-column: 1 / -1;
+    }
   }
 
   &:hover {
     background: ${props => props.$active ? '#f59e0b' : '#1e293b'};
     color: ${props => props.$active ? 'black' : 'white'};
+    
+    @media (max-width: 480px) {
+      background: ${props => props.$active ? '#f59e0b' : '#374151'};
+    }
   }
 `;
 
 const ContentContainer = styled.div`
   background: #1e293b;
   border-radius: 12px;
+  padding: 25px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   min-height: 400px;
@@ -569,56 +507,6 @@ const DetailValue = styled.span`
   font-weight: 600;
 `;
 
-const SignalActions = styled.div`
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-`;
-
-const ActionButton = styled.button<{ $variant?: 'success' | 'danger' | 'info' }>`
-  background: ${props => {
-    switch (props.$variant) {
-      case 'success': return '#10b981';
-      case 'danger': return '#ef4444';
-      case 'info': return '#3b82f6';
-      default: return '#6b7280';
-    }
-  }};
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-  
-  @media (max-width: 768px) {
-    padding: 6px 12px;
-    font-size: 0.9em;
-    gap: 5px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 5px 10px;
-    font-size: 0.8em;
-    gap: 3px;
-  }
-
-  &:hover {
-    transform: translateY(-1px);
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    background: #6b7280;
-    cursor: not-allowed;
-    transform: none;
-  }
-`;
-
 const LoadingSpinner = styled.div`
   display: flex;
   justify-content: center;
@@ -642,33 +530,6 @@ const EmptyIcon = styled.div`
   font-size: 4em;
   margin-bottom: 20px;
   opacity: 0.5;
-`;
-
-const StrategyExplanation = styled.div`
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-  padding: 25px;
-  border-radius: 12px;
-  border: 1px solid #f59e0b;
-  margin-bottom: 30px;
-`;
-
-const StrategyTitle = styled.h2`
-  color: #f59e0b;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
-const StrategyText = styled.p`
-  color: #94a3b8;
-  line-height: 1.6;
-  margin-bottom: 15px;
-`;
-
-const StrategyHighlight = styled.span`
-  color: #f59e0b;
-  font-weight: 600;
 `;
 
 const TechnicalGrid = styled.div`
@@ -758,923 +619,307 @@ const TechnicalSubtext = styled.div`
   }
 `;
 
-const RSIBar = styled.div<{ $rsi: number }>`
-  width: 100%;
-  height: 8px;
-  background: #374151;
-  border-radius: 4px;
-  position: relative;
-  margin: 10px 0;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100%;
-    width: ${props => props.$rsi}%;
-    background: ${props => {
-      if (props.$rsi >= 70) return '#ef4444';
-      if (props.$rsi <= 30) return '#10b981';
-      return '#f59e0b';
-    }};
-    border-radius: 4px;
-    transition: all 0.3s ease;
-  }
-`;
-
-const TimeframeRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #374151;
-  
-  &:last-child {
-    border-bottom: none;
-  }
-`;
-
-const TimeframeLabel = styled.span`
-  color: #94a3b8;
-  font-weight: 600;
-`;
-
-const TimeframeValue = styled.span<{ $color?: string }>`
-  color: ${props => props.$color || 'white'};
-  font-weight: 600;
-`;
-
-const RangeBar = styled.div<{ $percentage: number }>`
-  width: 100%;
-  height: 12px;
-  background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
-  border-radius: 6px;
-  position: relative;
-  margin: 10px 0;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    left: ${props => props.$percentage}%;
-    top: -2px;
-    width: 4px;
-    height: 16px;
-    background: white;
-    border-radius: 2px;
-    transform: translateX(-50%);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-`;
-
-const RefreshControls = styled.div`
+const StrategyTitle = styled.h2`
+  color: #f59e0b;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-left: auto;
-  
-  @media (max-width: 768px) {
-    gap: 10px;
-    margin-left: 0;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  @media (max-width: 480px) {
-    gap: 8px;
-    flex-direction: column;
-    width: 100%;
-  }
+  gap: 10px;
 `;
 
-const AutoRefreshToggle = styled.button<{ $active: boolean }>`
-  background: ${props => props.$active 
-    ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
-    : 'linear-gradient(135deg, #374151 0%, #4b5563 100%)'};
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9em;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  border: 1px solid ${props => props.$active ? '#10b981' : '#6b7280'};
-  position: relative;
-  overflow: hidden;
-  
-  @media (max-width: 768px) {
-    padding: 8px 12px;
-    font-size: 0.8em;
-    gap: 5px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 6px 10px;
-    font-size: 0.75em;
-    width: 100%;
-    justify-content: center;
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s;
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    
-    &::before {
-      left: 100%;
-    }
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-`;
-
-const DataFreshnessIndicator = styled.div<{ $freshness: string }>`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: ${props => {
-    switch (props.$freshness) {
-      case 'fresh': return 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%)';
-      case 'recent': return 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.2) 100%)';
-      case 'aging': return 'linear-gradient(135deg, rgba(249, 115, 22, 0.2) 0%, rgba(234, 88, 12, 0.2) 100%)';
-      case 'stale': return 'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%)';
-      default: return 'linear-gradient(135deg, rgba(107, 114, 128, 0.2) 0%, rgba(75, 85, 99, 0.2) 100%)';
-    }
-  }};
-  border: 1px solid ${props => {
-    switch (props.$freshness) {
-      case 'fresh': return '#10b981';
-      case 'recent': return '#f59e0b';
-      case 'aging': return '#f97316';
-      case 'stale': return '#ef4444';
-      default: return '#6b7280';
-    }
-  }};
-  font-size: 0.85em;
-  font-weight: 600;
-  color: ${props => {
-    switch (props.$freshness) {
-      case 'fresh': return '#10b981';
-      case 'recent': return '#f59e0b';
-      case 'aging': return '#f97316';
-      case 'stale': return '#ef4444';
-      default: return '#6b7280';
-    }
-  }};
-  transition: all 0.3s ease;
-  
-  &::before {
-    content: '●';
-    font-size: 1.2em;
-    animation: ${props => props.$freshness === 'fresh' ? 'pulse 2s infinite' : 'none'};
-  }
-  
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px ${props => {
-      switch (props.$freshness) {
-        case 'fresh': return 'rgba(16, 185, 129, 0.3)';
-        case 'recent': return 'rgba(245, 158, 11, 0.3)';
-        case 'aging': return 'rgba(249, 115, 22, 0.3)';
-        case 'stale': return 'rgba(239, 68, 68, 0.3)';
-        default: return 'rgba(107, 114, 128, 0.3)';
-      }
-    }};
-  }
-  
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.1); }
-  }
-`;
-
-const NextUpdateTimer = styled.div`
-  font-size: 0.8em;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-`;
-
-// Componente Principal
+// Main Component
 const BTCAnalysisPage: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'pending' | 'confirmed' | 'rejected' | 'monitoring'>('pending');
+  const [activeTab, setActiveTab] = useState('pending');
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  
-  // Estados dos dados
   const [pendingSignals, setPendingSignals] = useState<PendingSignal[]>([]);
   const [confirmedSignals, setConfirmedSignals] = useState<ConfirmedSignal[]>([]);
   const [rejectedSignals, setRejectedSignals] = useState<RejectedSignal[]>([]);
+  const [monitoredSignals, setMonitoredSignals] = useState<MonitoredSignal[]>([]);
+  const [expiredSignals, setExpiredSignals] = useState<ExpiredSignal[]>([]);
+  const [monitoringStats, setMonitoringStats] = useState<MonitoringStats | null>(null);
   const [btcMetrics, setBtcMetrics] = useState<BTCMetrics | null>(null);
   const [btcAnalysis, setBtcAnalysis] = useState<BTCAnalysis | null>(null);
-  const [restartSystemInfo, setRestartSystemInfo] = useState<RestartSystemInfo | null>(null);
-  
-  // Estados para auto-refresh
-  const [autoRefresh, setAutoRefresh] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [nextUpdate, setNextUpdate] = useState<Date>(new Date());
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const [restartInfo, setRestartInfo] = useState<RestartSystemInfo | null>(null);
 
-  // Verificar autenticação e permissão admin
-  useEffect(() => {
-    const checkAdminAccess = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login', {
-          state: {
-            returnUrl: '/btc-analysis',
-            message: 'Faça login para acessar a Análise BTC'
-          }
-        });
-        return;
-      }
-
-      try {
-        // Verificar se o usuário é admin
-        const response = await fetch('/api/auth/check-admin', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.is_admin) {
-            // Usuário é admin, carregar dados
-            loadData();
-          } else {
-            // Usuário não é admin, redirecionar para dashboard
-            navigate('/dashboard', {
-              state: {
-                message: 'Acesso negado: Apenas administradores podem acessar a Análise BTC'
-              }
-            });
-          }
-        } else {
-          // Token inválido ou erro, redirecionar para login
-          localStorage.removeItem('token');
-          navigate('/login', {
-            state: {
-              returnUrl: '/btc-analysis',
-              message: 'Sessão expirada. Faça login novamente'
-            }
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao verificar permissão de admin:', error);
-        navigate('/dashboard', {
-          state: {
-            message: 'Erro ao verificar permissões. Tente novamente'
-          }
-        });
-      }
-    };
-
-    checkAdminAccess();
-  }, [navigate]);
-
-  // Sistema de Auto-Refresh Inteligente
-  useEffect(() => {
-    if (!autoRefresh) return;
-
-    const setupAutoRefresh = () => {
-      // Limpar interval anterior se existir
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
-
-      // Calcular intervalo baseado na idade dos dados
-      const calculateRefreshInterval = () => {
-        if (!btcAnalysis) return 30000; // 30s se não há dados
-        
-        const now = new Date();
-        const lastBtcUpdate = new Date(btcAnalysis.last_updated);
-        const dataAge = now.getTime() - lastBtcUpdate.getTime();
-        
-        // Refresh mais frequente para dados mais antigos
-        if (dataAge > 300000) return 15000; // 15s se dados > 5min
-        if (dataAge > 120000) return 30000; // 30s se dados > 2min
-        if (dataAge > 60000) return 45000;  // 45s se dados > 1min
-        return 60000; // 1min para dados recentes
-      };
-
-      const interval = calculateRefreshInterval();
-      setNextUpdate(new Date(Date.now() + interval));
-
-      const newInterval = setInterval(async () => {
-        try {
-          await loadData();
-          setLastUpdate(new Date());
-        } catch (error) {
-          console.error('Erro no auto-refresh:', error);
-        }
-      }, interval);
-
-      setRefreshInterval(newInterval);
-    };
-
-    setupAutoRefresh();
-
-    // Cleanup
-    return () => {
-      if (refreshInterval) {
-        clearInterval(refreshInterval);
-      }
-    };
-  }, [autoRefresh, btcAnalysis?.last_updated]);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      await Promise.all([
-        loadPendingSignals(),
-        loadConfirmedSignals(),
-        loadRejectedSignals(),
-        loadBTCMetrics(),
-        loadRestartSystemInfo()
-      ]);
-    } catch (error) {
-      console.error('Erro ao carregar dados:', error);
-    } finally {
-      setLoading(false);
+  // Função para formatar preços
+  const formatPrice = (price: number): string => {
+    if (price >= 1) {
+      return `$${price.toFixed(4)}`;
+    } else {
+      return `$${price.toFixed(8)}`;
     }
   };
 
-  const loadRestartSystemInfo = async () => {
+  // Função para formatar data/hora
+  const formatDateTime = (dateString: string): string => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/restart-system/status', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const date = new Date(dateString);
+      return date.toLocaleString('pt-BR');
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Função auxiliar para verificar autenticação
+  const checkAuthAndRedirect = (response: Response) => {
+    if (response.status === 401 || response.status === 403) {
+      console.warn('Token expirado, redirecionando para login...');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      navigate('/login', { 
+        state: { 
+          message: 'Sessão expirada. Faça login novamente.',
+          returnUrl: '/btc-analysis'
         }
       });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setRestartSystemInfo(data.data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar informações do sistema de restart:', error);
+      return true;
     }
+    return false;
   };
 
+  // Funções para carregar dados
   const loadPendingSignals = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
       const response = await fetch('/api/btc-signals/pending', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`
         }
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        setPendingSignals(data.data.pending_signals || []);
+      if (checkAuthAndRedirect(response)) return;
+      
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setPendingSignals(data.data);
+      } else {
+        setPendingSignals([]);
       }
     } catch (error) {
       console.error('Erro ao carregar sinais pendentes:', error);
-    }
-  };
-
-  const loadRejectedSignals = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/btc-signals/rejected', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setRejectedSignals(data.data.rejected_signals || []);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar sinais rejeitados:', error);
+      setPendingSignals([]);
     }
   };
 
   const loadConfirmedSignals = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
       const response = await fetch('/api/btc-signals/confirmed', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`
         }
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Tratar diferentes formatos de resposta da API
-        let signalsArray;
-        if (Array.isArray(data)) {
-          // Formato direto (público)
-          signalsArray = data;
-        } else if (data.data && Array.isArray(data.data.confirmed_signals)) {
-          // Formato admin com wrapper
-          signalsArray = data.data.confirmed_signals;
-        } else if (data.success && Array.isArray(data.data)) {
-          // Formato alternativo
-          signalsArray = data.data;
-        } else {
-          console.warn('⚠️ Formato de resposta não reconhecido:', data);
-          signalsArray = [];
-        }
-        
-        console.log(`📊 Carregados ${signalsArray.length} sinais confirmados`);
-        setConfirmedSignals(signalsArray || []);
+      if (checkAuthAndRedirect(response)) return;
+      
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setConfirmedSignals(data.data);
+      } else {
+        setConfirmedSignals([]);
       }
     } catch (error) {
       console.error('Erro ao carregar sinais confirmados:', error);
+      setConfirmedSignals([]);
     }
   };
 
-  const loadBTCMetrics = async () => {
+  const loadRejectedSignals = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/btc-signals/metrics', {
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
+      const response = await fetch('/api/btc-signals/rejected', {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Authorization': `Bearer ${token}`
         }
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        setBtcMetrics(data.data.confirmation_metrics);
-        
-        // Combinar dados de btc_analysis e btc_price_data
-        const btcAnalysisData = data.data.btc_analysis;
-        const btcPriceData = data.data.btc_price_data;
-        
-        const combinedBtcData = {
-          trend: btcAnalysisData?.trend || 'NEUTRAL',
-          strength: btcAnalysisData?.strength || 50,
-          price: btcPriceData?.price || 0,
-          change_24h: btcPriceData?.change_24h || 0,
-          volume_24h: btcPriceData?.volume_24h || 0,
-          high_24h: btcPriceData?.high_24h || 0,
-          low_24h: btcPriceData?.low_24h || 0,
-          last_updated: btcPriceData?.last_updated || '',
-          volatility: btcAnalysisData?.volatility || 0,
-          timeframes: btcAnalysisData?.timeframes || {
-            '1h': {
-              rsi: 50,
-              rsi_condition: 'NEUTRAL',
-              macd_bullish: false,
-              macd_bearish: false,
-              ema20: 0,
-              ema50: 0,
-              ema_alignment: false,
-              atr: 0,
-              atr_percentage: 0,
-              volatility_level: 'LOW',
-              trend: 'NEUTRAL',
-              strength: 50,
-              momentum_aligned: false,
-              pivot_broken: false,
-              timestamp: ''
-            },
-            '4h': {
-              rsi: 50,
-              rsi_condition: 'NEUTRAL',
-              macd_bullish: false,
-              macd_bearish: false,
-              ema20: 0,
-              ema50: 0,
-              ema_alignment: false,
-              atr: 0,
-              atr_percentage: 0,
-              volatility_level: 'LOW',
-              trend: 'NEUTRAL',
-              strength: 50,
-              momentum_aligned: false,
-              pivot_broken: false,
-              timestamp: ''
-            }
-          }
-        };
-        
-        setBtcAnalysis(combinedBtcData);
+      if (checkAuthAndRedirect(response)) return;
+      
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setRejectedSignals(data.data);
+      } else {
+        setRejectedSignals([]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar sinais rejeitados:', error);
+      setRejectedSignals([]);
+    }
+  };
+
+  const loadMonitoredSignals = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
+      const response = await fetch('/api/signal-monitoring/signals/active', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (checkAuthAndRedirect(response)) return;
+      
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setMonitoredSignals(data.data);
+      } else {
+        setMonitoredSignals([]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar sinais monitorados:', error);
+      setMonitoredSignals([]);
+    }
+  };
+
+  const loadExpiredSignals = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
+      const response = await fetch('/api/signal-monitoring/signals/expired', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (checkAuthAndRedirect(response)) return;
+      
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setExpiredSignals(data.data);
+      } else {
+        setExpiredSignals([]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar sinais expirados:', error);
+      setExpiredSignals([]);
+    }
+  };
+
+  const loadMonitoringStats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
+      const response = await fetch('/api/signal-monitoring/stats', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (checkAuthAndRedirect(response)) return;
+      
+      const data = await response.json();
+      if (data.success) {
+        setMonitoringStats(data.data || null);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas de monitoramento:', error);
+    }
+  };
+
+  const loadBtcMetrics = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+      
+      const response = await fetch('/api/btc-signals/metrics', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (checkAuthAndRedirect(response)) return;
+      
+      const data = await response.json();
+      if (data.success) {
+        setBtcMetrics(data.data || null);
       }
     } catch (error) {
       console.error('Erro ao carregar métricas BTC:', error);
     }
   };
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
-  };
-
-  const handleConfirmSignal = async (signalId: string) => {
+  const loadBtcAnalysis = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/btc-signals/confirm/${signalId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        await loadData(); // Recarregar dados
-        alert('Sinal confirmado com sucesso!');
-      } else {
-        const error = await response.json();
-        alert(`Erro ao confirmar sinal: ${error.message}`);
-      }
-    } catch (error) {
-      console.error('Erro ao confirmar sinal:', error);
-      alert('Erro ao confirmar sinal');
-    }
-  };
-
-  const handleRejectSignal = async (signalId: string) => {
-    const reason = prompt('Motivo da rejeição (opcional):');
-    
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/btc-signals/reject/${signalId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ reason: reason || 'MANUAL_REJECTION_BY_ADMIN' })
-      });
-      
-      if (response.ok) {
-        await loadData(); // Recarregar dados
-        alert('Sinal rejeitado com sucesso!');
-      } else {
-        const error = await response.json();
-        alert(`Erro ao rejeitar sinal: ${error.message}`);
-      }
-    } catch (error) {
-      console.error('Erro ao rejeitar sinal:', error);
-      alert('Erro ao rejeitar sinal');
-    }
-  };
-
-  const formatPrice = (price: number | null | undefined) => {
-    if (price === null || price === undefined || isNaN(price)) {
-      return '$0.00';
-    }
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 8
-    }).format(price);
-  };
-
-  const formatPercentage = (value: number | null | undefined) => {
-    if (value === null || value === undefined || isNaN(value)) {
-      return '+0.00%';
-    }
-    return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
-  };
-
-  const formatVolume = (volume: number | null | undefined) => {
-    if (volume === null || volume === undefined || isNaN(volume)) {
-      return '$0.00B';
-    }
-    // Volume vem em BTC, converter para bilhões de dólares
-    // Assumindo preço médio do BTC ~$117,000
-    const volumeInDollars = volume * 117000; // volume em BTC * preço BTC
-    const volumeInBillions = volumeInDollars / 1000000000;
-    return `$${volumeInBillions.toFixed(2)}B`;
-  };
-
-  const formatStrength = (strength: number | null | undefined) => {
-    if (strength === null || strength === undefined || isNaN(strength)) {
-      return '50';
-    }
-    // Strength já vem como porcentagem (50.0), não multiplicar por 100
-    return strength.toFixed(0);
-  };
-
-  const formatRSI = (rsi: number | null | undefined) => {
-    if (rsi === null || rsi === undefined || isNaN(rsi)) {
-      return '50.0';
-    }
-    return rsi.toFixed(1);
-  };
-
-  const getRSIColor = (rsi: number) => {
-    if (rsi >= 70) return '#ef4444'; // Overbought - Red
-    if (rsi <= 30) return '#10b981'; // Oversold - Green
-    return '#f59e0b'; // Neutral - Orange
-  };
-
-  const getRSIBars = (rsi: number) => {
-    const bars = Math.round(rsi / 20); // 0-100 -> 0-5 bars
-    return '●'.repeat(Math.max(1, bars)) + '○'.repeat(Math.max(0, 5 - bars));
-  };
-
-  const formatMACD = (bullish: boolean, bearish: boolean) => {
-    if (bullish) return '↑ Bullish';
-    if (bearish) return '↓ Bearish';
-    return '⚖️ Neutral';
-  };
-
-  const getVolatilityColor = (level: string) => {
-    switch (level) {
-      case 'HIGH': return '#ef4444';
-      case 'MEDIUM': return '#f59e0b';
-      case 'LOW': return '#10b981';
-      default: return '#6b7280';
-    }
-  };
-
-  const formatRange24h = (high: number, low: number, current: number) => {
-    if (!high || !low || !current) return '0.00%';
-    const range = high - low;
-    const position = current - low;
-    const percentage = (position / range) * 100;
-    return percentage.toFixed(1) + '%';
-  };
-
-  const formatTimeAgo = (dateString: string) => {
-    if (!dateString || dateString === '' || dateString === 'null' || dateString === 'undefined') {
-      return 'Nunca atualizado';
-    }
-    
-    try {
-      // Verificar se já está no formato brasileiro
-      const brazilianDateRegex = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/;
-      if (brazilianDateRegex.test(dateString)) {
-        const [datePart, timePart] = dateString.split(' ');
-        const [day, month, year] = datePart.split('/');
-        const date = new Date(`${year}-${month}-${day}T${timePart}`);
-        
-        if (isNaN(date.getTime())) {
-          return 'Formato inválido';
-        }
-        
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffSec = Math.floor(diffMs / 1000);
-        const diffMin = Math.floor(diffSec / 60);
-        const diffHour = Math.floor(diffMin / 60);
-        
-        if (diffSec < 60) return `${diffSec}s atrás`;
-        if (diffMin < 60) return `${diffMin}m atrás`;
-        if (diffHour < 24) return `${diffHour}h atrás`;
-        return date.toLocaleDateString('pt-BR');
-      }
-      
-      // Tentar formato ISO
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        return 'Data inválida';
-      }
-      
-      const now = new Date();
-      const diffMs = now.getTime() - date.getTime();
-      const diffSec = Math.floor(diffMs / 1000);
-      const diffMin = Math.floor(diffSec / 60);
-      const diffHour = Math.floor(diffMin / 60);
-      
-      if (diffSec < 60) return `${diffSec}s atrás`;
-      if (diffMin < 60) return `${diffMin}m atrás`;
-      if (diffHour < 24) return `${diffHour}h atrás`;
-      return date.toLocaleDateString('pt-BR');
-    } catch (error) {
-      console.error('Erro ao formatar data:', error, 'String:', dateString);
-      return 'Erro na data';
-    }
-  };
-
-  const getDataFreshness = (dateString: string) => {
-    if (!dateString || dateString === '' || dateString === 'null' || dateString === 'undefined') {
-      return 'stale';
-    }
-    
-    try {
-      let date: Date;
-      
-      // Verificar se já está no formato brasileiro
-      const brazilianDateRegex = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/;
-      if (brazilianDateRegex.test(dateString)) {
-        const [datePart, timePart] = dateString.split(' ');
-        const [day, month, year] = datePart.split('/');
-        date = new Date(`${year}-${month}-${day}T${timePart}`);
-      } else {
-        // Tentar formato ISO
-        date = new Date(dateString);
-      }
-      
-      if (isNaN(date.getTime())) {
-        console.warn('Data inválida para getDataFreshness:', dateString);
-        return 'stale';
-      }
-      
-      const now = new Date();
-      const diffMs = now.getTime() - date.getTime();
-      
-      // Debug para entender o problema
-      console.log('getDataFreshness debug:', {
-        dateString,
-        parsedDate: date.toISOString(),
-        now: now.toISOString(),
-        diffMs,
-        diffSeconds: Math.floor(diffMs / 1000)
-      });
-      
-      if (diffMs < 60000) return 'fresh';     // < 1min
-      if (diffMs < 300000) return 'recent';   // < 5min
-      if (diffMs < 900000) return 'aging';    // < 15min
-      return 'stale';                         // > 15min
-    } catch (error) {
-      console.error('Erro em getDataFreshness:', error, 'String:', dateString);
-      return 'stale';
-    }
-  };
-
-  const getFreshnessColor = (freshness: string) => {
-    switch (freshness) {
-      case 'fresh': return '#10b981';   // Verde
-      case 'recent': return '#f59e0b';  // Laranja
-      case 'aging': return '#f97316';   // Laranja escuro
-      case 'stale': return '#ef4444';   // Vermelho
-      default: return '#6b7280';        // Cinza
-    }
-  };
-
-  const toggleAutoRefresh = () => {
-    setAutoRefresh(!autoRefresh);
-  };
-
-  // Funções de controle de monitoramento
-  const handleStartMonitoring = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/btc-signals/start-monitoring', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
+      const response = await fetch('/api/market-status');
       const data = await response.json();
-      
       if (data.success) {
-        alert('✅ ' + data.message);
-        // Atualizar dados
-        loadData();
-      } else {
-        alert('❌ ' + data.message);
+        setBtcAnalysis(data.data || null);
       }
     } catch (error) {
-      console.error('Erro ao iniciar monitoramento:', error);
-      alert('❌ Erro ao iniciar monitoramento');
-    }
-  };
-  
-  const handleStopMonitoring = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/btc-signals/stop-monitoring', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        alert('✅ ' + data.message);
-        // Atualizar dados
-        loadData();
-      } else {
-        alert('❌ ' + data.message);
-      }
-    } catch (error) {
-      console.error('Erro ao parar monitoramento:', error);
-      alert('❌ Erro ao parar monitoramento');
-    }
-  };
-  
-  const handleRestartMonitoring = async () => {
-    try {
-      // Primeiro parar
-      await handleStopMonitoring();
-      // Aguardar um pouco
-      setTimeout(async () => {
-        // Depois iniciar
-        await handleStartMonitoring();
-      }, 1000);
-    } catch (error) {
-      console.error('Erro ao reiniciar monitoramento:', error);
-      alert('❌ Erro ao reiniciar monitoramento');
+      console.error('Erro ao carregar análise BTC:', error);
     }
   };
 
-  const formatDateTime = (dateString: string | null | undefined) => {
-    // Verificar se a string de data é válida
-    if (!dateString || dateString === '' || dateString === 'null' || dateString === 'undefined') {
-      return 'Data não disponível';
-    }
-    
+  const loadRestartInfo = async () => {
     try {
-      // Se a data já está no formato brasileiro (dd/mm/aaaa hh:mm:ss), retornar diretamente
-      const brazilianDateRegex = /^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}:\d{2}$/;
-      if (brazilianDateRegex.test(dateString)) {
-        return dateString;
-      }
-      
-      // Tentar converter outros formatos
-      let date: Date;
-      
-      // Se a string contém 'T' (formato ISO), processar como UTC e converter para horário local do Brasil
-      if (dateString.includes('T')) {
-        date = new Date(dateString);
-        
-        // Verificar se a data é válida
-        if (isNaN(date.getTime())) {
-          console.warn('Data ISO inválida recebida:', dateString);
-          return 'Data inválida';
-        }
-        
-        // Converter para horário do Brasil (UTC-3)
-        const brazilOffset = -3 * 60; // -3 horas em minutos
-        const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
-        const brazilTime = new Date(utc + (brazilOffset * 60000));
-        
-        return brazilTime.toLocaleString('pt-BR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          timeZone: 'America/Sao_Paulo'
-        });
-      } else {
-        // Para outros formatos, tentar conversão direta
-        date = new Date(dateString);
-        
-        // Verificar se a data é válida
-        if (isNaN(date.getTime())) {
-          console.warn('Data inválida recebida:', dateString);
-          return 'Data inválida';
-        }
-        
-        return date.toLocaleString('pt-BR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          timeZone: 'America/Sao_Paulo'
-        });
+      const response = await fetch('/api/restart-system/status');
+      const data = await response.json();
+      if (data.success) {
+        setRestartInfo(data.data || null);
       }
     } catch (error) {
-      console.error('Erro ao formatar data:', error, 'String recebida:', dateString);
-      return 'Erro na data';
+      console.error('Erro ao carregar informações de restart:', error);
     }
   };
+
+  const loadData = async () => {
+    setLoading(true);
+    await Promise.all([
+      loadPendingSignals(),
+      loadConfirmedSignals(),
+      loadRejectedSignals(),
+      loadMonitoredSignals(),
+      loadExpiredSignals(),
+      loadMonitoringStats(),
+      loadBtcMetrics(),
+      loadBtcAnalysis(),
+      loadRestartInfo()
+    ]);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadData();
+    const interval = setInterval(loadData, 30000); // Atualiza a cada 30 segundos
+    return () => clearInterval(interval);
+  }, []);
 
   if (loading) {
     return (
       <BTCContainer>
         <LoadingSpinner>
-          <FaHourglassHalf /> Carregando dados BTC...
+          <FaSync className="fa-spin" /> Carregando dados...
         </LoadingSpinner>
       </BTCContainer>
     );
@@ -1682,346 +927,58 @@ const BTCAnalysisPage: React.FC = () => {
 
   return (
     <BTCContainer>
-      {/* CONTAINER MOTIVACIONAL NO TOPO DA DIV PRINCIPAL (4px) */}
-      <div className="mobile-motivation-header-container">
-        {/* Seção Motivacional */}
-        <div className="mobile-motivational">
-          <p className="mobile-motivational-text">
-            Analise o Bitcoin com precisão e confirme sinais que geram resultados.
-          </p>
-        </div>
-
-        {/* Espaçamento de Segurança (4px) */}
-        <div className="mobile-safety-gap"></div>
-      </div>
-
-      {/* CONTEÚDO DA PÁGINA BTC ANALYSIS */}
       <Header>
-        <Title>
-          <BTCIcon />
-          Análise BTC & Confirmação de Sinais
-        </Title>
-        <RefreshControls>
-          {btcAnalysis && (
-            <DataFreshnessIndicator $freshness={getDataFreshness(btcAnalysis.last_updated)}>
-              {formatTimeAgo(btcAnalysis.last_updated)}
-            </DataFreshnessIndicator>
-          )}
-          
-          <AutoRefreshToggle $active={autoRefresh} onClick={toggleAutoRefresh}>
-            {autoRefresh ? '🔄' : '⏸️'} Auto
-          </AutoRefreshToggle>
-          
-          <RefreshButton onClick={handleRefresh} disabled={refreshing}>
-            <FaSync /> {refreshing ? 'Atualizando...' : 'Atualizar'}
-          </RefreshButton>
-        </RefreshControls>
+        <LogoContainer>
+          <Logo src={logo3} alt="Logo" />
+          <Title>
+            <BTCIcon /> Análise BTC
+          </Title>
+        </LogoContainer>
+        <RefreshButton onClick={loadData}>
+          <FaSync /> Atualizar
+        </RefreshButton>
       </Header>
 
-      {/* BTC Overview */}
-      {btcAnalysis && (
-        <BTCOverviewCard>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <BTCPrice>{formatPrice(btcAnalysis.price)}</BTCPrice>
-              <BTCChange $positive={(btcAnalysis.change_24h || 0) >= 0}>
-                {formatPercentage(btcAnalysis.change_24h)} (24h)
-              </BTCChange>
-              <BTCTrend $trend={btcAnalysis.trend || 'NEUTRAL'}>
-                {btcAnalysis.trend || 'NEUTRAL'} - Força: {formatStrength(btcAnalysis.strength)}%
-              </BTCTrend>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <StatLabel>Volume 24h</StatLabel>
-              <StatValue style={{ fontSize: '1.5em' }}>
-                {formatVolume(btcAnalysis.volume_24h)}
-              </StatValue>
-            </div>
-          </div>
-        </BTCOverviewCard>
-      )}
-
-      {/* Cards Técnicos Avançados */}
-      {btcAnalysis && btcAnalysis.timeframes && (
-        <TechnicalGrid>
-          {/* Card RSI */}
-          <TechnicalCard>
-            <TechnicalTitle>
-              📊 RSI (Força Relativa)
-            </TechnicalTitle>
-            <TechnicalValue $color={getRSIColor(btcAnalysis.timeframes['1h'].rsi)}>
-              {formatRSI(btcAnalysis.timeframes['1h'].rsi)}
-            </TechnicalValue>
-            <TechnicalSubtext>1h: {btcAnalysis.timeframes['1h'].rsi_condition}</TechnicalSubtext>
-            <RSIBar $rsi={btcAnalysis.timeframes['1h'].rsi} />
-            <TimeframeRow>
-              <TimeframeLabel>4h:</TimeframeLabel>
-              <TimeframeValue $color={getRSIColor(btcAnalysis.timeframes['4h'].rsi)}>
-                {formatRSI(btcAnalysis.timeframes['4h'].rsi)} ({btcAnalysis.timeframes['4h'].rsi_condition})
-              </TimeframeValue>
-            </TimeframeRow>
-          </TechnicalCard>
-
-          {/* Card MACD */}
-          <TechnicalCard>
-            <TechnicalTitle>
-              📈 MACD (Convergência)
-            </TechnicalTitle>
-            <TechnicalValue>
-              Multi-Timeframe
-            </TechnicalValue>
-            <TimeframeRow>
-              <TimeframeLabel>1h:</TimeframeLabel>
-              <TimeframeValue $color={btcAnalysis.timeframes['1h'].macd_bullish ? '#10b981' : '#ef4444'}>
-                {formatMACD(btcAnalysis.timeframes['1h'].macd_bullish, btcAnalysis.timeframes['1h'].macd_bearish)}
-              </TimeframeValue>
-            </TimeframeRow>
-            <TimeframeRow>
-              <TimeframeLabel>4h:</TimeframeLabel>
-              <TimeframeValue $color={btcAnalysis.timeframes['4h'].macd_bullish ? '#10b981' : '#ef4444'}>
-                {formatMACD(btcAnalysis.timeframes['4h'].macd_bullish, btcAnalysis.timeframes['4h'].macd_bearish)}
-              </TimeframeValue>
-            </TimeframeRow>
-            {btcAnalysis.timeframes['1h'].macd_bullish !== btcAnalysis.timeframes['4h'].macd_bullish && (
-              <TechnicalSubtext style={{color: '#f59e0b', fontWeight: 'bold'}}>⚠️ Divergência detectada</TechnicalSubtext>
-            )}
-          </TechnicalCard>
-
-          {/* Card Volatilidade */}
-          <TechnicalCard>
-            <TechnicalTitle>
-              💥 Volatilidade (ATR)
-            </TechnicalTitle>
-            <TechnicalValue $color={getVolatilityColor(btcAnalysis.timeframes['1h'].volatility_level)}>
-              {btcAnalysis.timeframes['1h'].volatility_level}
-            </TechnicalValue>
-            <TechnicalSubtext>ATR 1h: {btcAnalysis.timeframes['1h'].atr_percentage.toFixed(2)}%</TechnicalSubtext>
-            <TimeframeRow>
-              <TimeframeLabel>4h:</TimeframeLabel>
-              <TimeframeValue $color={getVolatilityColor(btcAnalysis.timeframes['4h'].volatility_level)}>
-                {btcAnalysis.timeframes['4h'].volatility_level} ({btcAnalysis.timeframes['4h'].atr_percentage.toFixed(2)}%)
-              </TimeframeValue>
-            </TimeframeRow>
-          </TechnicalCard>
-
-          {/* Card Range 24h */}
-          <TechnicalCard>
-            <TechnicalTitle>
-              📊 Range 24h
-            </TechnicalTitle>
-            <TechnicalValue>
-              {formatPrice(btcAnalysis.high_24h)} - {formatPrice(btcAnalysis.low_24h)}
-            </TechnicalValue>
-            <TechnicalSubtext>
-              Posição atual: {formatRange24h(btcAnalysis.high_24h, btcAnalysis.low_24h, btcAnalysis.price)}
-            </TechnicalSubtext>
-            <RangeBar $percentage={parseFloat(formatRange24h(btcAnalysis.high_24h, btcAnalysis.low_24h, btcAnalysis.price))} />
-            <TechnicalSubtext>
-              Amplitude: {formatPrice(btcAnalysis.high_24h - btcAnalysis.low_24h)} ({formatPercentage((btcAnalysis.high_24h - btcAnalysis.low_24h) / btcAnalysis.low_24h * 100)})
-            </TechnicalSubtext>
-          </TechnicalCard>
-
-          {/* Card EMAs */}
-          <TechnicalCard>
-            <TechnicalTitle>
-              📈 Médias Móveis (EMA)
-            </TechnicalTitle>
-            <TechnicalValue>
-              {btcAnalysis.timeframes['1h'].ema_alignment ? '✅ Alinhadas' : '❌ Não Alinhadas'}
-            </TechnicalValue>
-            <TimeframeRow>
-              <TimeframeLabel>EMA 20 (1h):</TimeframeLabel>
-              <TimeframeValue>
-                {formatPrice(btcAnalysis.timeframes['1h'].ema20)}
-              </TimeframeValue>
-            </TimeframeRow>
-            <TimeframeRow>
-              <TimeframeLabel>EMA 50 (1h):</TimeframeLabel>
-              <TimeframeValue>
-                {formatPrice(btcAnalysis.timeframes['1h'].ema50)}
-              </TimeframeValue>
-            </TimeframeRow>
-            <TechnicalSubtext>
-              4h: {btcAnalysis.timeframes['4h'].ema_alignment ? 'Alinhadas' : 'Não Alinhadas'}
-            </TechnicalSubtext>
-          </TechnicalCard>
-
-          {/* Card Status de Atualização */}
-          <TechnicalCard>
-            <TechnicalTitle>
-              ⏰ Status de Atualização
-            </TechnicalTitle>
-            <TechnicalValue $color={getFreshnessColor(getDataFreshness(btcAnalysis.last_updated))} style={{fontSize: '1.2em'}}>
-              {formatTimeAgo(btcAnalysis.last_updated)}
-            </TechnicalValue>
-            <TechnicalSubtext>
-              {autoRefresh ? '🔄 Auto-refresh ativo' : '⏸️ Auto-refresh pausado'}
-            </TechnicalSubtext>
-            
-            <TimeframeRow>
-              <TimeframeLabel>Dados Gerais:</TimeframeLabel>
-              <TimeframeValue $color={getFreshnessColor(getDataFreshness(btcAnalysis.last_updated))}>
-                {getDataFreshness(btcAnalysis.last_updated) === 'fresh' ? '🟢 Atuais' : 
-                 getDataFreshness(btcAnalysis.last_updated) === 'recent' ? '🟡 Recentes' :
-                 getDataFreshness(btcAnalysis.last_updated) === 'aging' ? '🟠 Envelhecendo' : '🔴 Desatualizados'}
-              </TimeframeValue>
-            </TimeframeRow>
-            
-            <TimeframeRow>
-              <TimeframeLabel>Timeframe 1h:</TimeframeLabel>
-              <TimeframeValue $color={getFreshnessColor(getDataFreshness(btcAnalysis.timeframes['1h'].timestamp))}>
-                {formatTimeAgo(btcAnalysis.timeframes['1h'].timestamp)}
-              </TimeframeValue>
-            </TimeframeRow>
-            
-            <TimeframeRow>
-              <TimeframeLabel>Timeframe 4h:</TimeframeLabel>
-              <TimeframeValue $color={getFreshnessColor(getDataFreshness(btcAnalysis.timeframes['4h'].timestamp))}>
-                {formatTimeAgo(btcAnalysis.timeframes['4h'].timestamp)}
-              </TimeframeValue>
-            </TimeframeRow>
-            
-            {autoRefresh && (
-              <TechnicalSubtext style={{marginTop: '10px', color: '#10b981'}}>
-                📡 Próxima atualização automática em breve
-              </TechnicalSubtext>
-            )}
-          </TechnicalCard>
-
-          {/* Card de Restart System */}
-          {restartSystemInfo && (
-            <TechnicalCard>
-              <TechnicalTitle>
-                <FaCog /> 🔄 Sistema de Restart
-              </TechnicalTitle>
-              
-              <TechnicalValue $color="#f59e0b">
-                {String(restartSystemInfo.restart_info.countdown.hours).padStart(2, '0')}:
-                {String(restartSystemInfo.restart_info.countdown.minutes).padStart(2, '0')}:
-                {String(restartSystemInfo.restart_info.countdown.seconds).padStart(2, '0')}
-              </TechnicalValue>
-              
-              <TechnicalSubtext>
-                Próximo restart às 21:00 (SP)
-              </TechnicalSubtext>
-              
-              <TimeframeRow>
-                <TimeframeLabel>Uptime Sistema:</TimeframeLabel>
-                <TimeframeValue $color="#10b981">
-                  {restartSystemInfo.system_uptime.hours}h {restartSystemInfo.system_uptime.minutes}m
-                </TimeframeValue>
-              </TimeframeRow>
-              
-              <TimeframeRow>
-                <TimeframeLabel>Sistema BTC:</TimeframeLabel>
-                <TimeframeValue $color={restartSystemInfo.btc_system.status === 'active' ? '#10b981' : '#ef4444'}>
-                  {restartSystemInfo.btc_system.status === 'active' ? '🟢 Ativo' : '🔴 Inativo'}
-                </TimeframeValue>
-              </TimeframeRow>
-              
-              <TimeframeRow>
-                <TimeframeLabel>Último Restart:</TimeframeLabel>
-                <TimeframeValue>
-                  {restartSystemInfo.system_uptime.last_restart}
-                </TimeframeValue>
-              </TimeframeRow>
-              
-              <TechnicalSubtext style={{marginTop: '10px', fontSize: '0.8em'}}>
-                🧹 Limpeza automática de sinais<br/>
-                ₿ Reset do sistema BTC<br/>
-                📊 Atualização de estatísticas
-              </TechnicalSubtext>
-            </TechnicalCard>
-          )}
-        </TechnicalGrid>
-      )}
-
-      {/* Estratégia Explicativa */}
-      <StrategyExplanation>
-        <StrategyTitle>
-          <FaChartLine /> Nossa Estratégia de Confirmação BTC
-        </StrategyTitle>
-        <StrategyText>
-          O sistema de <StrategyHighlight>confirmação inteligente</StrategyHighlight> analisa cada sinal técnico 
-          detectado e aguarda confirmação de movimento antes de enviá-lo para o dashboard principal.
-        </StrategyText>
-        <StrategyText>
-          <StrategyHighlight>Critérios de Confirmação:</StrategyHighlight> Rompimento efetivo (0.5%+), 
-          aumento de volume (20%+), alinhamento com BTC, e sustentação do momentum por 2+ candles.
-        </StrategyText>
-        <StrategyText>
-          <StrategyHighlight>Vantagem:</StrategyHighlight> Reduz sinais falsos em 40-50% e melhora 
-          a precisão geral do sistema, especialmente em operações com alta alavancagem.
-        </StrategyText>
-      </StrategyExplanation>
-
-      {/* Métricas */}
-      {btcMetrics && (
-        <StatsContainer>
-          <StatCard>
-            <StatIcon><FaHourglassHalf /></StatIcon>
-            <StatValue>{btcMetrics.pending_signals}</StatValue>
-            <StatLabel>Sinais Pendentes</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon><FaCheckCircle /></StatIcon>
-            <StatValue>{btcMetrics.confirmed_signals}</StatValue>
-            <StatLabel>Sinais Confirmados</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon><FaTimesCircle /></StatIcon>
-            <StatValue>{btcMetrics.rejected_signals}</StatValue>
-            <StatLabel>Sinais Rejeitados</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon><FaChartLine /></StatIcon>
-            <StatValue>{btcMetrics.confirmation_rate.toFixed(1)}%</StatValue>
-            <StatLabel>Taxa de Confirmação</StatLabel>
-          </StatCard>
-          <StatCard>
-            <StatIcon><FaClock /></StatIcon>
-            <StatValue>{btcMetrics.average_confirmation_time_minutes.toFixed(1)}min</StatValue>
-            <StatLabel>Tempo Médio</StatLabel>
-          </StatCard>
-        </StatsContainer>
-      )}
-
-      {/* Tabs */}
       <TabContainer>
         <Tab 
           $active={activeTab === 'pending'} 
           onClick={() => setActiveTab('pending')}
         >
-          Sinais Pendentes ({pendingSignals.length})
+          Pendentes ({pendingSignals.length})
         </Tab>
         <Tab 
           $active={activeTab === 'confirmed'} 
           onClick={() => setActiveTab('confirmed')}
         >
-          Sinais Confirmados ({confirmedSignals.length})
+          Confirmados ({confirmedSignals.length})
         </Tab>
         <Tab 
           $active={activeTab === 'rejected'} 
           onClick={() => setActiveTab('rejected')}
         >
-          Sinais Rejeitados ({rejectedSignals.length})
+          Rejeitados ({rejectedSignals.length})
         </Tab>
         <Tab 
           $active={activeTab === 'monitoring'} 
           onClick={() => setActiveTab('monitoring')}
         >
-          <FaDesktop /> Monitoramento
+          Monitoramento ({monitoredSignals.length})
+        </Tab>
+        <Tab 
+          $active={activeTab === 'expired'} 
+          onClick={() => setActiveTab('expired')}
+        >
+          Expirados ({expiredSignals.length})
         </Tab>
       </TabContainer>
 
-      {/* Conteúdo das Tabs */}
       <ContentContainer>
         {activeTab === 'pending' && (
           <div>
             {pendingSignals.length === 0 ? (
               <EmptyState>
                 <EmptyIcon><FaHourglassHalf /></EmptyIcon>
-                <div>Nenhum sinal aguardando confirmação</div>
+                <div>Nenhum sinal pendente no momento</div>
               </EmptyState>
             ) : (
               pendingSignals.map(signal => (
@@ -2041,10 +998,6 @@ const BTCAnalysisPage: React.FC = () => {
                       <DetailValue>{formatPrice(signal.target_price)}</DetailValue>
                     </SignalDetail>
                     <SignalDetail>
-                      <DetailLabel>Projeção</DetailLabel>
-                      <DetailValue>{formatPercentage(signal.projection_percentage)}</DetailValue>
-                    </SignalDetail>
-                    <SignalDetail>
                       <DetailLabel>Qualidade</DetailLabel>
                       <DetailValue>{signal.quality_score.toFixed(1)} ({signal.signal_class})</DetailValue>
                     </SignalDetail>
@@ -2058,28 +1011,9 @@ const BTCAnalysisPage: React.FC = () => {
                     </SignalDetail>
                     <SignalDetail>
                       <DetailLabel>Tentativas</DetailLabel>
-                      <DetailValue>{signal.confirmation_attempts}/12</DetailValue>
-                    </SignalDetail>
-                    <SignalDetail>
-                      <DetailLabel>BTC Correlação</DetailLabel>
-                      <DetailValue>{signal.btc_correlation.toFixed(2)} ({signal.btc_trend})</DetailValue>
+                      <DetailValue>{signal.confirmation_attempts}</DetailValue>
                     </SignalDetail>
                   </SignalDetails>
-                  
-                  <SignalActions>
-                    <ActionButton 
-                      $variant="success" 
-                      onClick={() => handleConfirmSignal(signal.id)}
-                    >
-                      <FaThumbsUp /> Confirmar
-                    </ActionButton>
-                    <ActionButton 
-                      $variant="danger" 
-                      onClick={() => handleRejectSignal(signal.id)}
-                    >
-                      <FaThumbsDown /> Rejeitar
-                    </ActionButton>
-                  </SignalActions>
                 </SignalCard>
               ))
             )}
@@ -2108,15 +1042,11 @@ const BTCAnalysisPage: React.FC = () => {
                     </SignalDetail>
                     <SignalDetail>
                       <DetailLabel>Alvo</DetailLabel>
-                      <DetailValue>{formatPrice(signal.target_price)}</DetailValue>
-                    </SignalDetail>
-                    <SignalDetail>
-                      <DetailLabel>Projeção</DetailLabel>
-                      <DetailValue>{formatPercentage(signal.projection_percentage)}</DetailValue>
+                      <DetailValue>{signal.target_price ? formatPrice(signal.target_price) : 'N/A'}</DetailValue>
                     </SignalDetail>
                     <SignalDetail>
                       <DetailLabel>Qualidade</DetailLabel>
-                      <DetailValue>{signal.quality_score.toFixed(1)} ({signal.signal_class})</DetailValue>
+                      <DetailValue>{signal.quality_score?.toFixed(1) || 'N/A'} ({signal.signal_class || 'N/A'})</DetailValue>
                     </SignalDetail>
                     <SignalDetail>
                       <DetailLabel>Criado em</DetailLabel>
@@ -2124,19 +1054,11 @@ const BTCAnalysisPage: React.FC = () => {
                     </SignalDetail>
                     <SignalDetail>
                       <DetailLabel>Confirmado em</DetailLabel>
-                      <DetailValue>{formatDateTime(signal.confirmed_at)}</DetailValue>
+                      <DetailValue>{signal.confirmed_at ? formatDateTime(signal.confirmed_at) : 'N/A'}</DetailValue>
                     </SignalDetail>
                     <SignalDetail>
                       <DetailLabel>Tentativas</DetailLabel>
-                      <DetailValue>{signal.confirmation_attempts}</DetailValue>
-                    </SignalDetail>
-                    <SignalDetail>
-                      <DetailLabel>BTC Correlação</DetailLabel>
-                      <DetailValue>{signal.btc_correlation.toFixed(2)} ({signal.btc_trend})</DetailValue>
-                    </SignalDetail>
-                    <SignalDetail>
-                      <DetailLabel>Motivos</DetailLabel>
-                      <DetailValue>{signal.confirmation_reasons.join(', ')}</DetailValue>
+                      <DetailValue>{signal.confirmation_attempts || 0}</DetailValue>
                     </SignalDetail>
                   </SignalDetails>
                 </SignalCard>
@@ -2194,232 +1116,605 @@ const BTCAnalysisPage: React.FC = () => {
 
         {activeTab === 'monitoring' && (
           <div>
-            {/* Status do Sistema */}
+            
+            {/* Análise BTC */}
             <TechnicalGrid>
-              {/* Card Status Geral */}
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    <FaBitcoin /> Preço BTC
+                  </TechnicalTitle>
+                  <TechnicalValue $color={btcAnalysis?.change_24h >= 0 ? '#10b981' : '#ef4444'}>
+                    ${btcAnalysis?.price?.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0'}
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    {btcAnalysis?.change_24h >= 0 ? '+' : ''}{btcAnalysis?.change_24h?.toFixed(2) || '0'}% (24h)
+                  </TechnicalSubtext>
+                </TechnicalCard>
+                
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    <FaChartLine /> Tendência
+                  </TechnicalTitle>
+                  <TechnicalValue $color={btcAnalysis?.trend === 'BULLISH' ? '#10b981' : btcAnalysis?.trend === 'BEARISH' ? '#ef4444' : '#f59e0b'}>
+                    {btcAnalysis?.trend || 'NEUTRO'}
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    Força: {btcAnalysis?.strength?.toFixed(1) || '0'}%
+                  </TechnicalSubtext>
+                </TechnicalCard>
+                
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    📊 Volume 24h
+                  </TechnicalTitle>
+                  <TechnicalValue $color="#f59e0b">
+                    ${(btcAnalysis?.volume_24h / 1000000000)?.toFixed(2) || '0'}B
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    Volume de negociação
+                  </TechnicalSubtext>
+                </TechnicalCard>
+                
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    📈 Volatilidade
+                  </TechnicalTitle>
+                  <TechnicalValue $color={btcAnalysis?.volatility > 5 ? '#ef4444' : btcAnalysis?.volatility > 2 ? '#f59e0b' : '#10b981'}>
+                    {btcAnalysis?.volatility?.toFixed(2) || '0'}%
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    Nível de volatilidade
+                  </TechnicalSubtext>
+                </TechnicalCard>
+              </TechnicalGrid>
+            
+            {/* Informações do Sistema de Restart */}
+            <TechnicalGrid>
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    <FaClock /> Próximo Restart
+                  </TechnicalTitle>
+                  <TechnicalValue $color="#f59e0b" style={{fontSize: '1em'}}>
+                    {restartInfo?.restart_info?.countdown ? 
+                      `${restartInfo.restart_info.countdown.hours}h ${restartInfo.restart_info.countdown.minutes}m` : 
+                      'N/A'
+                    }
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    {restartInfo?.restart_info?.schedule || 'Agendamento não definido'}
+                  </TechnicalSubtext>
+                </TechnicalCard>
+                
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    ⏱️ Uptime Sistema
+                  </TechnicalTitle>
+                  <TechnicalValue $color="#10b981">
+                    {restartInfo?.system_uptime ? 
+                      `${restartInfo.system_uptime.hours}h ${restartInfo.system_uptime.minutes}m` : 
+                      'N/A'
+                    }
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    Tempo ativo desde último restart
+                  </TechnicalSubtext>
+                </TechnicalCard>
+                
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    🔧 Status BTC System
+                  </TechnicalTitle>
+                  <TechnicalValue $color={restartInfo?.btc_system?.status === 'ACTIVE' ? '#10b981' : '#ef4444'}>
+                    {restartInfo?.btc_system?.status || 'UNKNOWN'}
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    Sistema de confirmação BTC
+                  </TechnicalSubtext>
+                </TechnicalCard>
+                
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    📋 Recursos Ativos
+                  </TechnicalTitle>
+                  <TechnicalValue $color="#f59e0b" style={{fontSize: '0.9em'}}>
+                    {restartInfo?.restart_features?.length || 0} recursos
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    {restartInfo?.restart_features?.slice(0, 2).join(', ') || 'Nenhum recurso'}
+                  </TechnicalSubtext>
+                </TechnicalCard>
+              </TechnicalGrid>
+            
+            {/* Estatísticas do Monitoramento */}
+            <TechnicalGrid>
               <TechnicalCard>
                 <TechnicalTitle>
-                  <FaDesktop /> Status do Sistema
-                </TechnicalTitle>
-                <TechnicalValue $color={btcMetrics?.system_status === 'active' ? '#10b981' : '#ef4444'}>
-                  {btcMetrics?.system_status === 'active' ? '🟢 ATIVO' : '🔴 INATIVO'}
-                </TechnicalValue>
-                <TechnicalSubtext>
-                  Sistema de confirmação em tempo real
-                </TechnicalSubtext>
-                
-                <TimeframeRow>
-                  <TimeframeLabel>Thread Monitoramento:</TimeframeLabel>
-                  <TimeframeValue $color="#10b981">
-                    🔄 Rodando
-                  </TimeframeValue>
-                </TimeframeRow>
-                
-                <TimeframeRow>
-                  <TimeframeLabel>Última Verificação:</TimeframeLabel>
-                  <TimeframeValue>
-                    {new Date().toLocaleTimeString('pt-BR')}
-                  </TimeframeValue>
-                </TimeframeRow>
-                
-                <div style={{ marginTop: '15px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                   <ActionButton 
-                     $variant="success"
-                     onClick={handleStartMonitoring}
-                   >
-                     <FaPlay /> Iniciar
-                   </ActionButton>
-                   <ActionButton 
-                     $variant="danger"
-                     onClick={handleStopMonitoring}
-                   >
-                     <FaPause /> Pausar
-                   </ActionButton>
-                   <ActionButton 
-                     $variant="info"
-                     onClick={handleRestartMonitoring}
-                   >
-                     <FaRedo /> Reiniciar
-                   </ActionButton>
-                 </div>
-              </TechnicalCard>
-
-              {/* Card Métricas em Tempo Real */}
-              <TechnicalCard>
-                <TechnicalTitle>
-                  📊 Métricas em Tempo Real
+                  📊 Sinais Ativos
                 </TechnicalTitle>
                 <TechnicalValue $color="#f59e0b">
-                  {btcMetrics?.pending_signals || 0}
+                  {monitoringStats?.total_monitored || monitoredSignals.length}
                 </TechnicalValue>
                 <TechnicalSubtext>
                   Sinais sendo monitorados
                 </TechnicalSubtext>
-                
-                <TimeframeRow>
-                  <TimeframeLabel>Confirmados hoje:</TimeframeLabel>
-                  <TimeframeValue $color="#10b981">
-                    {btcMetrics?.confirmed_signals || 0}
-                  </TimeframeValue>
-                </TimeframeRow>
-                
-                <TimeframeRow>
-                  <TimeframeLabel>Rejeitados hoje:</TimeframeLabel>
-                  <TimeframeValue $color="#ef4444">
-                    {btcMetrics?.rejected_signals || 0}
-                  </TimeframeValue>
-                </TimeframeRow>
-                
-                <TimeframeRow>
-                  <TimeframeLabel>Taxa de Sucesso:</TimeframeLabel>
-                  <TimeframeValue $color="#f59e0b">
-                    {btcMetrics?.confirmation_rate?.toFixed(1) || 0}%
-                  </TimeframeValue>
-                </TimeframeRow>
               </TechnicalCard>
-
-              {/* Card Performance */}
+              
               <TechnicalCard>
                 <TechnicalTitle>
-                  ⚡ Performance do Sistema
+                  🎯 Taxa de Sucesso
                 </TechnicalTitle>
-                <TechnicalValue $color="#10b981">
-                  {btcMetrics?.average_confirmation_time_minutes?.toFixed(1) || 0}min
+                <TechnicalValue $color={monitoringStats?.success_rate >= 50 ? '#10b981' : '#ef4444'}>
+                  {monitoringStats?.success_rate?.toFixed(1) || '0.0'}%
                 </TechnicalValue>
                 <TechnicalSubtext>
-                  Tempo médio de confirmação
+                  {monitoringStats?.successful_signals || 0} de {monitoringStats?.total_evaluated_signals || 0} sinais
                 </TechnicalSubtext>
-                
-                <TimeframeRow>
-                  <TimeframeLabel>Processados total:</TimeframeLabel>
-                  <TimeframeValue>
-                    {btcMetrics?.total_signals_processed || 0}
-                  </TimeframeValue>
-                </TimeframeRow>
-                
-                <TimeframeRow>
-                  <TimeframeLabel>Uptime sistema:</TimeframeLabel>
-                  <TimeframeValue $color="#10b981">
-                    {restartSystemInfo?.system_uptime.hours || 0}h {restartSystemInfo?.system_uptime.minutes || 0}m
-                  </TimeframeValue>
-                </TimeframeRow>
-                
-                <TimeframeRow>
-                  <TimeframeLabel>Próximo restart:</TimeframeLabel>
-                  <TimeframeValue>
-                    {String(restartSystemInfo?.restart_info.countdown.hours || 0).padStart(2, '0')}:
-                    {String(restartSystemInfo?.restart_info.countdown.minutes || 0).padStart(2, '0')}
-                  </TimeframeValue>
-                </TimeframeRow>
+              </TechnicalCard>
+              
+              <TechnicalCard>
+                <TechnicalTitle>
+                  💰 Lucro Médio
+                </TechnicalTitle>
+                <TechnicalValue $color="#10b981">
+                  {monitoringStats?.average_successful_profit?.toFixed(1) || '0.0'}%
+                </TechnicalValue>
+                <TechnicalSubtext>
+                  Média dos sinais bem-sucedidos
+                </TechnicalSubtext>
+              </TechnicalCard>
+              
+              <TechnicalCard>
+                <TechnicalTitle>
+                  🏆 Melhor Performance
+                </TechnicalTitle>
+                <TechnicalValue $color="#10b981">
+                  {monitoringStats?.max_profit?.toFixed(1) || '0.0'}%
+                </TechnicalValue>
+                <TechnicalSubtext>
+                  Maior lucro registrado
+                </TechnicalSubtext>
+              </TechnicalCard>
+              
+              <TechnicalCard>
+                <TechnicalTitle>
+                  ✅ Sinais Completados
+                </TechnicalTitle>
+                <TechnicalValue $color="#10b981">
+                  {monitoringStats?.total_completed || 0}
+                </TechnicalValue>
+                <TechnicalSubtext>
+                  Atingiram 300% de lucro
+                </TechnicalSubtext>
+              </TechnicalCard>
+              
+              <TechnicalCard>
+                <TechnicalTitle>
+                  ⏰ Sinais Expirados
+                </TechnicalTitle>
+                <TechnicalValue $color="#ef4444">
+                  {monitoringStats?.total_expired || 0}
+                </TechnicalValue>
+                <TechnicalSubtext>
+                  Expiraram após 15 dias
+                </TechnicalSubtext>
+              </TechnicalCard>
+              
+              <TechnicalCard>
+                <TechnicalTitle>
+                  🔄 Status do Sistema
+                </TechnicalTitle>
+                <TechnicalValue $color={
+                  (monitoringStats?.is_monitoring || 
+                   btcMetrics?.system_status === 'active' || 
+                   restartInfo?.btc_system?.status === 'ACTIVE' ||
+                   restartInfo?.system_status?.btc_confirmation === 'active') ? '#10b981' : '#ef4444'
+                }>
+                  {(monitoringStats?.is_monitoring || 
+                    btcMetrics?.system_status === 'active' || 
+                    restartInfo?.btc_system?.status === 'ACTIVE' ||
+                    restartInfo?.system_status?.btc_confirmation === 'active') ? 'ATIVO' : 'INATIVO'}
+                </TechnicalValue>
+                <TechnicalSubtext>
+                  Sistema de monitoramento
+                </TechnicalSubtext>
+              </TechnicalCard>
+              
+              <TechnicalCard>
+                <TechnicalTitle>
+                  📅 Última Atualização
+                </TechnicalTitle>
+                <TechnicalValue $color="#94a3b8" style={{fontSize: '1em'}}>
+                  {monitoringStats?.last_update ? new Date(monitoringStats.last_update).toLocaleString('pt-BR') : 'Nunca'}
+                </TechnicalValue>
+                <TechnicalSubtext>
+                  Dados do sistema
+                </TechnicalSubtext>
               </TechnicalCard>
             </TechnicalGrid>
-
-            {/* Lista de Sinais em Monitoramento */}
-            {pendingSignals.length > 0 && (
-              <div>
-                <StrategyTitle style={{ marginBottom: '20px' }}>
-                  <FaEye /> Sinais em Monitoramento Ativo
-                </StrategyTitle>
-                
-                {pendingSignals.slice(0, 3).map(signal => (
-                  <SignalCard key={signal.id} style={{ borderLeft: '4px solid #f59e0b' }}>
-                    <SignalHeader>
-                      <SignalSymbol>{signal.symbol}</SignalSymbol>
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                        <SignalType $type={signal.type}>{signal.type}</SignalType>
-                        <span style={{ 
-                          padding: '4px 8px', 
-                          borderRadius: '12px', 
-                          fontSize: '0.8em', 
-                          fontWeight: 'bold',
-                          background: signal.quality_score >= 85 ? '#10b981' : signal.quality_score >= 80 ? '#f59e0b' : '#6b7280',
-                          color: 'white'
-                        }}>
-                          {signal.signal_class}
-                        </span>
-                      </div>
-                    </SignalHeader>
-                    
-                    <div style={{ 
-                      background: 'rgba(245, 158, 11, 0.1)', 
-                      padding: '15px', 
-                      borderRadius: '8px', 
-                      marginBottom: '15px',
-                      border: '1px solid rgba(245, 158, 11, 0.3)'
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ color: '#f59e0b', fontWeight: 'bold' }}>🔍 Status do Monitoramento</span>
-                        <span style={{ color: '#10b981', fontSize: '0.9em' }}>⏱️ Monitorando há {signal.confirmation_attempts * 2}min</span>
-                      </div>
-                      
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-                        <div>
-                          <div style={{ color: '#94a3b8', fontSize: '0.8em' }}>📈 Movimento Preço</div>
-                          <div style={{ color: 'white', fontWeight: 'bold' }}>⏳ Aguardando (+0.3%)</div>
-                        </div>
-                        <div>
-                          <div style={{ color: '#94a3b8', fontSize: '0.8em' }}>📊 Volume</div>
-                          <div style={{ color: '#10b981', fontWeight: 'bold' }}>✅ Confirmado (+45%)</div>
-                        </div>
-                        <div>
-                          <div style={{ color: '#94a3b8', fontSize: '0.8em' }}>₿ BTC Alinhamento</div>
-                          <div style={{ color: '#10b981', fontWeight: 'bold' }}>✅ Alinhado ({signal.btc_trend})</div>
-                        </div>
-                        <div>
-                          <div style={{ color: '#94a3b8', fontSize: '0.8em' }}>🔄 Momentum</div>
-                          <div style={{ color: '#f59e0b', fontWeight: 'bold' }}>⏳ 1/2 velas</div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <SignalDetails>
-                      <SignalDetail>
-                        <DetailLabel>Entrada</DetailLabel>
-                        <DetailValue>{formatPrice(signal.entry_price)}</DetailValue>
-                      </SignalDetail>
-                      <SignalDetail>
-                        <DetailLabel>Alvo</DetailLabel>
-                        <DetailValue>{formatPrice(signal.target_price)}</DetailValue>
-                      </SignalDetail>
-                      <SignalDetail>
-                        <DetailLabel>Score Qualidade</DetailLabel>
-                        <DetailValue>{signal.quality_score.toFixed(1)}</DetailValue>
-                      </SignalDetail>
-                      <SignalDetail>
-                        <DetailLabel>Tentativas</DetailLabel>
-                        <DetailValue>{signal.confirmation_attempts}/12</DetailValue>
-                      </SignalDetail>
-                      <SignalDetail>
-                        <DetailLabel>Expira em</DetailLabel>
-                        <DetailValue>{formatDateTime(signal.expires_at)}</DetailValue>
-                      </SignalDetail>
-                    </SignalDetails>
-                  </SignalCard>
-                ))}
-                
-                {pendingSignals.length > 3 && (
-                  <div style={{ 
-                    textAlign: 'center', 
-                    padding: '20px', 
-                    color: '#94a3b8',
-                    background: 'rgba(30, 41, 59, 0.5)',
-                    borderRadius: '8px',
-                    marginTop: '15px'
-                  }}>
-                    ... e mais {pendingSignals.length - 3} sinais sendo monitorados
-                  </div>
-                )}
-              </div>
-            )}
             
-            {pendingSignals.length === 0 && (
+            {/* Lista de Sinais Monitorados */}
+            {monitoredSignals.length === 0 ? (
               <EmptyState>
                 <EmptyIcon><FaDesktop /></EmptyIcon>
                 <div>Nenhum sinal sendo monitorado no momento</div>
-                <div style={{ fontSize: '0.9em', marginTop: '10px', color: '#6b7280' }}>
-                  O sistema está ativo e aguardando novos sinais para monitorar
+                <div style={{fontSize: '0.9em', marginTop: '10px', color: '#6b7280'}}>
+                  Sinais confirmados serão automaticamente adicionados aqui
                 </div>
               </EmptyState>
+            ) : (
+              monitoredSignals.map(signal => (
+                <SignalCard key={signal.id} style={{borderLeft: `4px solid ${signal.current_profit >= 0 ? '#10b981' : '#ef4444'}`}}>
+                  <SignalHeader>
+                    <SignalSymbol>{signal.symbol}</SignalSymbol>
+                    <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                      <SignalType $type={signal.signal_type}>{signal.signal_type}</SignalType>
+                      <div style={{
+                        padding: '4px 8px',
+                        borderRadius: '12px',
+                        fontSize: '0.8em',
+                        fontWeight: '600',
+                        background: signal.current_profit >= signal.required_percentage ? '#10b981' : signal.current_profit >= 0 ? '#f59e0b' : '#ef4444',
+                        color: 'white'
+                      }}>
+                        {signal.current_profit >= signal.required_percentage ? '🎯 META ATINGIDA' : 
+                         signal.current_profit >= 0 ? '📈 LUCRO' : '📉 PREJUÍZO'}
+                      </div>
+                    </div>
+                  </SignalHeader>
+                  
+                  {/* Barra de Progresso do Lucro */}
+                  <div style={{marginBottom: '20px'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
+                      <span style={{color: '#94a3b8', fontSize: '0.9em'}}>Progresso para 300% de Lucro</span>
+                      <span style={{color: '#f59e0b', fontWeight: '600'}}>
+                        {((signal.current_profit / signal.required_percentage) * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                    <div style={{
+                      width: '100%',
+                      height: '12px',
+                      background: '#374151',
+                      borderRadius: '6px',
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: `${Math.min(100, (signal.current_profit / signal.required_percentage) * 100)}%`,
+                        height: '100%',
+                        background: signal.current_profit >= signal.required_percentage ? 
+                          'linear-gradient(90deg, #10b981, #059669)' : 
+                          signal.current_profit >= 0 ? 
+                          'linear-gradient(90deg, #f59e0b, #d97706)' : 
+                          'linear-gradient(90deg, #ef4444, #dc2626)',
+                        borderRadius: '6px',
+                        transition: 'all 0.3s ease'
+                      }} />
+                    </div>
+                  </div>
+                  
+                  <SignalDetails>
+                    <SignalDetail>
+                      <DetailLabel>💰 Lucro Atual</DetailLabel>
+                      <DetailValue style={{color: signal.current_profit >= 0 ? '#10b981' : '#ef4444'}}>
+                        {signal.current_profit >= 0 ? '+' : ''}{signal.current_profit.toFixed(2)}%
+                      </DetailValue>
+                    </SignalDetail>
+                    <SignalDetail>
+                      <DetailLabel>🎯 Meta de Lucro</DetailLabel>
+                      <DetailValue style={{color: '#f59e0b'}}>
+                        {signal.required_percentage.toFixed(1)}% ({signal.max_leverage}x)
+                      </DetailValue>
+                    </SignalDetail>
+                    <SignalDetail>
+                      <DetailLabel>📊 Preço Entrada</DetailLabel>
+                      <DetailValue>{formatPrice(signal.entry_price)}</DetailValue>
+                    </SignalDetail>
+                    <SignalDetail>
+                      <DetailLabel>📈 Preço Atual</DetailLabel>
+                      <DetailValue style={{color: signal.current_price > signal.entry_price ? '#10b981' : '#ef4444'}}>
+                        {formatPrice(signal.current_price)}
+                      </DetailValue>
+                    </SignalDetail>
+                    <SignalDetail>
+                      <DetailLabel>⏱️ Dias Monitorados</DetailLabel>
+                      <DetailValue>{signal.days_monitored} de 15 dias</DetailValue>
+                    </SignalDetail>
+                    <SignalDetail>
+                      <DetailLabel>⏰ Dias Restantes</DetailLabel>
+                      <DetailValue style={{color: (15 - signal.days_monitored) <= 3 ? '#ef4444' : '#94a3b8'}}>
+                        {15 - signal.days_monitored} dias
+                      </DetailValue>
+                    </SignalDetail>
+                    <SignalDetail>
+                      <DetailLabel>🏆 Lucro Máximo</DetailLabel>
+                      <DetailValue style={{color: '#10b981'}}>
+                        +{signal.max_profit_reached.toFixed(2)}%
+                      </DetailValue>
+                    </SignalDetail>
+                    <SignalDetail>
+                      <DetailLabel>🔄 Última Atualização</DetailLabel>
+                      <DetailValue>{signal.last_updated}</DetailValue>
+                    </SignalDetail>
+                  </SignalDetails>
+                  
+                  {/* Indicador de Tempo Restante */}
+                  <div style={{
+                    marginTop: '15px',
+                    padding: '10px',
+                    background: (15 - signal.days_monitored) <= 3 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(107, 114, 128, 0.1)',
+                    borderRadius: '8px',
+                    border: `1px solid ${(15 - signal.days_monitored) <= 3 ? '#ef4444' : '#374151'}`
+                  }}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                      <span style={{fontSize: '0.9em', color: '#94a3b8'}}>
+                        {(15 - signal.days_monitored) <= 3 ? '⚠️ Expirando em breve' : '⏳ Tempo de monitoramento'}
+                      </span>
+                      <span style={{fontWeight: '600', color: (15 - signal.days_monitored) <= 3 ? '#ef4444' : '#f59e0b'}}>
+                        {Math.round(((15 - signal.days_monitored) / 15) * 100)}% restante
+                      </span>
+                    </div>
+                  </div>
+                </SignalCard>
+              ))
+            )}
+          </div>
+        )}
+
+        {activeTab === 'expired' && (
+          <div>
+            {/* Estatísticas dos Sinais Expirados */}
+            {monitoringStats && (
+              <TechnicalGrid>
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    ✅ Sinais Bem-Sucedidos
+                  </TechnicalTitle>
+                  <TechnicalValue $color="#10b981">
+                    {monitoringStats.successful_signals || 0}
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    Atingiram 300% de lucro
+                  </TechnicalSubtext>
+                </TechnicalCard>
+                
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    ❌ Sinais Expirados
+                  </TechnicalTitle>
+                  <TechnicalValue $color="#ef4444">
+                    {monitoringStats.failed_signals || 0}
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    Expiraram após 15 dias
+                  </TechnicalSubtext>
+                </TechnicalCard>
+                
+                <TechnicalCard>
+                  <TechnicalTitle>
+                    🏆 Lucro Máximo Atingido
+                  </TechnicalTitle>
+                  <TechnicalValue $color="#f59e0b">
+                    {monitoringStats.max_profit.toFixed(1)}%
+                  </TechnicalValue>
+                  <TechnicalSubtext>
+                    Melhor performance registrada
+                  </TechnicalSubtext>
+                </TechnicalCard>
+              </TechnicalGrid>
+            )}
+            
+            {/* Lista de Sinais Expirados */}
+            {expiredSignals.length === 0 ? (
+              <EmptyState>
+                <EmptyIcon><FaClock /></EmptyIcon>
+                <div>Nenhum sinal finalizado ainda</div>
+                <div style={{fontSize: '0.9em', marginTop: '10px', color: '#6b7280'}}>
+                  Sinais aparecerão aqui após 15 dias de monitoramento ou ao atingir 300% de lucro
+                </div>
+              </EmptyState>
+            ) : (
+              <div>
+                {/* Separar sinais bem-sucedidos dos expirados */}
+                {expiredSignals.filter(signal => signal.status === 'COMPLETED').length > 0 && (
+                  <div style={{marginBottom: '30px'}}>
+                    <StrategyTitle style={{color: '#10b981'}}>
+                      🎯 Sinais Bem-Sucedidos (300% Atingido)
+                    </StrategyTitle>
+                    {expiredSignals.filter(signal => signal.status === 'COMPLETED').map(signal => (
+                      <SignalCard key={signal.id} style={{borderLeft: '4px solid #10b981'}}>
+                        <SignalHeader>
+                          <SignalSymbol>{signal.symbol}</SignalSymbol>
+                          <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                            <SignalType $type={signal.signal_type}>{signal.signal_type}</SignalType>
+                            <div style={{
+                              padding: '4px 8px',
+                              borderRadius: '12px',
+                              fontSize: '0.8em',
+                              fontWeight: '600',
+                              background: '#10b981',
+                              color: 'white'
+                            }}>
+                              🎯 SUCESSO
+                            </div>
+                          </div>
+                        </SignalHeader>
+                        
+                        {/* Barra de Sucesso */}
+                        <div style={{marginBottom: '20px'}}>
+                          <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
+                            <span style={{color: '#94a3b8', fontSize: '0.9em'}}>Meta de 300% de Lucro</span>
+                            <span style={{color: '#10b981', fontWeight: '600'}}>✅ ATINGIDA</span>
+                          </div>
+                          <div style={{
+                            width: '100%',
+                            height: '12px',
+                            background: 'linear-gradient(90deg, #10b981, #059669)',
+                            borderRadius: '6px'
+                          }} />
+                        </div>
+                        
+                        <SignalDetails>
+                          <SignalDetail>
+                            <DetailLabel>🏆 Lucro Máximo</DetailLabel>
+                            <DetailValue style={{color: '#10b981'}}>
+                              +{signal.max_profit_reached.toFixed(2)}%
+                            </DetailValue>
+                          </SignalDetail>
+                          <SignalDetail>
+                            <DetailLabel>🎯 Meta Necessária</DetailLabel>
+                            <DetailValue style={{color: '#f59e0b'}}>
+                              {signal.required_percentage.toFixed(1)}% ({signal.max_leverage}x)
+                            </DetailValue>
+                          </SignalDetail>
+                          <SignalDetail>
+                            <DetailLabel>📊 Preço Entrada</DetailLabel>
+                            <DetailValue>{formatPrice(signal.entry_price)}</DetailValue>
+                          </SignalDetail>
+                          <SignalDetail>
+                            <DetailLabel>🎯 Preço Alvo</DetailLabel>
+                            <DetailValue>{formatPrice(signal.target_price)}</DetailValue>
+                          </SignalDetail>
+                          <SignalDetail>
+                            <DetailLabel>⏱️ Tempo para Sucesso</DetailLabel>
+                            <DetailValue style={{color: '#10b981'}}>
+                              {signal.days_monitored} dias
+                            </DetailValue>
+                          </SignalDetail>
+                          <SignalDetail>
+                            <DetailLabel>📅 Confirmado em</DetailLabel>
+                            <DetailValue>{signal.confirmed_at}</DetailValue>
+                          </SignalDetail>
+                        </SignalDetails>
+                        
+                        {/* Indicador de Sucesso */}
+                        <div style={{
+                          marginTop: '15px',
+                          padding: '10px',
+                          background: 'rgba(16, 185, 129, 0.1)',
+                          borderRadius: '8px',
+                          border: '1px solid #10b981'
+                        }}>
+                          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <span style={{fontSize: '0.9em', color: '#10b981'}}>
+                              🎉 Meta de 300% de lucro atingida com sucesso!
+                            </span>
+                            <span style={{fontWeight: '600', color: '#10b981'}}>
+                              {((signal.max_profit_reached / signal.required_percentage) * 100).toFixed(0)}% da meta
+                            </span>
+                          </div>
+                        </div>
+                      </SignalCard>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Sinais que expiraram sem atingir a meta */}
+                {expiredSignals.filter(signal => signal.status === 'EXPIRED').length > 0 && (
+                  <div>
+                    <StrategyTitle style={{color: '#ef4444'}}>
+                      ⏰ Sinais Expirados (15 Dias Completos)
+                    </StrategyTitle>
+                    {expiredSignals.filter(signal => signal.status === 'EXPIRED').map(signal => (
+                      <SignalCard key={signal.id} style={{borderLeft: '4px solid #ef4444'}}>
+                        <SignalHeader>
+                          <SignalSymbol>{signal.symbol}</SignalSymbol>
+                          <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                            <SignalType $type={signal.signal_type}>{signal.signal_type}</SignalType>
+                            <div style={{
+                              padding: '4px 8px',
+                              borderRadius: '12px',
+                              fontSize: '0.8em',
+                              fontWeight: '600',
+                              background: '#ef4444',
+                              color: 'white'
+                            }}>
+                              ⏰ EXPIRADO
+                            </div>
+                          </div>
+                        </SignalHeader>
+                        
+                        {/* Barra de Progresso Final */}
+                        <div style={{marginBottom: '20px'}}>
+                          <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
+                            <span style={{color: '#94a3b8', fontSize: '0.9em'}}>Progresso Final (Meta: 300%)</span>
+                            <span style={{color: '#ef4444', fontWeight: '600'}}>
+                              {((signal.max_profit_reached / signal.required_percentage) * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                          <div style={{
+                            width: '100%',
+                            height: '12px',
+                            background: '#374151',
+                            borderRadius: '6px',
+                            position: 'relative',
+                            overflow: 'hidden'
+                          }}>
+                            <div style={{
+                              width: `${Math.min(100, (signal.max_profit_reached / signal.required_percentage) * 100)}%`,
+                              height: '100%',
+                              background: signal.max_profit_reached >= 0 ? 
+                                'linear-gradient(90deg, #f59e0b, #d97706)' : 
+                                'linear-gradient(90deg, #ef4444, #dc2626)',
+                              borderRadius: '6px'
+                            }} />
+                          </div>
+                        </div>
+                        
+                        <SignalDetails>
+                          <SignalDetail>
+                            <DetailLabel>🏆 Lucro Máximo</DetailLabel>
+                            <DetailValue style={{color: signal.max_profit_reached >= 0 ? '#f59e0b' : '#ef4444'}}>
+                              {signal.max_profit_reached >= 0 ? '+' : ''}{signal.max_profit_reached.toFixed(2)}%
+                            </DetailValue>
+                          </SignalDetail>
+                          <SignalDetail>
+                            <DetailLabel>🎯 Meta Necessária</DetailLabel>
+                            <DetailValue style={{color: '#f59e0b'}}>
+                              {signal.required_percentage.toFixed(1)}% ({signal.max_leverage}x)
+                            </DetailValue>
+                          </SignalDetail>
+                          <SignalDetail>
+                            <DetailLabel>📊 Preço Entrada</DetailLabel>
+                            <DetailValue>{formatPrice(signal.entry_price)}</DetailValue>
+                          </SignalDetail>
+                          <SignalDetail>
+                            <DetailLabel>🎯 Preço Alvo</DetailLabel>
+                            <DetailValue>{formatPrice(signal.target_price)}</DetailValue>
+                          </SignalDetail>
+                          <SignalDetail>
+                            <DetailLabel>⏱️ Tempo Monitorado</DetailLabel>
+                            <DetailValue style={{color: '#ef4444'}}>
+                              {signal.days_monitored} dias (completo)
+                            </DetailValue>
+                          </SignalDetail>
+                          <SignalDetail>
+                            <DetailLabel>📅 Confirmado em</DetailLabel>
+                            <DetailValue>{signal.confirmed_at}</DetailValue>
+                          </SignalDetail>
+                        </SignalDetails>
+                        
+                        {/* Indicador de Expiração */}
+                        <div style={{
+                          marginTop: '15px',
+                          padding: '10px',
+                          background: 'rgba(239, 68, 68, 0.1)',
+                          borderRadius: '8px',
+                          border: '1px solid #ef4444'
+                        }}>
+                          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                            <span style={{fontSize: '0.9em', color: '#ef4444'}}>
+                              ⏰ Sinal expirou após 15 dias sem atingir a meta
+                            </span>
+                            <span style={{fontWeight: '600', color: '#ef4444'}}>
+                              Faltaram {(signal.required_percentage - signal.max_profit_reached).toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                      </SignalCard>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}

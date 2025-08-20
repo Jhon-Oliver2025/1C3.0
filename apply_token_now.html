@@ -1,0 +1,16 @@
+﻿<!DOCTYPE html>
+<html><head><title>Aplicar Token Imediatamente</title></head>
+<body>
+<h1>🔧 Aplicando Token Válido</h1>
+<div id="status">Processando...</div>
+<script>
+const TOKEN = '0295de1e-c854-4afd-bc6e-b7ff6d206356';
+console.log('Aplicando token:', TOKEN);
+localStorage.clear();
+localStorage.setItem('token', TOKEN);
+localStorage.setItem('user', JSON.stringify({"email":"jonatasprojetos2013@gmail.com","id":"86bab845-1921-43b8-bdf7-b13fb17efdc8","is_admin":true,"username":"admin"}));
+document.getElementById('status').innerHTML = '✅ Token aplicado: ' + TOKEN.substring(0,8) + '...';
+console.log('Token salvo:', localStorage.getItem('token'));
+setTimeout(() => { window.location.href = 'http://localhost:3000/btc-analysis?refresh=' + Date.now(); }, 2000);
+</script>
+</body></html>

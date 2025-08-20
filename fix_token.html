@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Corrigir Token - Solução Final</title>
+</head>
+<body>
+    <h1>🔧 Corrigindo Token...</h1>
+    <div id="status">Processando...</div>
+    
+    <script>
+        console.log('=== DIAGNÓSTICO DO TOKEN ===');
+        console.log('Token atual:', localStorage.getItem('token'));
+        console.log('User atual:', localStorage.getItem('user'));
+        
+        // Token válido confirmado que funciona
+        const VALID_TOKEN = '09a9deb1-47d3-4386-b123-e971650fee61';
+        const VALID_USER = {
+            "email": "jonatasprojetos2013@gmail.com",
+            "id": "86bab845-1921-43b8-bdf7-b13fb17efdc8",
+            "is_admin": true,
+            "username": "admin"
+        };
+        
+        function updateStatus(message) {
+            document.getElementById('status').innerHTML = message;
+            console.log(message);
+        }
+        
+        function fixToken() {
+            updateStatus('🗑️ Limpando dados antigos...');
+            
+            // Limpar TUDO do localStorage
+            localStorage.clear();
+            
+            setTimeout(() => {
+                updateStatus('✅ Definindo token válido...');
+                
+                // Definir o token válido
+                localStorage.setItem('token', VALID_TOKEN);
+                localStorage.setItem('user', JSON.stringify(VALID_USER));
+                
+                setTimeout(() => {
+                    updateStatus('🔍 Verificando token...');
+                    
+                    const newToken = localStorage.getItem('token');
+                    const newUser = localStorage.getItem('user');
+                    
+                    console.log('=== APÓS CORREÇÃO ===');
+                    console.log('Novo token:', newToken);
+                    console.log('Novo user:', newUser);
+                    
+                    if (newToken === VALID_TOKEN) {
+                        updateStatus('✅ Token corrigido com sucesso!');
+                        
+                        setTimeout(() => {
+                            updateStatus('🔄 Redirecionando para BTC Analysis...');
+                            window.location.href = 'http://localhost:3000/btc-analysis';
+                        }, 1000);
+                    } else {
+                        updateStatus('❌ Erro: Token não foi definido corretamente');
+                    }
+                }, 500);
+            }, 500);
+        }
+        
+        // Executar correção
+        setTimeout(fixToken, 1000);
+    </script>
+    
+    <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+        <h3>🔧 Diagnóstico:</h3>
+        <p><strong>Problema:</strong> Token inválido no localStorage</p>
+        <p><strong>Token Atual:</strong> 88c45f52-187b-4b2a-8ceb-d0ded221dcf9 (INVÁLIDO)</p>
+        <p><strong>Token Correto:</strong> 09a9deb1-47d3-4386-b123-e971650fee61</p>
+        <p><strong>Solução:</strong> Substituindo token automaticamente...</p>
+    </div>
+</body>
+</html>
