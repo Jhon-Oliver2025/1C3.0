@@ -120,9 +120,15 @@ class KryptonBotSupabase:
                 print(f"⚠️ Erro ao inicializar Market Scheduler: {scheduler_error}")
                 self.market_scheduler = None
             
-            # Sistema de limpeza já está integrado no MarketScheduler
-            # Removido para evitar duplicação de limpezas
-            print("🧹 Sistema de limpeza integrado ao MarketScheduler")
+            # Inicializar sistema de limpeza
+            try:
+                from core.signal_cleanup import cleanup_system
+                cleanup_system.start_scheduler()
+                self.cleanup_system = cleanup_system
+                print("✅ Sistema de limpeza inicializado e ativo")
+            except Exception as cleanup_error:
+                print(f"⚠️ Erro ao inicializar sistema de limpeza: {cleanup_error}")
+                self.cleanup_system = None
             
             # Inicializar monitoramento contínuo de mercado
             try:
@@ -250,6 +256,17 @@ def create_app():
             init_signal_monitoring_routes(bot.db, bot.binance_client)
             server.register_blueprint(signal_monitoring_bp)
             print("✅ Rotas de Monitoramento de Sinais registradas com sucesso")
+            
+            # Inicializar sistema de monitoramento automaticamente
+            try:
+                from api_routes.signal_monitoring import monitoring_system
+                if monitoring_system:
+                    monitoring_system.start_monitoring()
+                    print("✅ Sistema de monitoramento de sinais iniciado automaticamente")
+                else:
+                    print("⚠️ Sistema de monitoramento não disponível")
+            except Exception as monitor_start_error:
+                print(f"⚠️ Erro ao iniciar monitoramento automático: {monitor_start_error}")
         else:
             print("⚠️ Dependências para monitoramento não disponíveis - rotas não registradas")
     except Exception as e:
