@@ -18,7 +18,6 @@ import {
   FaPause,
   FaRedo
 } from 'react-icons/fa';
-import logo3 from '/logo3.png';
 import '../Dashboard/DashboardMobile.css';
 
 // Interfaces
@@ -225,16 +224,7 @@ const Header = styled.div`
   }
 `;
 
-const LogoContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 15px;
-`;
 
-const Logo = styled.img`
-  height: 40px;
-  width: auto;
-`;
 
 const Title = styled.h1`
   color: #f59e0b;
@@ -928,12 +918,9 @@ const BTCAnalysisPage: React.FC = () => {
   return (
     <BTCContainer>
       <Header>
-        <LogoContainer>
-          <Logo src={logo3} alt="Logo" />
-          <Title>
-            <BTCIcon /> Análise BTC
-          </Title>
-        </LogoContainer>
+        <Title>
+          <BTCIcon /> Análise BTC
+        </Title>
         <RefreshButton onClick={loadData}>
           <FaSync /> Atualizar
         </RefreshButton>
