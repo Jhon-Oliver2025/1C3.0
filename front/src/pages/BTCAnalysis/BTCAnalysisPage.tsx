@@ -86,6 +86,20 @@ interface MonitoredSignal {
   status: string;
   last_updated: string;
   days_monitored: number;
+  // Informações de confirmação
+  confirmation_reasons?: string[];
+  quality_score?: number;
+  signal_class?: string;
+  btc_correlation?: number;
+  btc_trend?: string;
+  confirmation_attempts?: number;
+  technical_indicators?: {
+    rsi?: number;
+    macd_bullish?: boolean;
+    ema_alignment?: boolean;
+    volume_increase?: number;
+    breakout_percentage?: number;
+  };
 }
 
 interface ExpiredSignal {
@@ -615,6 +629,101 @@ const StrategyTitle = styled.h2`
   display: flex;
   align-items: center;
   gap: 10px;
+`;
+
+// Componentes para Justificativas de Confirmação
+const ConfirmationSection = styled.div`
+  margin-top: 20px;
+  padding: 15px;
+  background: rgba(245, 158, 11, 0.1);
+  border-radius: 8px;
+  border: 1px solid #f59e0b;
+`;
+
+const ConfirmationTitle = styled.h4`
+  color: #f59e0b;
+  margin: 0 0 15px 0;
+  font-size: 1.1em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const ConfirmationGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+`;
+
+const ConfirmationItem = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+`;
+
+const ConfirmationLabel = styled.span`
+  color: #f59e0b;
+  font-size: 0.9em;
+  font-weight: 600;
+`;
+
+const ConfirmationValue = styled.span`
+  color: white;
+  font-weight: 500;
+`;
+
+const ReasonsList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+`;
+
+const ReasonTag = styled.span`
+  background: #10b981;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 500;
+`;
+
+const TechnicalIndicators = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 15px;
+  padding: 10px;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 6px;
+  border: 1px solid #10b981;
+`;
+
+const IndicatorItem = styled.div`
+  text-align: center;
+`;
+
+const IndicatorLabel = styled.div`
+  color: #10b981;
+  font-size: 0.8em;
+  margin-bottom: 4px;
+`;
+
+const IndicatorValue = styled.div<{ $positive?: boolean }>`
+  color: ${props => props.$positive ? '#10b981' : '#ef4444'};
+  font-weight: 600;
+  font-size: 0.9em;
 `;
 
 // Main Component
@@ -1522,6 +1631,103 @@ const BTCAnalysisPage: React.FC = () => {
                       </span>
                     </div>
                   </div>
+                  
+                  {/* Seção de Justificativas de Confirmação */}
+                  <ConfirmationSection>
+                    <ConfirmationTitle>
+                      <FaCheckCircle /> Por que este sinal foi confirmado?
+                    </ConfirmationTitle>
+                    
+                    <ConfirmationGrid>
+                      <ConfirmationItem>
+                        <ConfirmationLabel>📊 Qualidade do Sinal</ConfirmationLabel>
+                        <ConfirmationValue style={{color: signal.quality_score >= 80 ? '#10b981' : '#f59e0b'}}>
+                          {signal.quality_score?.toFixed(1) || 'N/A'} pontos
+                        </ConfirmationValue>
+                      </ConfirmationItem>
+                      
+                      <ConfirmationItem>
+                        <ConfirmationLabel>🏷️ Classe do Sinal</ConfirmationLabel>
+                        <ConfirmationValue>{signal.signal_class || 'N/A'}</ConfirmationValue>
+                      </ConfirmationItem>
+                      
+                      <ConfirmationItem>
+                        <ConfirmationLabel>₿ Correlação BTC</ConfirmationLabel>
+                        <ConfirmationValue style={{color: signal.btc_correlation >= 0.5 ? '#10b981' : '#ef4444'}}>
+                          {signal.btc_correlation ? `${(signal.btc_correlation * 100).toFixed(1)}%` : 'N/A'}
+                        </ConfirmationValue>
+                      </ConfirmationItem>
+                      
+                      <ConfirmationItem>
+                        <ConfirmationLabel>📈 Tendência BTC</ConfirmationLabel>
+                        <ConfirmationValue style={{color: signal.btc_trend === 'BULLISH' ? '#10b981' : signal.btc_trend === 'BEARISH' ? '#ef4444' : '#f59e0b'}}>
+                          {signal.btc_trend || 'N/A'}
+                        </ConfirmationValue>
+                      </ConfirmationItem>
+                      
+                      <ConfirmationItem>
+                        <ConfirmationLabel>🔄 Tentativas</ConfirmationLabel>
+                        <ConfirmationValue>{signal.confirmation_attempts || 1} tentativa(s)</ConfirmationValue>
+                      </ConfirmationItem>
+                      
+                      <ConfirmationItem>
+                        <ConfirmationLabel>⏰ Confirmado em</ConfirmationLabel>
+                        <ConfirmationValue>{signal.confirmed_at}</ConfirmationValue>
+                      </ConfirmationItem>
+                    </ConfirmationGrid>
+                    
+                    {/* Motivos de Confirmação */}
+                    {signal.confirmation_reasons && signal.confirmation_reasons.length > 0 && (
+                      <div>
+                        <ConfirmationLabel style={{display: 'block', marginBottom: '8px'}}>✅ Motivos da Confirmação:</ConfirmationLabel>
+                        <ReasonsList>
+                          {signal.confirmation_reasons.map((reason, index) => (
+                            <ReasonTag key={index}>{reason}</ReasonTag>
+                          ))}
+                        </ReasonsList>
+                      </div>
+                    )}
+                    
+                    {/* Indicadores Técnicos */}
+                    {signal.technical_indicators && (
+                      <TechnicalIndicators>
+                        <IndicatorItem>
+                          <IndicatorLabel>RSI</IndicatorLabel>
+                          <IndicatorValue $positive={signal.technical_indicators.rsi >= 30 && signal.technical_indicators.rsi <= 70}>
+                            {signal.technical_indicators.rsi?.toFixed(1) || 'N/A'}
+                          </IndicatorValue>
+                        </IndicatorItem>
+                        
+                        <IndicatorItem>
+                          <IndicatorLabel>MACD</IndicatorLabel>
+                          <IndicatorValue $positive={signal.technical_indicators.macd_bullish}>
+                            {signal.technical_indicators.macd_bullish ? 'BULLISH' : 'BEARISH'}
+                          </IndicatorValue>
+                        </IndicatorItem>
+                        
+                        <IndicatorItem>
+                          <IndicatorLabel>EMA Align</IndicatorLabel>
+                          <IndicatorValue $positive={signal.technical_indicators.ema_alignment}>
+                            {signal.technical_indicators.ema_alignment ? 'SIM' : 'NÃO'}
+                          </IndicatorValue>
+                        </IndicatorItem>
+                        
+                        <IndicatorItem>
+                          <IndicatorLabel>Volume</IndicatorLabel>
+                          <IndicatorValue $positive={signal.technical_indicators.volume_increase >= 1.2}>
+                            +{signal.technical_indicators.volume_increase ? `${((signal.technical_indicators.volume_increase - 1) * 100).toFixed(1)}%` : '0%'}
+                          </IndicatorValue>
+                        </IndicatorItem>
+                        
+                        <IndicatorItem>
+                          <IndicatorLabel>Breakout</IndicatorLabel>
+                          <IndicatorValue $positive={signal.technical_indicators.breakout_percentage >= 0.5}>
+                            {signal.technical_indicators.breakout_percentage ? `${signal.technical_indicators.breakout_percentage.toFixed(2)}%` : 'N/A'}
+                          </IndicatorValue>
+                        </IndicatorItem>
+                      </TechnicalIndicators>
+                    )}
+                  </ConfirmationSection>
                 </SignalCard>
               ))
             )}

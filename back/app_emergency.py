@@ -173,39 +173,124 @@ def btc_rejected():
 
 @app.route('/api/signal-monitoring/stats')
 def monitoring_stats():
-    """Estatísticas de monitoramento temporárias"""
+    """Estatísticas de monitoramento com dados simulados"""
     return jsonify({
         'success': True,
         'data': {
             'system_status': 'initializing',
             'stats': {
-                'active_signals': 0,
-                'expired_signals': 0,
-                'completed_signals': 0,
-                'total_monitored': 0,
-                'success_rate': 0.0,
-                'average_profit': 0.0,
-                'best_performance': 0.0
+                'total_monitored': 2,
+                'total_expired': 5,
+                'total_completed': 3,
+                'successful_signals': 3,
+                'failed_signals': 2,
+                'total_evaluated_signals': 8,
+                'success_rate': 62.5,
+                'average_successful_profit': 4.2,
+                'max_profit': 8.7,
+                'is_monitoring': True,
+                'last_update': datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             },
             'config': {
                 'monitoring_days': 15,
                 'target_profit': 300.0,
                 'update_interval': 300
             },
-            'note': 'Sistema principal inicializando - Dados reais em breve'
+            'note': 'Dados simulados - Sistema principal inicializando'
         }
     }), 200
 
 @app.route('/api/signal-monitoring/signals/active')
 def monitoring_active():
-    """Sinais ativos monitorados temporários"""
+    """Sinais ativos monitorados com justificativas de confirmação"""
+    # Dados simulados com justificativas detalhadas
+    sample_signals = [
+        {
+            'id': 'monitor-001',
+            'symbol': 'BTCUSDT',
+            'signal_type': 'COMPRA',
+            'entry_price': 67234.50,
+            'target_price': 69500.00,
+            'created_at': '15/01/2025 08:30:00',
+            'confirmed_at': '15/01/2025 09:15:00',
+            'max_leverage': 75,
+            'required_percentage': 4.0,
+            'current_price': 67890.25,
+            'current_percentage': 0.97,
+            'current_profit': 0.97,
+            'max_profit_reached': 1.2,
+            'status': 'MONITORING',
+            'last_updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+            'days_monitored': 2,
+            # Justificativas de confirmação
+            'confirmation_reasons': [
+                'Rompimento de resistência confirmado',
+                'Volume acima da média (150%)',
+                'BTC em tendência bullish',
+                'RSI em zona favorável (45.2)',
+                'MACD cruzamento bullish',
+                'Alinhamento das EMAs'
+            ],
+            'quality_score': 87.5,
+            'signal_class': 'PREMIUM',
+            'btc_correlation': 0.73,
+            'btc_trend': 'BULLISH',
+            'confirmation_attempts': 2,
+            'technical_indicators': {
+                'rsi': 45.2,
+                'macd_bullish': True,
+                'ema_alignment': True,
+                'volume_increase': 1.5,
+                'breakout_percentage': 0.85
+            }
+        },
+        {
+            'id': 'monitor-002',
+            'symbol': 'ETHUSDT',
+            'signal_type': 'COMPRA',
+            'entry_price': 3456.78,
+            'target_price': 3595.00,
+            'created_at': '14/01/2025 14:20:00',
+            'confirmed_at': '14/01/2025 15:45:00',
+            'max_leverage': 50,
+            'required_percentage': 6.0,
+            'current_price': 3512.45,
+            'current_percentage': 1.61,
+            'current_profit': 1.61,
+            'max_profit_reached': 2.1,
+            'status': 'MONITORING',
+            'last_updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+            'days_monitored': 3,
+            # Justificativas de confirmação
+            'confirmation_reasons': [
+                'Padrão de reversão confirmado',
+                'Suporte testado com sucesso',
+                'Correlação positiva com BTC',
+                'Volume de confirmação presente',
+                'Indicadores técnicos alinhados'
+            ],
+            'quality_score': 82.3,
+            'signal_class': 'STANDARD',
+            'btc_correlation': 0.68,
+            'btc_trend': 'BULLISH',
+            'confirmation_attempts': 1,
+            'technical_indicators': {
+                'rsi': 38.7,
+                'macd_bullish': True,
+                'ema_alignment': True,
+                'volume_increase': 1.3,
+                'breakout_percentage': 0.62
+            }
+        }
+    ]
+    
     return jsonify({
         'success': True,
         'data': {
-            'signals': [],
-            'count': 0,
+            'signals': sample_signals,
+            'count': len(sample_signals),
             'last_updated': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
-            'note': 'Sistema principal inicializando - Sinais serão carregados em breve'
+            'note': 'Dados simulados - Sistema principal inicializando'
         }
     }), 200
 
