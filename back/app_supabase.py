@@ -120,34 +120,48 @@ class KryptonBotSupabase:
                 print(f"⚠️ Erro ao inicializar Market Scheduler: {scheduler_error}")
                 self.market_scheduler = None
             
-            # Inicializar sistema de limpeza
+            # Inicializar sistema de limpeza de forma assíncrona
             try:
                 from core.signal_cleanup import cleanup_system
-                cleanup_system.start_scheduler()
+                # Inicializar em thread separada para não bloquear o Flask
+                import threading
+                def init_cleanup_async():
+                    try:
+                        cleanup_system.start_scheduler()
+                        print("✅ Sistema de limpeza inicializado e ativo")
+                    except Exception as e:
+                        print(f"⚠️ Erro ao inicializar sistema de limpeza: {e}")
+                
+                cleanup_thread = threading.Thread(target=init_cleanup_async, daemon=True)
+                cleanup_thread.start()
                 self.cleanup_system = cleanup_system
-                print("✅ Sistema de limpeza inicializado e ativo")
+                print("🔄 Sistema de limpeza inicializando em background...")
             except Exception as cleanup_error:
                 print(f"⚠️ Erro ao inicializar sistema de limpeza: {cleanup_error}")
                 self.cleanup_system = None
             
-            # Inicializar monitoramento contínuo de mercado
+            # Inicializar monitoramento contínuo de mercado de forma otimizada
             try:
                 import threading
                 import time
                 
                 def start_monitoring():
-                    """Inicia o monitoramento contínuo após 5 segundos"""
-                    time.sleep(5)  # Aguardar Flask inicializar
+                    """Inicia o monitoramento contínuo após Flask estar pronto"""
+                    time.sleep(10)  # Aguardar Flask e outros sistemas inicializarem
                     print("🔍 Iniciando monitoramento contínuo de mercado...")
                     if hasattr(self, 'technical_analysis') and self.technical_analysis:
-                        self.technical_analysis.start_monitoring()
+                        try:
+                            self.technical_analysis.start_monitoring()
+                            print("✅ Monitoramento de mercado ativo")
+                        except Exception as e:
+                            print(f"⚠️ Erro ao iniciar monitoramento de mercado: {e}")
                     else:
                         print("⚠️ TechnicalAnalysis não disponível para monitoramento")
                 
-                # Iniciar thread de monitoramento
+                # Iniciar thread de monitoramento com prioridade baixa
                 monitor_thread = threading.Thread(target=start_monitoring, daemon=True)
                 monitor_thread.start()
-                print("✅ Thread de monitoramento iniciada")
+                print("🔄 Thread de monitoramento agendada para inicialização...")
                 
             except Exception as monitor_error:
                 print(f"⚠️ Erro ao inicializar monitoramento: {monitor_error}")
@@ -257,12 +271,23 @@ def create_app():
             server.register_blueprint(signal_monitoring_bp)
             print("✅ Rotas de Monitoramento de Sinais registradas com sucesso")
             
-            # Inicializar sistema de monitoramento automaticamente
+            # Inicializar sistema de monitoramento de forma assíncrona
             try:
                 from api_routes.signal_monitoring import monitoring_system
                 if monitoring_system:
-                    monitoring_system.start_monitoring()
-                    print("✅ Sistema de monitoramento de sinais iniciado automaticamente")
+                    # Inicializar em thread separada para não bloquear o Flask
+                    def init_monitoring_async():
+                        try:
+                            import time
+                            time.sleep(5)  # Aguardar Flask inicializar completamente
+                            monitoring_system.start_monitoring()
+                            print("✅ Sistema de monitoramento de sinais iniciado automaticamente")
+                        except Exception as e:
+                            print(f"⚠️ Erro ao iniciar monitoramento automático: {e}")
+                    
+                    monitor_thread = threading.Thread(target=init_monitoring_async, daemon=True)
+                    monitor_thread.start()
+                    print("🔄 Sistema de monitoramento inicializando em background...")
                 else:
                     print("⚠️ Sistema de monitoramento não disponível")
             except Exception as monitor_start_error:
@@ -295,14 +320,17 @@ def create_app():
     @server.route('/api/health')
     def health_check():
         """
-        Endpoint de health check para Docker
+        Endpoint de health check otimizado para Docker
+        Resposta rápida sem dependências pesadas
         """
         try:
-            status = bot.get_status()
+            # Health check simples e rápido
+            from datetime import datetime
             return jsonify({
                 'status': 'healthy',
                 'service': 'krypton-bot-supabase',
-                'details': status
+                'timestamp': datetime.now().isoformat(),
+                'version': '1.0.0'
             }), 200
         except Exception as e:
             return jsonify({
