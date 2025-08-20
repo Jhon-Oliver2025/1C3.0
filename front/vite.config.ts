@@ -6,10 +6,18 @@ export default defineConfig(({ mode }) => {
   // Detectar se está em produção ou desenvolvimento
   const isProduction = mode === 'production';
   
+  // Forçar desenvolvimento local para evitar problemas
+  const isDevelopment = mode === 'development' || !isProduction;
+  
   // Configurar target da API baseado no ambiente
-  const apiTarget = isProduction 
-    ? 'https://1crypten.space'  // HTTPS em produção
-    : 'http://127.0.0.1:5000';  // HTTP em desenvolvimento local
+  const apiTarget = isDevelopment 
+    ? 'http://localhost:5000'  // HTTP em desenvolvimento local
+    : 'https://1crypten.space';  // HTTPS em produção
+  
+  console.log(`🔧 Vite Mode: ${mode}`);
+  console.log(`🎯 API Target: ${apiTarget}`);
+  console.log(`🔍 Is Development: ${isDevelopment}`);
+  console.log(`🔍 Is Production: ${isProduction}`);
 
   return {
     plugins: [react()],
@@ -28,7 +36,7 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: apiTarget,
           changeOrigin: true,
-          secure: isProduction, // true em produção para HTTPS
+          secure: !isDevelopment, // false em desenvolvimento, true em produção
           ws: true,
           configure: (proxy, options) => {
             proxy.on('error', (err, req, res) => {
