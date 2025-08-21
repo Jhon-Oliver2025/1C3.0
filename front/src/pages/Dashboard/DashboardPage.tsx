@@ -724,7 +724,7 @@ const DashboardPage: React.FC = () => {
                     entryPrice={String(signal.entry_price)}
                     targetPrice={String(signal.target_price)}
                     projectionPercentage={String(signal.projection_percentage)}
-                    date={signal.entry_time || (signal as any).created_at || ''}
+                    date={signal.entry_time || (signal as any).created_at || (signal as any).confirmed_at || ''}
                     createdAt={(signal as any).created_at}
                     confirmedAt={(signal as any).confirmed_at}
                     signalClass={signal.signal_class}

@@ -89,8 +89,13 @@ const SignalCard: React.FC<SignalCardProps> = ({
     if (createdAt) {
       return `Criado: ${formatDate(createdAt)}`;
     }
-    if (date) {
+    if (date && date.trim() !== '') {
       return formatDate(date);
+    }
+    // Se chegou até aqui, tentar usar qualquer data disponível
+    const availableDate = confirmedAt || createdAt || date;
+    if (availableDate && availableDate.trim() !== '') {
+      return formatDate(availableDate);
     }
     return 'Data não disponível';
   };
