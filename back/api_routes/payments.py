@@ -107,7 +107,10 @@ def create_payment_preference():
         if preference:
             return jsonify({
                 'success': True,
-                'preference': preference
+                'preference_id': preference['preference_id'],
+                'init_point': preference['init_point'],
+                'sandbox_init_point': preference.get('sandbox_init_point'),
+                'public_key': preference['public_key']
             }), 201
         else:
             return jsonify({'error': 'Erro ao criar preferência de pagamento'}), 500
