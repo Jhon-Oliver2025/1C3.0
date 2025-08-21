@@ -435,6 +435,213 @@
   font-style: italic;
 }
 
+/* Skeleton Loading Styles */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes progressBar {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 70%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.skeletonBase {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Header Skeletons */
+.skeletonTitle {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 32px;
+  width: 300px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+}
+
+.skeletonSubtitle {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 20px;
+  width: 250px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.skeletonLastUpdated {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 16px;
+  width: 200px;
+  border-radius: 4px;
+}
+
+/* Stat Card Skeletons */
+.skeletonStatIcon {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.skeletonStatTitle {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 16px;
+  width: 80px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+.skeletonStatValue {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 24px;
+  width: 60px;
+  border-radius: 4px;
+}
+
+/* Section Title Skeleton */
+.skeletonSectionTitle {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 24px;
+  width: 200px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+}
+
+/* Signal Card Skeletons */
+.skeletonSymbol {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 20px;
+  width: 80px;
+  border-radius: 4px;
+}
+
+.skeletonSignalType {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 18px;
+  width: 60px;
+  border-radius: 12px;
+}
+
+.skeletonMetricLabel {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 14px;
+  width: 70px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+}
+
+.skeletonMetricValue {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 16px;
+  width: 50px;
+  border-radius: 4px;
+}
+
+.skeletonSimulationTitle {
+  background: linear-gradient(90deg, #1e3a5f 25%, #2a4a6b 50%, #1e3a5f 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  height: 18px;
+  width: 120px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+}
+
+/* Loading Indicator */
+.loadingIndicator {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: rgba(16, 34, 64, 0.95);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(100, 255, 218, 0.2);
+  border-top: 3px solid #64FFDA;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingText {
+  color: #64FFDA;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
+}
+
+.loadingProgress {
+  width: 200px;
+  height: 4px;
+  background: rgba(100, 255, 218, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #64FFDA, #4ADE80);
+  border-radius: 2px;
+  animation: progressBar 2s ease-in-out infinite;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .container {
@@ -469,6 +676,25 @@
   .leverageMetrics {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+  }
+  
+  .loadingIndicator {
+    bottom: 20px;
+    right: 20px;
+    padding: 16px;
+  }
+  
+  .loadingProgress {
+    width: 150px;
+  }
+  
+  .skeletonTitle {
+    width: 250px;
+    height: 28px;
+  }
+  
+  .skeletonSubtitle {
+    width: 200px;
   }
 }
 

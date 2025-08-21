@@ -322,9 +322,69 @@ const TradingSimulation: React.FC = () => {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>
-          <div className={styles.spinner}></div>
-          <p>Carregando simulação de trading...</p>
+        <div className={styles.header}>
+          <div className={styles.skeletonTitle}></div>
+          <div className={styles.skeletonSubtitle}></div>
+          <div className={styles.skeletonLastUpdated}></div>
+        </div>
+
+        {/* Skeleton para estatísticas */}
+        <div className={styles.statsGrid}>
+          {[...Array(6)].map((_, index) => (
+            <div key={index} className={styles.statCard}>
+              <div className={styles.skeletonStatIcon}></div>
+              <div className={styles.statContent}>
+                <div className={styles.skeletonStatTitle}></div>
+                <div className={styles.skeletonStatValue}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton para seção de sinais */}
+        <div className={styles.signalsSection}>
+          <div className={styles.skeletonSectionTitle}></div>
+          
+          <div className={styles.signalsList}>
+            {[...Array(6)].map((_, index) => (
+              <div key={index} className={styles.signalCard}>
+                <div className={styles.signalHeader}>
+                  <div className={styles.skeletonSymbol}></div>
+                  <div className={styles.skeletonSignalType}></div>
+                </div>
+                
+                <div className={styles.signalMetrics}>
+                  {[...Array(3)].map((_, metricIndex) => (
+                    <div key={metricIndex} className={styles.metric}>
+                      <div className={styles.skeletonMetricLabel}></div>
+                      <div className={styles.skeletonMetricValue}></div>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className={styles.simulationData}>
+                  <div className={styles.skeletonSimulationTitle}></div>
+                  <div className={styles.simulationMetrics}>
+                    {[...Array(4)].map((_, simIndex) => (
+                      <div key={simIndex} className={styles.metric}>
+                        <div className={styles.skeletonMetricLabel}></div>
+                        <div className={styles.skeletonMetricValue}></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Indicador de carregamento com animação */}
+        <div className={styles.loadingIndicator}>
+          <div className={styles.loadingSpinner}></div>
+          <p className={styles.loadingText}>🔄 Carregando preços em tempo real...</p>
+          <div className={styles.loadingProgress}>
+            <div className={styles.progressBar}></div>
+          </div>
         </div>
       </div>
     );
