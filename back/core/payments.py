@@ -117,7 +117,7 @@ class PaymentManager:
                     "failure": failure_url or f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/payment/failure",
                     "pending": f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/payment/pending"
                 },
-                "auto_return": "approved",
+
                 "external_reference": f"{user_id}_{course_id}_{datetime.now().timestamp()}",
                 "notification_url": f"{os.getenv('BACKEND_URL', 'http://localhost:5000')}/api/payments/webhook",
                 "statement_descriptor": "1CRYPTEN CURSO",
