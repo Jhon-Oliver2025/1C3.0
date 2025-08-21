@@ -114,11 +114,19 @@ const TradingSimulation: React.FC = () => {
               }
              
              // Calcular dias monitorados
-             if (signal.entry_time || signal.confirmed_at) {
-               const entryDate = new Date(signal.entry_time || signal.confirmed_at);
-               const now = new Date();
-               daysMonitored = Math.floor((now.getTime() - entryDate.getTime()) / (1000 * 60 * 60 * 24));
-             }
+              if (signal.entry_time || signal.confirmed_at) {
+                const entryDate = new Date(signal.entry_time || signal.confirmed_at);
+                const now = new Date();
+                const timeDiff = now.getTime() - entryDate.getTime();
+                daysMonitored = Math.max(0, Math.floor(timeDiff / (1000 * 60 * 60 * 24)));
+                
+                // Garantir que não seja NaN
+                if (isNaN(daysMonitored)) {
+                  daysMonitored = 0;
+                }
+              } else {
+                daysMonitored = 0;
+              }
              
              // Calcular simulação com dados reais
              const investment = 1000.00;
