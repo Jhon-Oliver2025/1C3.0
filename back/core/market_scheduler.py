@@ -118,8 +118,8 @@ class MarketScheduler:
         if now >= ny_time:
             ny_time += timedelta(days=1)
         
-        # Próximo horário ÁSIA (21:00)
-        asia_time = now.replace(hour=21, minute=0, second=0, microsecond=0)
+        # Próximo horário ÁSIA (21:30)
+        asia_time = now.replace(hour=21, minute=30, second=0, microsecond=0)
         if now >= asia_time:
             asia_time += timedelta(days=1)
         

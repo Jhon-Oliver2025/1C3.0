@@ -16,32 +16,44 @@ def init_market_status_routes(btc_analyzer_instance):
 
 def get_market_status():
     """
-    Determina o status (aberto/fechado) dos mercados de New York e de Tóquio.
-    Sistema de limpeza baseado em horário de São Paulo: 10:00 e 21:00.
+    Determina o status (aberto/fechado) do mercado asiático.
+    Sistema de limpeza baseado em horário de São Paulo: 21:00.
     """
     now_utc = datetime.utcnow().replace(tzinfo=pytz.utc)
 
-    # Mercado New York - 09:30 às 16:00, Seg-Sex (horário real)
-    tz_ny = pytz.timezone('America/New_York')
-    now_ny = now_utc.astimezone(tz_ny)
-    ny_open_time = now_ny.replace(hour=9, minute=30, second=0, microsecond=0).time()
-    ny_close_time = now_ny.replace(hour=16, minute=0, second=0, microsecond=0).time()
-    ny_is_weekday = now_ny.weekday() < 5  # 0=Seg, 4=Sex
-    ny_is_open = ny_is_weekday and ny_open_time <= now_ny.time() < ny_close_time
-    ny_status = 'ABERTO' if ny_is_open else 'FECHADO'
-
-    # Mercado Tóquio - 09:00 às 15:00, Seg-Sex (horário real)
-    tz_tokyo = pytz.timezone('Asia/Tokyo')
-    now_tokyo = now_utc.astimezone(tz_tokyo)
-    asia_open_time = now_tokyo.replace(hour=9, minute=0, second=0, microsecond=0).time()
-    asia_close_time = now_tokyo.replace(hour=15, minute=0, second=0, microsecond=0).time()
-    asia_is_weekday = now_tokyo.weekday() < 5  # 0=Seg, 4=Sex
-    asia_is_open = asia_is_weekday and asia_open_time <= now_tokyo.time() < asia_close_time
+    # Mercado Asiático - Das 21:30 (abertura Tóquio) até 08:00 (fechamento China)
+    # Usando horário de São Paulo como referência para facilitar o cálculo
+    tz_sao_paulo = pytz.timezone('America/Sao_Paulo')
+    now_sp = now_utc.astimezone(tz_sao_paulo)
+    
+    # Mercado asiático funciona das 21:30 às 08:00 (horário de São Paulo)
+    # Isso corresponde ao período de Tóquio (09:00) até China (20:00 horário local)
+    current_time = now_sp.time()
+    current_weekday = now_sp.weekday()  # 0=Seg, 6=Dom
+    
+    # Lógica para horário que cruza meia-noite (21:30 até 08:00)
+    asia_open_time = now_sp.replace(hour=21, minute=30, second=0, microsecond=0).time()
+    asia_close_time = now_sp.replace(hour=8, minute=0, second=0, microsecond=0).time()
+    
+    # Verificar se está em horário de funcionamento
+    is_in_operating_hours = current_time >= asia_open_time or current_time < asia_close_time
+    
+    # Verificar se é dia útil (Seg-Sex)
+    # Para mercado que cruza meia-noite, considerar tanto o dia atual quanto o anterior
+    is_weekday = current_weekday < 5  # 0-4 = Seg-Sex
+    
+    # Se estamos na madrugada (00:00-08:00), verificar se ontem era dia útil
+    if current_time < asia_close_time:  # Madrugada
+        yesterday_weekday = (current_weekday - 1) % 7
+        is_weekday = yesterday_weekday < 5
+    
+    # Mercado está aberto se está em horário de funcionamento E é dia útil
+    asia_is_open = is_in_operating_hours and is_weekday
+    
     asia_status = 'ABERTO' if asia_is_open else 'FECHADO'
     
     return {
-        'new_york': {'status': ny_status, 'time': now_ny.strftime('%H:%M:%S')},
-        'asia': {'status': asia_status, 'time': now_tokyo.strftime('%H:%M:%S')}
+        'asia': {'status': asia_status, 'time': now_sp.strftime('%H:%M:%S')}
     }
 
 @market_status_bp.route('/market-status', methods=['GET'])
