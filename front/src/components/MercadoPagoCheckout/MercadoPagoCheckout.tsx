@@ -460,16 +460,16 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   };
 
   /**
-   * Inicializa o checkout usando Mercado Pago Bricks
+   * Inicializa o checkout transparente do Mercado Pago
    */
-  const initializeTransparentCheckout = async () => {
+  const initializeTransparentCheckout = () => {
     if (!mpInstance || !preferenceId) {
       console.log('Aguardando mpInstance e preferenceId:', { mpInstance: !!mpInstance, preferenceId });
       return;
     }
 
     try {
-      console.log('Inicializando Mercado Pago Bricks com preferenceId:', preferenceId);
+      console.log('Inicializando checkout transparente com preferenceId:', preferenceId);
       
       // Limpar container antes de renderizar
       const container = document.getElementById('mercadopago-checkout');
@@ -477,72 +477,44 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         container.innerHTML = '';
       }
       
-      // Usar Mercado Pago Bricks - versão mais moderna
-      const bricks = mpInstance.bricks();
-      
-      // Criar Payment Brick que inclui todas as formas de pagamento
-      const paymentBrick = await bricks.create('payment', 'mercadopago-checkout', {
-        initialization: {
-          amount: course.price,
-          preferenceId: preferenceId
+      // Usar checkout transparente padrão do Mercado Pago
+      const checkout = mpInstance.checkout({
+        preference: {
+          id: preferenceId
         },
-        customization: {
-          paymentMethods: {
-            creditCard: 'all',
-            debitCard: 'all',
-            ticket: 'all',
-            bankTransfer: 'all',
-            mercadoPago: 'all'
-          },
-          visual: {
-            style: {
-              theme: 'dark',
-              customVariables: {
-                baseColor: '#2196f3',
-                baseColorFirstVariant: '#1976d2',
-                baseColorSecondVariant: '#00bcd4',
-                errorColor: '#f44336',
-                successColor: '#4caf50',
-                outlinePrimaryColor: '#2196f3',
-                outlineSecondaryColor: 'rgba(255, 255, 255, 0.2)',
-                buttonTextColor: '#ffffff',
-                formBackgroundColor: 'rgba(255, 255, 255, 0.05)',
-                inputBackgroundColor: 'rgba(255, 255, 255, 0.1)',
-                inputFocusedBackgroundColor: 'rgba(255, 255, 255, 0.15)',
-                inputBorderColor: 'rgba(255, 255, 255, 0.2)',
-                inputFocusedBorderColor: '#2196f3',
-                inputTextColor: '#ffffff',
-                placeholderColor: 'rgba(255, 255, 255, 0.5)',
-                secondaryColor: 'rgba(255, 255, 255, 0.8)'
-              }
-            }
-          }
+        render: {
+          container: '#mercadopago-checkout',
+          label: 'Finalizar Pagamento'
+        },
+        theme: {
+          elementsColor: '#2196f3',
+          headerColor: '#2196f3'
         },
         callbacks: {
-          onReady: () => {
-            console.log('Payment Brick pronto');
+          onFormMounted: (error: any) => {
+            if (error) {
+              console.error('Erro ao montar checkout:', error);
+              setStatusMessage({
+                type: 'error',
+                message: 'Erro ao carregar formulário de pagamento'
+              });
+            } else {
+              console.log('Checkout montado com sucesso');
+            }
             setIsLoading(false);
           },
-          onSubmit: ({ selectedPaymentMethod, formData }: any) => {
-            console.log('Pagamento enviado:', { selectedPaymentMethod, formData });
+          onSubmit: (event: any) => {
+            event.preventDefault();
+            console.log('Formulário submetido');
             setIsLoading(true);
-            
-            // Processar pagamento
-            return new Promise((resolve, reject) => {
-              // Aqui você processaria o pagamento com seu backend
-              setTimeout(() => {
-                console.log('Pagamento processado com sucesso');
-                setStatusMessage({
-                  type: 'success',
-                  message: 'Pagamento processado com sucesso!'
-                });
-                setIsLoading(false);
-                resolve({});
-              }, 2000);
-            });
+            // O Mercado Pago processará automaticamente
+          },
+          onReady: () => {
+            console.log('Checkout pronto');
+            setIsLoading(false);
           },
           onError: (error: any) => {
-            console.error('Erro no Payment Brick:', error);
+            console.error('Erro no checkout:', error);
             setStatusMessage({
               type: 'error',
               message: 'Erro no processamento do pagamento'
@@ -552,10 +524,10 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         }
       });
 
-      setCardForm(paymentBrick);
-      console.log('Payment Brick inicializado:', paymentBrick);
+      setCardForm(checkout);
+      console.log('Checkout transparente inicializado:', checkout);
     } catch (error) {
-      console.error('Erro ao inicializar Payment Brick:', error);
+      console.error('Erro ao inicializar checkout transparente:', error);
       setStatusMessage({
         type: 'error',
         message: 'Erro ao inicializar sistema de pagamento'
@@ -682,44 +654,37 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
                    <h3 style={{ color: '#ffffff', margin: 0 }}>Escolha sua forma de pagamento</h3>
                  </div>
                  
-                 {/* Botões de pagamento diretos */}
-                 <div style={{
-                   display: 'flex',
-                   flexDirection: 'column',
-                   gap: '1rem',
-                   width: '100%'
+                 {/* Container onde o Mercado Pago renderizará o checkout */}
+                 <div id="mercadopago-checkout" style={{
+                   minHeight: '400px',
+                   width: '100%',
+                   border: '1px solid rgba(255, 255, 255, 0.1)',
+                   borderRadius: '8px',
+                   padding: '1rem'
                  }}>
-                   {/* PIX */}
-                   <CheckoutButton 
-                     onClick={() => window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank')}
-                     disabled={isLoading || !preferenceId}
-                     $loading={isLoading}
-                     style={{ background: 'linear-gradient(135deg, #00C851, #00A041)' }}
-                   >
-                     <span style={{ fontSize: '1.2rem' }}>🔥</span>
-                     Pagar com PIX - Instantâneo
-                   </CheckoutButton>
-                   
-                   {/* Cartão */}
-                   <CheckoutButton 
-                     onClick={() => window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank')}
-                     disabled={isLoading || !preferenceId}
-                     $loading={isLoading}
-                   >
-                     <CreditCard size={20} />
-                     Cartão de Crédito - 12x sem juros
-                   </CheckoutButton>
-                   
-                   {/* Boleto */}
-                   <CheckoutButton 
-                     onClick={() => window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank')}
-                     disabled={isLoading || !preferenceId}
-                     $loading={isLoading}
-                     style={{ background: 'linear-gradient(135deg, #FF6B35, #F7931E)' }}
-                   >
-                     <span style={{ fontSize: '1.2rem' }}>📄</span>
-                     Boleto Bancário
-                   </CheckoutButton>
+                   {isLoading && (
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'center',
+                       alignItems: 'center',
+                       height: '200px',
+                       color: 'rgba(255, 255, 255, 0.7)'
+                     }}>
+                       <LoadingSpinner />
+                       <span style={{ marginLeft: '0.5rem' }}>Carregando checkout...</span>
+                     </div>
+                   )}
+                   {!isLoading && !preferenceId && (
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'center',
+                       alignItems: 'center',
+                       height: '200px',
+                       color: 'rgba(255, 255, 255, 0.7)'
+                     }}>
+                       Preparando sistema de pagamento...
+                     </div>
+                   )}
                  </div>
               </>
             )}
