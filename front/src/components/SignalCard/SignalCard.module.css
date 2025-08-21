@@ -159,9 +159,10 @@
 }
 
 .date {
-  color: #9ca3af;
-  font-size: 11px;
-  font-weight: 400;
+  color: #e5e7eb;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .projectionContainer {
@@ -386,6 +387,29 @@
   
   .priceValue {
     font-size: 15px;
+  }
+}
+
+/* Responsividade para mobile */
+@media (max-width: 480px) {
+  .date {
+    font-size: 12px;
+    font-weight: 500;
+  }
+  
+  .projectionLabel {
+    font-size: 10px;
+  }
+  
+  .changePercentage {
+    font-size: 12px;
+  }
+}
+
+/* Responsividade para tablets */
+@media (min-width: 481px) and (max-width: 768px) {
+  .date {
+    font-size: 14px;
   }
 }
 

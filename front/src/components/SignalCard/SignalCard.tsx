@@ -48,30 +48,42 @@ const SignalCard: React.FC<SignalCardProps> = ({
         
         if (!isNaN(dateObj.getTime())) {
           // Converter para horário do Brasil usando timezone
-          return dateObj.toLocaleString('pt-BR', {
-            year: 'numeric',
-            month: '2-digit',
+          const formattedDate = dateObj.toLocaleDateString('pt-BR', {
             day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            timeZone: 'America/Sao_Paulo'
+          });
+          
+          const formattedTime = dateObj.toLocaleTimeString('pt-BR', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false,
             timeZone: 'America/Sao_Paulo'
           });
+          
+          return `${formattedDate} ${formattedTime}`;
         }
       } else {
         // Para outros formatos, tentar conversão direta
         dateObj = new Date(dateString);
         
         if (!isNaN(dateObj.getTime())) {
-          return dateObj.toLocaleString('pt-BR', {
-            year: 'numeric',
-            month: '2-digit',
+          const formattedDate = dateObj.toLocaleDateString('pt-BR', {
             day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            timeZone: 'America/Sao_Paulo'
+          });
+          
+          const formattedTime = dateObj.toLocaleTimeString('pt-BR', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false,
             timeZone: 'America/Sao_Paulo'
           });
+          
+          return `${formattedDate} ${formattedTime}`;
         }
       }
     } catch (error) {
