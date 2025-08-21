@@ -288,27 +288,31 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
       setIsLoading(true);
       setStatusMessage(null);
       
+      // Obter token se disponível (opcional para checkout público)
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        setStatusMessage({
-          type: 'error',
-          message: 'Você precisa estar logado para comprar um curso'
-        });
-        return;
-      }
-
+      
       // Criar preferência de pagamento
       const apiUrl = import.meta.env.VITE_API_URL || '';
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Adicionar autorização apenas se token estiver disponível
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       const response = await fetch(`${apiUrl}/api/payments/create-preference`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify({
           course_id: courseId,
           success_url: `${window.location.origin}/payment/success`,
-          failure_url: `${window.location.origin}/payment/failure`
+          failure_url: `${window.location.origin}/payment/failure`,
+          // Incluir informações do curso para checkout público
+          course_name: course.name,
+          course_price: course.price,
+          course_description: course.description
         })
       });
 

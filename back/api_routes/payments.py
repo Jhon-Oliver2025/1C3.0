@@ -47,14 +47,12 @@ def get_user_courses():
         return jsonify({'error': 'Erro interno do servidor'}), 500
 
 @payments_bp.route('/create-preference', methods=['POST'])
-@jwt_required
 def create_payment_preference():
-    """Cria preferência de pagamento no Mercado Pago"""
+    """
+    Cria preferência de pagamento no Mercado Pago
+    Suporte para checkout público (sem autenticação obrigatória)
+    """
     try:
-        current_user = get_current_user()
-        if not current_user:
-            return jsonify({'error': 'Usuário não encontrado'}), 404
-        
         data = request.get_json()
         if not data:
             return jsonify({'error': 'Dados não fornecidos'}), 400
@@ -63,22 +61,40 @@ def create_payment_preference():
         if not course_id:
             return jsonify({'error': 'ID do curso é obrigatório'}), 400
         
-        user_id = str(current_user.get('id'))
+        # Obter usuário se autenticado (opcional para checkout público)
+        current_user = None
+        user_id = None
         
-        # Verificar se usuário já tem acesso ao curso
-        if payment_manager.check_course_access(user_id, course_id):
-            return jsonify({'error': 'Usuário já tem acesso a este curso'}), 400
+        try:
+            current_user = get_current_user()
+            if current_user:
+                user_id = str(current_user.get('id'))
+                
+                # Verificar se usuário já tem acesso ao curso
+                if payment_manager.check_course_access(user_id, course_id):
+                    return jsonify({'error': 'Usuário já tem acesso a este curso'}), 400
+        except:
+            # Usuário não autenticado - checkout público
+            pass
         
         # URLs de retorno personalizadas (opcionais)
         success_url = data.get('success_url')
         failure_url = data.get('failure_url')
         
+        # Dados do curso para checkout público
+        course_name = data.get('course_name')
+        course_price = data.get('course_price')
+        course_description = data.get('course_description')
+        
         # Criar preferência de pagamento
         preference = payment_manager.create_payment_preference(
-            user_id=user_id,
+            user_id=user_id,  # Pode ser None para checkout público
             course_id=course_id,
             success_url=success_url,
-            failure_url=failure_url
+            failure_url=failure_url,
+            course_name=course_name,
+            course_price=course_price,
+            course_description=course_description
         )
         
         if preference:
