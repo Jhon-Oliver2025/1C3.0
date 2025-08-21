@@ -452,81 +452,65 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   };
 
   /**
-   * Inicializa o checkout transparente
+   * Inicializa o checkout transparente completo (PIX, Boleto, Cartão)
    */
   const initializeTransparentCheckout = () => {
     if (!mpInstance || !preferenceId || !checkoutRef.current) return;
 
     try {
-      const cardFormInstance = mpInstance.cardForm({
-        amount: course.price.toString(),
-        iframe: true,
-        form: {
-          id: 'form-checkout',
-          cardNumber: {
-            id: 'form-checkout__cardNumber',
-            placeholder: 'Número do cartão'
-          },
-          expirationDate: {
-            id: 'form-checkout__expirationDate',
-            placeholder: 'MM/YY'
-          },
-          securityCode: {
-            id: 'form-checkout__securityCode',
-            placeholder: 'Código de segurança'
-          },
-          cardholderName: {
-            id: 'form-checkout__cardholderName',
-            placeholder: 'Titular do cartão'
-          },
-          issuer: {
-            id: 'form-checkout__issuer',
-            placeholder: 'Banco emissor'
-          },
-          installments: {
-            id: 'form-checkout__installments',
-            placeholder: 'Parcelas'
-          },
-          identificationType: {
-            id: 'form-checkout__identificationType',
-            placeholder: 'Tipo de documento'
-          },
-          identificationNumber: {
-            id: 'form-checkout__identificationNumber',
-            placeholder: 'Número do documento'
-          },
-          cardholderEmail: {
-            id: 'form-checkout__cardholderEmail',
-            placeholder: 'E-mail'
-          }
+      // Usar checkout completo em vez de apenas cardForm
+      const checkout = mpInstance.checkout({
+        preference: {
+          id: preferenceId
+        },
+        render: {
+          container: '#mercadopago-checkout',
+          label: 'Finalizar Pagamento'
+        },
+        theme: {
+          elementsColor: '#2196f3',
+          headerColor: '#2196f3'
         },
         callbacks: {
           onFormMounted: (error: any) => {
             if (error) {
-              console.error('Erro ao montar formulário:', error);
+              console.error('Erro ao montar checkout:', error);
               setStatusMessage({
                 type: 'error',
                 message: 'Erro ao carregar formulário de pagamento'
               });
+            } else {
+              console.log('Checkout montado com sucesso');
+              setIsLoading(false);
             }
           },
-          onSubmit: (event: any) => {
-            event.preventDefault();
-            processPayment(cardFormInstance);
+          onSubmit: (formData: any) => {
+            console.log('Dados do formulário:', formData);
+            // O Mercado Pago processará automaticamente
           },
-          onFetching: (resource: string) => {
-            console.log('Buscando recurso:', resource);
+          onReady: () => {
+            console.log('Checkout pronto');
+            setIsLoading(false);
+          },
+          onError: (error: any) => {
+            console.error('Erro no checkout:', error);
+            setStatusMessage({
+              type: 'error',
+              message: 'Erro no processamento do pagamento'
+            });
+            setIsLoading(false);
           }
         }
       });
 
-      setCardForm(cardFormInstance);
+      setCardForm(checkout);
     } catch (error) {
-      console.error('Erro ao inicializar checkout transparente:', error);
+      console.error('Erro ao inicializar checkout:', error);
       setStatusMessage({
         type: 'error',
-        message: 'Erro ao inicializar formulário de pagamento'
+        message: 'Erro ao inicializar sistema de pagamento'
       });
+      setIsLoading(false);
     }
   };
 
@@ -639,121 +623,22 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
             ) : (
               <>
                 <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  marginBottom: '1.5rem' 
-                }}>
-                  <CreditCard size={24} style={{ color: '#2196f3', marginRight: '0.5rem' }} />
-                  <h3 style={{ color: '#ffffff', margin: 0 }}>Dados do Cartão</h3>
-                </div>
-                
-                {/* Formulário do Mercado Pago será renderizado aqui */}
-                <form id="form-checkout">
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ 
-                      display: 'block', 
-                      color: 'rgba(255, 255, 255, 0.9)', 
-                      marginBottom: '0.5rem',
-                      fontWeight: '500'
-                    }}>Número do cartão</label>
-                    <div id="form-checkout__cardNumber"></div>
-                  </div>
-                  
-                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                    <div style={{ flex: 1 }}>
-                      <label style={{ 
-                        display: 'block', 
-                        color: 'rgba(255, 255, 255, 0.9)', 
-                        marginBottom: '0.5rem',
-                        fontWeight: '500'
-                      }}>Vencimento</label>
-                      <div id="form-checkout__expirationDate"></div>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <label style={{ 
-                        display: 'block', 
-                        color: 'rgba(255, 255, 255, 0.9)', 
-                        marginBottom: '0.5rem',
-                        fontWeight: '500'
-                      }}>CVV</label>
-                      <div id="form-checkout__securityCode"></div>
-                    </div>
-                  </div>
-                  
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ 
-                      display: 'block', 
-                      color: 'rgba(255, 255, 255, 0.9)', 
-                      marginBottom: '0.5rem',
-                      fontWeight: '500'
-                    }}>Nome do titular</label>
-                    <div id="form-checkout__cardholderName"></div>
-                  </div>
-                  
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ 
-                      display: 'block', 
-                      color: 'rgba(255, 255, 255, 0.9)', 
-                      marginBottom: '0.5rem',
-                      fontWeight: '500'
-                    }}>E-mail</label>
-                    <div id="form-checkout__cardholderEmail"></div>
-                  </div>
-                  
-                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-                    <div style={{ flex: 1 }}>
-                      <label style={{ 
-                        display: 'block', 
-                        color: 'rgba(255, 255, 255, 0.9)', 
-                        marginBottom: '0.5rem',
-                        fontWeight: '500'
-                      }}>Tipo de documento</label>
-                      <div id="form-checkout__identificationType"></div>
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <label style={{ 
-                        display: 'block', 
-                        color: 'rgba(255, 255, 255, 0.9)', 
-                        marginBottom: '0.5rem',
-                        fontWeight: '500'
-                      }}>Número do documento</label>
-                      <div id="form-checkout__identificationNumber"></div>
-                    </div>
-                  </div>
-                  
-                  <div style={{ marginBottom: '1rem' }}>
-                    <label style={{ 
-                      display: 'block', 
-                      color: 'rgba(255, 255, 255, 0.9)', 
-                      marginBottom: '0.5rem',
-                      fontWeight: '500'
-                    }}>Parcelas</label>
-                    <div id="form-checkout__installments"></div>
-                  </div>
-                  
-                  <div style={{ display: 'none' }}>
-                    <div id="form-checkout__issuer"></div>
-                  </div>
-                  
-                  <CheckoutButton 
-                    type="submit"
-                    disabled={isLoading || !cardForm}
-                    $loading={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <LoadingSpinner />
-                        Processando...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard size={20} />
-                        Finalizar Pagamento
-                      </>
-                    )}
-                  </CheckoutButton>
-                </form>
+                   display: 'flex', 
+                   alignItems: 'center', 
+                   justifyContent: 'center', 
+                   marginBottom: '1.5rem' 
+                 }}>
+                   <CreditCard size={24} style={{ color: '#2196f3', marginRight: '0.5rem' }} />
+                   <h3 style={{ color: '#ffffff', margin: 0 }}>Escolha sua forma de pagamento</h3>
+                 </div>
+                 
+                 {/* Container onde o Mercado Pago renderizará o checkout completo */}
+                 <div id="mercadopago-checkout" style={{
+                   minHeight: '400px',
+                   width: '100%'
+                 }}>
+                   {/* O checkout do Mercado Pago será renderizado aqui automaticamente */}
+                 </div>
               </>
             )}
           </TransparentCheckoutContainer>
