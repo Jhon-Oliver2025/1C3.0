@@ -181,6 +181,31 @@
   color: #FF6B6B;
 }
 
+.mobile-stat-value.simulation {
+  color: #FFD700;
+  font-size: 20px;
+}
+
+.mobile-simulation-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s ease;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.mobile-simulation-link:hover {
+  background: rgba(255, 215, 0, 0.1);
+  transform: scale(1.05);
+}
+
+.mobile-simulation-link:active {
+  transform: scale(0.95);
+}
+
 /* Container de cards */
 .mobile-cards-container {
   margin-top: 8px;

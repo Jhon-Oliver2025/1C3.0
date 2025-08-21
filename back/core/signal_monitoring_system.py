@@ -19,7 +19,7 @@ import traceback
 @dataclass
 class MonitoredSignal:
     """
-    Classe que representa um sinal sendo monitorado
+    Classe que representa um sinal sendo monitorado com simulação de trading de $1.000 USD
     """
     id: str
     symbol: str
@@ -38,6 +38,15 @@ class MonitoredSignal:
     last_updated: str = ''
     days_monitored: int = 0
     price_history: List[Dict] = None
+    
+    # Campos de simulação financeira com $1.000 USD
+    simulation_investment: float = 1000.0  # Investimento fixo de $1.000
+    simulation_current_value: float = 1000.0  # Valor atual da posição
+    simulation_pnl_usd: float = 0.0  # P&L em dólares
+    simulation_pnl_percentage: float = 0.0  # P&L em percentual
+    simulation_max_value_reached: float = 1000.0  # Maior valor atingido
+    simulation_target_value: float = 4000.0  # Meta de $4.000 (300% de lucro)
+    simulation_position_size: float = 0.0  # Tamanho da posição (quantidade de moedas)
     
     def __post_init__(self):
         if self.price_history is None:
@@ -279,7 +288,7 @@ class SignalMonitoringSystem:
     
     def _update_signal_metrics(self, signal: MonitoredSignal):
         """
-        Atualiza as métricas de um sinal específico
+        Atualiza as métricas de um sinal específico incluindo simulação financeira de $1.000 USD
         
         Args:
             signal: Sinal a ser atualizado
@@ -303,6 +312,26 @@ class SignalMonitoringSystem:
             # Atualizar máximo lucro atingido
             if signal.current_profit > signal.max_profit_reached:
                 signal.max_profit_reached = signal.current_profit
+            
+            # === SIMULAÇÃO FINANCEIRA COM $1.000 USD ===
+            
+            # Calcular tamanho da posição (quantidade de moedas com $1.000)
+            if signal.simulation_position_size == 0.0:
+                # Primeira vez - calcular posição inicial
+                signal.simulation_position_size = signal.simulation_investment / entry_price
+            
+            # Calcular valor atual da posição
+            signal.simulation_current_value = signal.simulation_position_size * current_price
+            
+            # Calcular P&L em dólares
+            signal.simulation_pnl_usd = signal.simulation_current_value - signal.simulation_investment
+            
+            # Calcular P&L em percentual
+            signal.simulation_pnl_percentage = (signal.simulation_pnl_usd / signal.simulation_investment) * 100
+            
+            # Atualizar maior valor atingido
+            if signal.simulation_current_value > signal.simulation_max_value_reached:
+                signal.simulation_max_value_reached = signal.simulation_current_value
             
             # Calcular dias monitorados
             if signal.confirmed_at:
@@ -374,18 +403,24 @@ class SignalMonitoringSystem:
     
     def _check_completed_signals(self):
         """
-        Verifica sinais que atingiram o objetivo de 300% de lucro
+        Verifica sinais que atingiram o objetivo de $4.000 (300% de lucro na simulação)
         """
         completed_ids = []
         
         for signal_id, signal in self.monitored_signals.items():
-            if signal.current_profit >= self.config['target_profit_percentage']:
+            # Verificar se atingiu $4.000 na simulação OU 300% de alavancagem (backup)
+            simulation_target_reached = signal.simulation_current_value >= signal.simulation_target_value
+            leverage_target_reached = signal.current_profit >= self.config['target_profit_percentage']
+            
+            if simulation_target_reached or leverage_target_reached:
                 signal.status = 'COMPLETED'
                 completed_ids.append(signal_id)
                 
                 print(f"🎯 Sinal {signal.symbol} atingiu objetivo!")
-                print(f"   Lucro: {signal.current_profit:.2f}%")
-                print(f"   Dias para atingir: {signal.days_monitored}")
+                print(f"   💰 Valor da simulação: ${signal.simulation_current_value:.2f}")
+                print(f"   📈 P&L: ${signal.simulation_pnl_usd:.2f} ({signal.simulation_pnl_percentage:.2f}%)")
+                print(f"   ⚡ Lucro alavancado: {signal.current_profit:.2f}%")
+                print(f"   📅 Dias para atingir: {signal.days_monitored}")
         
         # Mover para expirados (sinais completados também vão para histórico)
         for signal_id in completed_ids:

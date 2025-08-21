@@ -1,0 +1,91 @@
+/* Estilos para a página de Simulação de Trading */
+
+.container {
+  min-height: 100vh;
+  background: #000000;
+  color: #E6F1FF;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, rgba(16, 34, 64, 0.9), rgba(30, 41, 59, 0.8));
+  border-bottom: 1px solid rgba(100, 255, 218, 0.2);
+  padding: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  color: #64FFDA;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin-bottom: 16px;
+}
+
+.backButton:hover {
+  background: rgba(100, 255, 218, 0.1);
+  transform: translateX(-4px);
+}
+
+.pageTitle {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #64FFDA;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 8px rgba(100, 255, 218, 0.3);
+}
+
+.headerDescription {
+  margin: 0;
+}
+
+.headerDescription p {
+  font-size: 1.1rem;
+  color: #B8D4E3;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Content */
+.content {
+  padding: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    padding: 16px;
+  }
+  
+  .pageTitle {
+    font-size: 2rem;
+  }
+  
+  .headerDescription p {
+    font-size: 1rem;
+  }
+  
+  .backButton {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+  
+  .headerDescription p {
+    font-size: 0.9rem;
+  }
+}

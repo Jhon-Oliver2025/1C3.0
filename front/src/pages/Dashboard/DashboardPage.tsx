@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SignalCard from '../../components/SignalCard/SignalCard';
+import TradingSimulation from '../../components/TradingSimulation/TradingSimulation';
 import { useAuthToken } from '../../hooks/useAuthToken';
 import { useAdminCheck } from '../../hooks/useAdminCheck';
 // PWA removido - agora temos página dedicada para o App 1Crypten

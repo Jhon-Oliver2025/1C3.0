@@ -48,6 +48,9 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout, isBackendOnl
             {isAdmin && (
               <NavLink to="/btc-analysis" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>BTC Analysis</NavLink>
             )}
+            {isAdmin && (
+              <NavLink to="/simulacao-trading" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Investimentos Simulados</NavLink>
+            )}
             <NavLink to="/suporte" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Suporte</NavLink>
             {/* REMOVIDO: <NavLink to="/configuracoes" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Configurações</NavLink> */}
             {/* REMOVIDO: <NavLink to="/chat" className={({ isActive }) => isActive ? styles.activeNavLink : styles.navLink}>Zion</NavLink> */}
@@ -115,6 +118,9 @@ const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, onLogout, isBackendOnl
                     </NavLink>
                     <NavLink to="/btc-analysis" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
                       BTC Analysis
+                    </NavLink>
+                    <NavLink to="/simulacao-trading" className={({ isActive }) => isActive ? styles.activeMobileNavLink : styles.mobileNavLink} onClick={toggleMobileMenu}>
+                      Investimentos Simulados
                     </NavLink>
                   </div>
                 )}

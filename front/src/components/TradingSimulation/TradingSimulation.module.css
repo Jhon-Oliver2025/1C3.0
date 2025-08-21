@@ -1,0 +1,434 @@
+/* Estilos para o componente de Simulação de Trading */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #000000;
+  color: #E6F1FF;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.1), rgba(16, 34, 64, 0.3));
+  border-radius: 16px;
+  border: 1px solid rgba(100, 255, 218, 0.2);
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #64FFDA;
+  margin: 0 0 8px 0;
+  text-shadow: 0 2px 8px rgba(100, 255, 218, 0.3);
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #B8D4E3;
+  margin: 0 0 12px 0;
+  font-weight: 500;
+}
+
+.lastUpdated {
+  font-size: 0.9rem;
+  color: #94A3B8;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(100, 255, 218, 0.3);
+  border-top: 3px solid #64FFDA;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error */
+.error {
+  text-align: center;
+  padding: 40px 20px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.error h3 {
+  color: #EF4444;
+  margin: 0 0 12px 0;
+  font-size: 1.3rem;
+}
+
+.error p {
+  color: #FCA5A5;
+  margin: 0 0 20px 0;
+}
+
+.retryButton {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.retryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.statCard {
+  background: linear-gradient(135deg, rgba(16, 34, 64, 0.8), rgba(30, 41, 59, 0.6));
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.3s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(100, 255, 218, 0.4);
+  box-shadow: 0 8px 25px rgba(100, 255, 218, 0.1);
+}
+
+.statIcon {
+  font-size: 2rem;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(100, 255, 218, 0.1);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.statContent {
+  flex: 1;
+}
+
+.statContent h3 {
+  font-size: 0.9rem;
+  color: #B8D4E3;
+  margin: 0 0 4px 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #E6F1FF;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.statSubvalue {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 4px 0 0 0;
+  opacity: 0.8;
+}
+
+/* Signals Section */
+.signalsSection {
+  margin-bottom: 30px;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #64FFDA;
+  margin: 0 0 20px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(100, 255, 218, 0.2);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(16, 34, 64, 0.3);
+  border: 2px dashed rgba(100, 255, 218, 0.3);
+  border-radius: 12px;
+  color: #B8D4E3;
+}
+
+.emptyState p {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+}
+
+.emptyState p:last-child {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+/* Signals List */
+.signalsList {
+  display: grid;
+  gap: 20px;
+}
+
+.signalCard {
+  background: linear-gradient(135deg, rgba(16, 34, 64, 0.8), rgba(30, 41, 59, 0.6));
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.signalCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(100, 255, 218, 0.4);
+  box-shadow: 0 12px 40px rgba(100, 255, 218, 0.1);
+}
+
+/* Signal Header */
+.signalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+}
+
+.signalSymbol {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.symbolText {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #E6F1FF;
+}
+
+.signalType {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.signalType.compra {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.signalType.venda {
+  background: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.signalStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusIcon {
+  font-size: 1.2rem;
+}
+
+.statusText {
+  font-size: 0.9rem;
+  color: #B8D4E3;
+  font-weight: 500;
+}
+
+/* Metrics */
+.signalMetrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metricLabel {
+  font-size: 0.8rem;
+  color: #94A3B8;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metricValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #E6F1FF;
+}
+
+/* Simulation Data */
+.simulationData {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(100, 255, 218, 0.05);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  border-radius: 12px;
+}
+
+.simulationTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #64FFDA;
+  margin: 0 0 12px 0;
+}
+
+.simulationMetrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+/* Leverage Data */
+.leverageData {
+  padding: 16px;
+  background: rgba(255, 193, 7, 0.05);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  border-radius: 12px;
+}
+
+.leverageTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #FFC107;
+  margin: 0 0 12px 0;
+}
+
+.leverageMetrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 20px;
+}
+
+.refreshButton {
+  background: linear-gradient(135deg, #64FFDA, #4CAF50);
+  color: #0A192F;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.refreshButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(100, 255, 218, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .signalCard {
+    padding: 20px;
+  }
+  
+  .signalHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .signalMetrics {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .simulationMetrics,
+  .leverageMetrics {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .simulationMetrics,
+  .leverageMetrics {
+    grid-template-columns: 1fr;
+  }
+  
+  .statCard {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .statIcon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+  }
+}

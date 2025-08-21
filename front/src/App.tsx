@@ -30,6 +30,7 @@ import SalesPage from './pages/SalesPage/SalesPage';
 import SalesAdminPage from './pages/SalesAdmin/SalesAdminPage';
 import CRMPage from './pages/CRM/CRMPage';
 import BTCAnalysisPage from './pages/BTCAnalysis/BTCAnalysisPage';
+import TradingSimulationPage from './pages/TradingSimulationPage/TradingSimulationPage';
 
 import MainLayout from './components/MainLayout/MainLayout';
 import UpdateNotification from './components/UpdateNotification/UpdateNotification';
@@ -109,6 +110,14 @@ function App() {
         <ProtectedRoute>
           <MainLayout>
             <DashboardPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/simulacao-trading" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <TradingSimulationPage />
           </MainLayout>
         </ProtectedRoute>
       } />
