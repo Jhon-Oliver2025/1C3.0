@@ -99,28 +99,28 @@ const TradingSimulation: React.FC = () => {
              let currentPrice = entryPrice;
              let daysMonitored = 0;
              
-             // Simular variação de preço realística em tempo real
-               try {
-                 // Criar variação baseada no tempo atual para simular movimento real
-                 const now = Date.now();
-                 const timeBasedSeed = Math.sin(now / 100000) * Math.cos(now / 50000);
-                 
-                 // Variação mais realística baseada no tipo de sinal
-                 const baseVariation = Math.random() * 0.06 - 0.03; // -3% a +3%
-                 const timeVariation = timeBasedSeed * 0.02; // Variação temporal
-                 const volatilityFactor = 0.015; // 1.5% de volatilidade
-                 
-                 const totalVariation = (baseVariation + timeVariation) * volatilityFactor;
-                 currentPrice = entryPrice * (1 + totalVariation);
-                 
-                 // Garantir que o preço não seja negativo
-                 currentPrice = Math.max(currentPrice, entryPrice * 0.5);
-                 
-                 console.log(`📊 ${signal.symbol}: Preço entrada $${entryPrice.toFixed(4)} → Atual $${currentPrice.toFixed(4)} (${(totalVariation * 100).toFixed(2)}%)`);
-               } catch (error) {
-                 console.log(`⚠️ Erro ao calcular preço de ${signal.symbol}, usando preço de entrada`);
-                 currentPrice = entryPrice;
-               }
+             // Simular variação de preço mais visível em tempo real
+                try {
+                  // Criar variação baseada no tempo atual para simular movimento real
+                  const now = Date.now();
+                  const timeBasedSeed = Math.sin(now / 50000) * Math.cos(now / 30000);
+                  
+                  // Variação mais agressiva para ser mais visível
+                  const baseVariation = Math.random() * 0.12 - 0.06; // -6% a +6%
+                  const timeVariation = timeBasedSeed * 0.04; // Variação temporal maior
+                  const volatilityFactor = 0.03; // 3% de volatilidade (dobrado)
+                  
+                  const totalVariation = (baseVariation + timeVariation) * volatilityFactor;
+                  currentPrice = entryPrice * (1 + totalVariation);
+                  
+                  // Garantir que o preço não seja negativo
+                  currentPrice = Math.max(currentPrice, entryPrice * 0.7);
+                  
+                  console.log(`🔄 ${signal.symbol}: Preço entrada $${entryPrice.toFixed(4)} → Atual $${currentPrice.toFixed(4)} (${(totalVariation * 100).toFixed(2)}%) - ${new Date().toLocaleTimeString()}`);
+                } catch (error) {
+                  console.log(`⚠️ Erro ao calcular preço de ${signal.symbol}, usando preço de entrada`);
+                  currentPrice = entryPrice;
+                }
              
              // Calcular dias monitorados
               if (signal.entry_time || signal.confirmed_at) {
