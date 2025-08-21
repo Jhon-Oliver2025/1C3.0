@@ -320,10 +320,11 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
 
   // Inicializar checkout transparente quando tiver preferência
   useEffect(() => {
-    if (preferenceId && mpInstance && !hasAccess) {
+    if (preferenceId && !hasAccess) {
+      console.log('Iniciando checkout com preferenceId:', preferenceId);
       initializeTransparentCheckout();
     }
-  }, [preferenceId, mpInstance, hasAccess]);
+  }, [preferenceId, hasAccess]);
 
   /**
    * Carrega o SDK do Mercado Pago Bricks (versão mais recente)
