@@ -460,7 +460,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   };
 
   /**
-   * Inicializa o checkout usando iframe (funciona em dev e produção)
+   * Inicializa o Web Checkout do Mercado Pago (sempre funciona)
    */
   const initializeTransparentCheckout = () => {
     if (!preferenceId) {
@@ -469,44 +469,111 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
     }
 
     try {
-      console.log('Inicializando checkout via iframe com preferenceId:', preferenceId);
+      console.log('Inicializando Web Checkout com preferenceId:', preferenceId);
       
       // Limpar container antes de renderizar
       const container = document.getElementById('mercadopago-checkout');
       if (container) {
         container.innerHTML = '';
         
-        // Criar iframe com o checkout do Mercado Pago
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`;
-        iframe.style.width = '100%';
-        iframe.style.height = '600px';
-        iframe.style.border = 'none';
-        iframe.style.borderRadius = '8px';
-        iframe.style.backgroundColor = 'transparent';
+        // Criar botões de pagamento estilizados
+        const checkoutContainer = document.createElement('div');
+        checkoutContainer.style.display = 'flex';
+        checkoutContainer.style.flexDirection = 'column';
+        checkoutContainer.style.gap = '1rem';
+        checkoutContainer.style.width = '100%';
         
-        // Adicionar evento de load
-        iframe.onload = () => {
-          console.log('Checkout iframe carregado com sucesso');
-          setIsLoading(false);
+        // Botão PIX
+        const pixButton = document.createElement('button');
+        pixButton.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <span style="font-size: 1.2rem;">🔥</span>
+            <span>Pagar com PIX - Instantâneo</span>
+          </div>
+        `;
+        pixButton.style.cssText = `
+          background: linear-gradient(135deg, #00C851, #00A041);
+          color: white;
+          border: none;
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          width: 100%;
+        `;
+        pixButton.onmouseover = () => pixButton.style.transform = 'translateY(-2px)';
+        pixButton.onmouseout = () => pixButton.style.transform = 'translateY(0)';
+        pixButton.onclick = () => {
+          window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank');
         };
         
-        iframe.onerror = () => {
-          console.error('Erro ao carregar checkout iframe');
-          setStatusMessage({
-            type: 'error',
-            message: 'Erro ao carregar sistema de pagamento'
-          });
-          setIsLoading(false);
+        // Botão Cartão
+        const cardButton = document.createElement('button');
+        cardButton.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <span>💳</span>
+            <span>Cartão de Crédito - 12x sem juros</span>
+          </div>
+        `;
+        cardButton.style.cssText = `
+          background: linear-gradient(135deg, #2196f3, #1976d2);
+          color: white;
+          border: none;
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          width: 100%;
+        `;
+        cardButton.onmouseover = () => cardButton.style.transform = 'translateY(-2px)';
+        cardButton.onmouseout = () => cardButton.style.transform = 'translateY(0)';
+        cardButton.onclick = () => {
+          window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank');
         };
         
-        // Adicionar iframe ao container
-        container.appendChild(iframe);
+        // Botão Boleto
+        const boletoButton = document.createElement('button');
+        boletoButton.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <span style="font-size: 1.2rem;">📄</span>
+            <span>Boleto Bancário</span>
+          </div>
+        `;
+        boletoButton.style.cssText = `
+          background: linear-gradient(135deg, #FF6B35, #F7931E);
+          color: white;
+          border: none;
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          width: 100%;
+        `;
+        boletoButton.onmouseover = () => boletoButton.style.transform = 'translateY(-2px)';
+        boletoButton.onmouseout = () => boletoButton.style.transform = 'translateY(0)';
+        boletoButton.onclick = () => {
+          window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank');
+        };
         
-        console.log('Iframe do checkout adicionado ao container');
+        // Adicionar botões ao container
+        checkoutContainer.appendChild(pixButton);
+        checkoutContainer.appendChild(cardButton);
+        checkoutContainer.appendChild(boletoButton);
+        
+        // Adicionar ao container principal
+        container.appendChild(checkoutContainer);
+        
+        console.log('Web Checkout buttons criados com sucesso');
+        setIsLoading(false);
       }
     } catch (error) {
-      console.error('Erro ao inicializar checkout iframe:', error);
+      console.error('Erro ao inicializar Web Checkout:', error);
       setStatusMessage({
         type: 'error',
         message: 'Erro ao inicializar sistema de pagamento'
