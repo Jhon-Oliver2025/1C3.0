@@ -36,6 +36,7 @@ from api_routes.payments import payments_bp
 from api_routes.btc_signals import btc_signals_bp, init_btc_signals_routes
 from api_routes.signal_monitoring import signal_monitoring_bp, init_signal_monitoring_routes
 from api_routes.restart_system import restart_system_bp
+from api_routes.binance_prices import binance_prices_bp
 
 # Configurar CORS
 CORS(server, resources={
@@ -259,6 +260,7 @@ def create_app():
     server.register_blueprint(cleanup_status_bp, url_prefix='/api')
     server.register_blueprint(debug_bp, url_prefix='/api/debug')
     server.register_blueprint(payments_bp, url_prefix='/api/payments')
+    server.register_blueprint(binance_prices_bp)
     try:
         server.register_blueprint(restart_system_bp)
         print("✅ Blueprint restart_system registrado com sucesso")

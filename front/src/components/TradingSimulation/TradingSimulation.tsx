@@ -99,28 +99,37 @@ const TradingSimulation: React.FC = () => {
              let currentPrice = entryPrice;
              let daysMonitored = 0;
              
-             // Simular variação de preço mais visível em tempo real
-                try {
-                  // Criar variação baseada no tempo atual para simular movimento real
-                  const now = Date.now();
-                  const timeBasedSeed = Math.sin(now / 50000) * Math.cos(now / 30000);
-                  
-                  // Variação mais agressiva para ser mais visível
-                  const baseVariation = Math.random() * 0.12 - 0.06; // -6% a +6%
-                  const timeVariation = timeBasedSeed * 0.04; // Variação temporal maior
-                  const volatilityFactor = 0.03; // 3% de volatilidade (dobrado)
-                  
-                  const totalVariation = (baseVariation + timeVariation) * volatilityFactor;
-                  currentPrice = entryPrice * (1 + totalVariation);
-                  
-                  // Garantir que o preço não seja negativo
-                  currentPrice = Math.max(currentPrice, entryPrice * 0.7);
-                  
-                  console.log(`🔄 ${signal.symbol}: Preço entrada $${entryPrice.toFixed(4)} → Atual $${currentPrice.toFixed(4)} (${(totalVariation * 100).toFixed(2)}%) - ${new Date().toLocaleTimeString()}`);
-                } catch (error) {
-                  console.log(`⚠️ Erro ao calcular preço de ${signal.symbol}, usando preço de entrada`);
-                  currentPrice = entryPrice;
-                }
+             // Buscar preço real da Binance
+                 try {
+                   const priceResponse = await fetch(`${apiUrl}/api/binance/price/${signal.symbol}`);
+                   
+                   if (priceResponse.ok) {
+                     const priceData = await priceResponse.json();
+                     if (priceData.success && priceData.price) {
+                       currentPrice = priceData.price;
+                       console.log(`📊 ${signal.symbol}: Preço entrada $${entryPrice.toFixed(4)} → Atual $${currentPrice.toFixed(4)} (REAL) - ${new Date().toLocaleTimeString()}`);
+                     } else {
+                       throw new Error('Preço não disponível na resposta');
+                     }
+                   } else {
+                     throw new Error(`API retornou ${priceResponse.status}`);
+                   }
+                 } catch (error) {
+                   console.log(`⚠️ Erro ao buscar preço real de ${signal.symbol}: ${error.message}`);
+                   console.log(`🔄 Usando simulação como fallback...`);
+                   
+                   // Fallback para simulação se a API falhar
+                   const now = Date.now();
+                   const timeBasedSeed = Math.sin(now / 50000) * Math.cos(now / 30000);
+                   const baseVariation = Math.random() * 0.12 - 0.06;
+                   const timeVariation = timeBasedSeed * 0.04;
+                   const volatilityFactor = 0.03;
+                   const totalVariation = (baseVariation + timeVariation) * volatilityFactor;
+                   currentPrice = entryPrice * (1 + totalVariation);
+                   currentPrice = Math.max(currentPrice, entryPrice * 0.7);
+                   
+                   console.log(`🔄 ${signal.symbol}: Preço entrada $${entryPrice.toFixed(4)} → Atual $${currentPrice.toFixed(4)} (SIMULADO) - ${new Date().toLocaleTimeString()}`);
+                 }
              
              // Calcular dias monitorados
               if (signal.entry_time || signal.confirmed_at) {
