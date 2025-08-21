@@ -53,8 +53,15 @@ def create_payment_preference():
     Suporte para checkout público (sem autenticação obrigatória)
     """
     try:
+        print(f"🔄 [PAYMENTS] Recebendo requisição POST /create-preference")
+        print(f"📋 [PAYMENTS] Headers: {dict(request.headers)}")
+        print(f"📦 [PAYMENTS] Content-Type: {request.content_type}")
+        
         data = request.get_json()
+        print(f"📊 [PAYMENTS] Dados recebidos: {data}")
+        
         if not data:
+            print(f"❌ [PAYMENTS] Nenhum dado JSON recebido")
             return jsonify({'error': 'Dados não fornecidos'}), 400
         
         course_id = data.get('course_id')
@@ -106,8 +113,12 @@ def create_payment_preference():
             return jsonify({'error': 'Erro ao criar preferência de pagamento'}), 500
         
     except Exception as e:
+        print(f"❌ [PAYMENTS] Erro na criação de preferência: {str(e)}")
+        print(f"🔍 [PAYMENTS] Tipo do erro: {type(e).__name__}")
+        import traceback
+        print(f"📋 [PAYMENTS] Traceback completo: {traceback.format_exc()}")
         current_app.logger.error(f"Erro ao criar preferência: {str(e)}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+        return jsonify({'error': f'Erro interno do servidor: {str(e)}'}), 500
 
 @payments_bp.route('/webhook', methods=['POST'])
 def payment_webhook():
