@@ -682,12 +682,44 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
                    <h3 style={{ color: '#ffffff', margin: 0 }}>Escolha sua forma de pagamento</h3>
                  </div>
                  
-                 {/* Container onde o Mercado Pago renderizará o checkout completo */}
-                 <div id="mercadopago-checkout" style={{
-                   minHeight: '400px',
+                 {/* Botões de pagamento diretos */}
+                 <div style={{
+                   display: 'flex',
+                   flexDirection: 'column',
+                   gap: '1rem',
                    width: '100%'
                  }}>
-                   {/* O checkout do Mercado Pago será renderizado aqui automaticamente */}
+                   {/* PIX */}
+                   <CheckoutButton 
+                     onClick={() => window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank')}
+                     disabled={isLoading || !preferenceId}
+                     $loading={isLoading}
+                     style={{ background: 'linear-gradient(135deg, #00C851, #00A041)' }}
+                   >
+                     <span style={{ fontSize: '1.2rem' }}>🔥</span>
+                     Pagar com PIX - Instantâneo
+                   </CheckoutButton>
+                   
+                   {/* Cartão */}
+                   <CheckoutButton 
+                     onClick={() => window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank')}
+                     disabled={isLoading || !preferenceId}
+                     $loading={isLoading}
+                   >
+                     <CreditCard size={20} />
+                     Cartão de Crédito - 12x sem juros
+                   </CheckoutButton>
+                   
+                   {/* Boleto */}
+                   <CheckoutButton 
+                     onClick={() => window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank')}
+                     disabled={isLoading || !preferenceId}
+                     $loading={isLoading}
+                     style={{ background: 'linear-gradient(135deg, #FF6B35, #F7931E)' }}
+                   >
+                     <span style={{ fontSize: '1.2rem' }}>📄</span>
+                     Boleto Bancário
+                   </CheckoutButton>
                  </div>
               </>
             )}
