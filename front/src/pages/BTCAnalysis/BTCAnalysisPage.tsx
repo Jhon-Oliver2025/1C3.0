@@ -62,7 +62,7 @@ interface ConfirmedSignal {
   signal_class?: string;
   created_at: string;
   confirmed_at?: string;
-  confirmation_reasons?: string[];
+  confirmation_reasons?: string[] | string;
   confirmation_attempts?: number;
   btc_correlation?: number;
   btc_trend?: string;
@@ -88,7 +88,7 @@ interface MonitoredSignal {
   last_updated: string;
   days_monitored: number;
   // Informações de confirmação
-  confirmation_reasons?: string[];
+  confirmation_reasons?: string[] | string;
   quality_score?: number;
   signal_class?: string;
   btc_correlation?: number;
@@ -913,7 +913,7 @@ const BTCAnalysisPage: React.FC = () => {
   };
 
   // Função para traduzir motivos de confirmação
-  const translateConfirmationReasons = (reasons: string[]) => {
+  const translateConfirmationReasons = (reasons: string[] | string) => {
     const translations: { [key: string]: string } = {
       'breakout_confirmed': '🚀 Rompimento Confirmado',
       'volume_confirmed': '📈 Volume Confirmado',
@@ -921,7 +921,32 @@ const BTCAnalysisPage: React.FC = () => {
       'momentum_sustained': '⚡ Momentum Sustentado',
       'support_resistance_hold': '📊 Suporte/Resistência Confirmado'
     };
-    return reasons.map(reason => translations[reason] || reason);
+    
+    // Se reasons é uma string, converter para array
+    let reasonsArray: string[];
+    if (typeof reasons === 'string') {
+      // Tratar diferentes formatos de string
+      if (reasons.includes(',')) {
+        // Formato: "breakout_confirmed, volume_confirmed"
+        reasonsArray = reasons.split(',').map(r => r.trim());
+      } else if (reasons.startsWith('[') && reasons.endsWith(']')) {
+        // Formato: "['breakout_confirmed', 'volume_confirmed']"
+        try {
+          reasonsArray = JSON.parse(reasons.replace(/'/g, '"'));
+        } catch {
+          reasonsArray = [reasons];
+        }
+      } else {
+        // String simples
+        reasonsArray = [reasons];
+      }
+    } else if (Array.isArray(reasons)) {
+      reasonsArray = reasons;
+    } else {
+      reasonsArray = [];
+    }
+    
+    return reasonsArray.map(reason => translations[reason] || reason);
   };
 
   // Estado para horário asiático

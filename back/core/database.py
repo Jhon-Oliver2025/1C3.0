@@ -31,12 +31,15 @@ class Database:
         self.files_to_check = {
             self.signals_list_file: [
                 'symbol', 'type', 'entry_price', 'entry_time', 
-                'target_price', 'projection_percentage', 'signal_class', 'status'
+                'target_price', 'projection_percentage', 'signal_class', 'status',
+                'confirmed_at', 'confirmation_reasons', 'confirmation_attempts',
+                'quality_score', 'btc_correlation', 'btc_trend'
             ],
             self.signals_history_file: [
                 'symbol', 'type', 'entry_price', 'entry_time', 
                 'target_price', 'projection_percentage', 'signal_class', 'status', 
-                'exit_price', 'result'
+                'exit_price', 'result', 'confirmed_at', 'confirmation_reasons', 
+                'confirmation_attempts', 'quality_score', 'btc_correlation', 'btc_trend'
             ],
             self.config_file: ['key', 'value'],
             self.users_file: ['username', 'password', 'email', 'is_admin', 'id', 'status'], # Adicionado 'status'

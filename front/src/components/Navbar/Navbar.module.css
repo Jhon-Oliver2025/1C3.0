@@ -34,12 +34,12 @@
 
 .logoWrapper.online {
   border: 2px solid #07FF86; /* Borda verde para online */
-  animation: border-glow-green 2s infinite ease-in-out; /* Animação de brilho verde */
+  box-shadow: 0 0 8px rgba(7, 255, 134, 0.3); /* Brilho sutil estático */
 }
 
 .logoWrapper.offline {
   border: 2px solid #FF0000; /* Borda vermelha para offline */
-  animation: border-glow-red 2s infinite ease-in-out; /* Animação de brilho vermelho */
+  box-shadow: 0 0 8px rgba(255, 0, 0, 0.3); /* Brilho sutil estático */
 }
 
 .crypTenLogo { /* Estilo para a imagem do logo dentro do wrapper */
@@ -307,24 +307,7 @@
   }
 }
 
-/* NEW: Animações para o brilho da borda */
-@keyframes border-glow-green {
-  0%, 100% {
-    box-shadow: 0 0 0px 0px rgba(7, 255, 134, 0.0); /* Sem brilho */
-  }
-  50% {
-    box-shadow: 0 0 15px 8px rgba(7, 255, 134, 0.7); /* Brilho verde */
-  }
-}
-
-@keyframes border-glow-red {
-  0%, 100% {
-    box-shadow: 0 0 0px 0px rgba(255, 0, 0, 0.0); /* Sem brilho */
-  }
-  50% {
-    box-shadow: 0 0 15px 8px rgba(255, 0, 0, 0.7); /* Brilho vermelho */
-  }
-}
+/* Animações removidas - agora usando brilho estático */
 
 /* Se quiser adicionar animação de entrada */
 /* Mobile Menu Overlay e Menu - definições únicas */

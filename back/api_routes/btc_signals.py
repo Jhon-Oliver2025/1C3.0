@@ -337,7 +337,11 @@ def get_confirmed_signals():
                     'status': signal.get('status', 'CONFIRMED'),
                     'created_at': signal.get('created_at'),
                     'confirmed_at': signal.get('confirmed_at'),
-                    'quality_score': signal.get('quality_score')
+                    'quality_score': signal.get('quality_score'),
+                    'confirmation_reasons': signal.get('confirmation_reasons', []),
+                    'confirmation_attempts': signal.get('confirmation_attempts', 0),
+                    'btc_correlation': signal.get('btc_correlation', 0),
+                    'btc_trend': signal.get('btc_trend', 'NEUTRAL')
                 })
             
             return jsonify(formatted_signals)

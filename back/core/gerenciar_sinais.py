@@ -4,7 +4,7 @@ import csv
 import traceback  # Adicionando import do traceback
 from datetime import datetime, timedelta
 import pytz  # Adicionar esta importação
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 from pandas import DataFrame, Series
 from .database import Database
 
@@ -18,10 +18,12 @@ class GerenciadorSinais:
         self.history_file = os.path.join(base_dir, 'historico_sinais.csv')
         # Adicionar timezone
         self.timezone = pytz.timezone('America/Sao_Paulo')
-        # Simplificar colunas para apenas as informações do Telegram
+        # Colunas incluindo campos de confirmação
         self.SIGNAL_COLUMNS = pd.Index([
             'symbol', 'type', 'entry_price', 'entry_time',
-            'target_price', 'projection_percentage', 'signal_class', 'status'
+            'target_price', 'projection_percentage', 'signal_class', 'status',
+            'confirmed_at', 'confirmation_reasons', 'confirmation_attempts',
+            'quality_score', 'btc_correlation', 'btc_trend'
         ])
         self._empty_df = DataFrame(columns=self.SIGNAL_COLUMNS)
 
@@ -463,6 +465,49 @@ class GerenciadorSinais:
         except Exception as e:
             print(f"❌ Erro ao limpar sinais futuros: {e}")
             traceback.print_exc()
+    
+    def load_signals_from_csv(self) -> List[Dict[str, Any]]:
+        """Carrega todos os sinais do arquivo CSV"""
+        try:
+            if not os.path.exists(self.signals_file):
+                print(f"⚠️ Arquivo de sinais não encontrado: {self.signals_file}")
+                return []
+            
+            df = pd.read_csv(self.signals_file)
+            
+            if df.empty:
+                print("📭 Arquivo de sinais está vazio")
+                return []
+            
+            # Converter DataFrame para lista de dicionários
+            signals = df.replace({pd.NA: None, float('nan'): None}).to_dict(orient='records')
+            
+            # Processar confirmation_reasons para garantir formato correto
+            for signal in signals:
+                reasons = signal.get('confirmation_reasons')
+                if reasons and isinstance(reasons, str):
+                    # Se é uma string, tentar converter para lista
+                    if reasons.startswith('[') and reasons.endswith(']'):
+                        # Formato de lista como string
+                        try:
+                            import ast
+                            signal['confirmation_reasons'] = ast.literal_eval(reasons)
+                        except:
+                            # Se falhar, dividir por vírgula
+                            signal['confirmation_reasons'] = [r.strip().strip("'\"") for r in reasons.strip('[]').split(',')]
+                    else:
+                        # String simples separada por vírgula
+                        signal['confirmation_reasons'] = [r.strip() for r in reasons.split(',')]
+                elif not reasons:
+                    signal['confirmation_reasons'] = []
+            
+            print(f"📊 Carregados {len(signals)} sinais do CSV")
+            return signals
+            
+        except Exception as e:
+            print(f"❌ Erro ao carregar sinais do CSV: {e}")
+            traceback.print_exc()
+            return []
 
     # No método onde ocorre o warning
     def save_signal_to_file(self, signal_data):

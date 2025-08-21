@@ -89,6 +89,9 @@ class BTCSignalManager:
         # Configurar notificações (opcional)
         self.notifier = self._setup_telegram_notifier()
         
+        # Carregar sinais confirmados existentes do CSV
+        self._load_confirmed_signals_from_csv()
+        
         print("✅ BTCSignalManager inicializado com sucesso!")
         
         # Limpar sinais duplicados na inicialização
@@ -563,13 +566,16 @@ class BTCSignalManager:
             print(f"   📅 Adicionado à lista de confirmados hoje: {signal_key}")
             print(f"   📊 Total de sinais únicos confirmados hoje: {len(self.daily_confirmed_signals)}")
             
-            # Criar sinal confirmado
+            # Criar sinal confirmado com todos os campos necessários
             confirmed_signal = signal['original_data'].copy()
             confirmed_signal.update({
                 'confirmation_id': signal['id'],
                 'confirmed_at': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
-                'confirmation_reasons': reasons,
-                'confirmation_attempts': signal['confirmation_attempts']
+                'confirmation_reasons': ', '.join(reasons) if reasons else '',
+                'confirmation_attempts': signal['confirmation_attempts'],
+                'btc_correlation': signal.get('btc_correlation', 0.0),
+                'btc_trend': signal.get('btc_trend', ''),
+                'status': 'CONFIRMED'
             })
             
             # Adicionar à lista de confirmados
@@ -579,6 +585,7 @@ class BTCSignalManager:
             from .gerenciar_sinais import GerenciadorSinais
             gerenciador = GerenciadorSinais(self.db)
             gerenciador.save_signal(confirmed_signal)
+            print(f"✅ Sinal {signal['symbol']} salvo no banco com motivos: {', '.join(reasons)}")
             
             # NOVO: Adicionar automaticamente ao sistema de monitoramento
             self._add_to_monitoring_system(confirmed_signal)
@@ -596,9 +603,6 @@ class BTCSignalManager:
                     )
                 except Exception as e:
                     print(f"⚠️ Erro ao enviar notificação de confirmação: {e}")
-            
-            # Salvar no banco como confirmado
-            self._save_confirmed_signal_to_db(signal, confirmed_signal, reasons)
             
             print(f"✅ Sinal {signal['symbol']} confirmado e enviado para dashboard!")
             print(f"📊 Sinal adicionado ao sistema de monitoramento para avaliação quantitativa")
@@ -669,11 +673,39 @@ class BTCSignalManager:
                                    confirmed_signal: Dict[str, Any], reasons: List[str]) -> None:
         """Salva sinal confirmado no banco de dados"""
         try:
-            # Implementar salvamento no banco se necessário
-            # Por enquanto, apenas log
-            pass
+            # Importar GerenciadorSinais
+            from .gerenciar_sinais import GerenciadorSinais
+            
+            # Criar instância do gerenciador
+            gerenciador = GerenciadorSinais(self.db)
+            
+            # Preparar dados do sinal para salvamento
+            signal_data = {
+                'id': confirmed_signal.get('id', original_signal['id']),
+                'symbol': confirmed_signal['symbol'],
+                'type': confirmed_signal['type'],
+                'entry_price': confirmed_signal['entry_price'],
+                'target_price': confirmed_signal['target_price'],
+                'projection_percentage': confirmed_signal['projection_percentage'],
+                'quality_score': confirmed_signal['quality_score'],
+                'signal_class': confirmed_signal['signal_class'],
+                'status': 'CONFIRMED',
+                'created_at': original_signal['created_at'].strftime('%d/%m/%Y %H:%M:%S'),
+                'confirmed_at': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+                'confirmation_reasons': ', '.join(reasons) if reasons else '',
+                'confirmation_attempts': original_signal.get('confirmation_attempts', 0),
+                'btc_correlation': original_signal.get('btc_correlation', 0.0),
+                'btc_trend': original_signal.get('btc_trend', '')
+            }
+            
+            # Salvar no banco de dados
+            gerenciador.save_signal(signal_data)
+            print(f"✅ Sinal {confirmed_signal['symbol']} salvo no banco com motivos: {', '.join(reasons)}")
+            
         except Exception as e:
             print(f"❌ Erro ao salvar sinal confirmado no DB: {e}")
+            import traceback
+            traceback.print_exc()
     
     def _save_rejected_signal_to_db(self, rejected_signal: Dict[str, Any]) -> None:
         """Salva sinal rejeitado no banco de dados"""
@@ -900,6 +932,87 @@ class BTCSignalManager:
         except Exception as e:
             print(f"⚠️ Erro ao adicionar sinal ao monitoramento: {e}")
             # Não falhar a confirmação por causa disso
+            pass
+    
+    def _load_confirmed_signals_from_csv(self) -> None:
+        """Carrega sinais confirmados do CSV na inicialização"""
+        try:
+            from .gerenciar_sinais import GerenciadorSinais
+            
+            # Criar instância do gerenciador
+            gerenciador = GerenciadorSinais(self.db)
+            
+            # Carregar sinais do CSV
+            csv_signals = gerenciador.load_signals_from_csv()
+            
+            if csv_signals:
+                # Filtrar sinais que têm motivos de confirmação dos últimos 2 dias
+                today = datetime.now().date()
+                yesterday = today - timedelta(days=1)
+                confirmed_with_reasons = []
+                
+                for signal in csv_signals:
+                    try:
+                        # Verificar se tem motivos de confirmação
+                        reasons = signal.get('confirmation_reasons')
+                        confirmed_at = signal.get('confirmed_at')
+                        
+                        if reasons and confirmed_at:
+                            # Verificar se foi confirmado hoje
+                            signal_date = None
+                            for date_format in ['%d/%m/%Y %H:%M:%S', '%Y-%m-%d %H:%M:%S', '%d/%m/%Y']:
+                                try:
+                                    signal_date = datetime.strptime(confirmed_at, date_format).date()
+                                    break
+                                except ValueError:
+                                    continue
+                            
+                            if signal_date == today or signal_date == yesterday:
+                                # Converter para formato esperado pela API
+                                confirmed_signal = {
+                                    'id': signal.get('id', ''),
+                                    'confirmation_id': signal.get('id', ''),
+                                    'symbol': signal['symbol'],
+                                    'type': signal['type'],
+                                    'entry_price': float(signal['entry_price']) if signal.get('entry_price') else 0.0,
+                                    'target_price': float(signal['target_price']) if signal.get('target_price') else 0.0,
+                                    'projection_percentage': float(signal['projection_percentage']) if signal.get('projection_percentage') else 0.0,
+                                    'quality_score': float(signal['quality_score']) if signal.get('quality_score') else 0.0,
+                                    'signal_class': signal.get('signal_class', ''),
+                                    'created_at': signal.get('entry_time', ''),
+                                    'confirmed_at': confirmed_at,
+                                    'confirmation_reasons': reasons if isinstance(reasons, list) else [reasons] if reasons else [],
+                                    'confirmation_attempts': int(signal.get('confirmation_attempts', 0)) if signal.get('confirmation_attempts') else 0,
+                                    'btc_correlation': float(signal.get('btc_correlation', 0)) if signal.get('btc_correlation') else 0.0,
+                                    'btc_trend': signal.get('btc_trend', 'NEUTRAL'),
+                                    'status': 'CONFIRMED'
+                                }
+                                
+                                confirmed_with_reasons.append(confirmed_signal)
+                                
+                                # Adicionar ao controle de duplicação
+                                signal_key = (signal['symbol'], signal['type'])
+                                self.daily_confirmed_signals.add(signal_key)
+                    
+                    except Exception as e:
+                        print(f"⚠️ Erro ao processar sinal do CSV: {e}")
+                        continue
+                
+                # Adicionar à lista de confirmados
+                self.confirmed_signals.extend(confirmed_with_reasons)
+                
+                print(f"📊 Carregados {len(confirmed_with_reasons)} sinais confirmados de hoje do CSV")
+                print(f"🔒 {len(self.daily_confirmed_signals)} tipos de sinais únicos já confirmados hoje")
+                
+                if confirmed_with_reasons:
+                    print(f"✅ Primeiros sinais carregados:")
+                    for signal in confirmed_with_reasons[:3]:
+                        reasons_str = ', '.join(signal['confirmation_reasons']) if signal['confirmation_reasons'] else 'Sem motivos'
+                        print(f"   • {signal['symbol']} - {signal['type']} - Motivos: {reasons_str}")
+            
+        except Exception as e:
+            print(f"⚠️ Erro ao carregar sinais confirmados do CSV: {e}")
+            # Não falhar a inicialização por causa disso
             pass
     
     def get_monitoring_integration_status(self) -> Dict[str, Any]:

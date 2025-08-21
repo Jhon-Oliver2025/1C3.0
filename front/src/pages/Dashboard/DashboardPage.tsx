@@ -22,6 +22,8 @@ interface Signal {
   signal_class: 'PREMIUM' | 'PREMIUM+' | 'ELITE' | 'ELITE+' | 'PADRÃO';
   status: string;
   is_favorite?: boolean;
+  created_at?: string;
+  confirmed_at?: string;
 }
 
 /**
@@ -449,16 +451,18 @@ const DashboardPage: React.FC = () => {
         }
         
         return {
-            id: signal.id || `${signal.symbol}-${signal.entry_time}`,
+            id: signal.id || `${signal.symbol}-${signal.entry_time || signal.created_at}`,
             symbol: signal.symbol,
             type: normalizedType,
             entry_price: parseFloat(signal.entry_price) || 0,
-            entry_time: signal.entry_time,
+            entry_time: signal.entry_time || signal.created_at || signal.confirmed_at || '',
             target_price: parseFloat(signal.target_price) || 0,
             projection_percentage: parseFloat(signal.projection_percentage) || 0,
             signal_class: signal.signal_class || 'PADRÃO',
             status: signal.status || 'CONFIRMED',
-            is_favorite: false
+            is_favorite: false,
+            created_at: signal.created_at,
+            confirmed_at: signal.confirmed_at
           };
       });
       
@@ -469,8 +473,8 @@ const DashboardPage: React.FC = () => {
       
       // Ordenar sinais por data/hora mais recente primeiro
       const sortedSignals = uniqueSignals.sort((a, b) => {
-        const dateA = new Date(a.entry_time).getTime();
-        const dateB = new Date(b.entry_time).getTime();
+        const dateA = new Date(a.entry_time || '1970-01-01').getTime();
+        const dateB = new Date(b.entry_time || '1970-01-01').getTime();
         return dateB - dateA; // Mais recente primeiro
       });
       
@@ -724,9 +728,9 @@ const DashboardPage: React.FC = () => {
                     entryPrice={String(signal.entry_price)}
                     targetPrice={String(signal.target_price)}
                     projectionPercentage={String(signal.projection_percentage)}
-                    date={signal.entry_time || (signal as any).created_at || (signal as any).confirmed_at || ''}
-                    createdAt={(signal as any).created_at}
-                    confirmedAt={(signal as any).confirmed_at}
+                    date={signal.entry_time}
+                    createdAt={signal.created_at}
+                    confirmedAt={signal.confirmed_at}
                     signalClass={signal.signal_class}
                     onToggleFavorite={() => toggleFavorite(index)}
                     isFavorite={signal.is_favorite || false}
