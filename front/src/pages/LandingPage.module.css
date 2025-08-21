@@ -18,6 +18,24 @@
   top: 0;
   left: 0;
   overflow-x: hidden;
+  
+  /* Configurações específicas para PWA */
+  /* Garante que a área da status bar tenha fundo preto */
+  padding-top: env(safe-area-inset-top, 0);
+  background-color: #000000; /* Fallback para área da status bar */
+}
+
+/* Configuração específica para PWA - área da status bar */
+.landingPageContainer::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 44px); /* 44px é a altura padrão da status bar no iOS */
+  background-color: #000000;
+  z-index: 9999;
+  pointer-events: none;
 }
 
 /* Adicionar estilo para o body para remover margens padrão */
