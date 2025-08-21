@@ -70,14 +70,35 @@ class PaymentManager:
         except Exception as e:
             print(f"Erro ao criar tabelas de pagamento: {e}")
     
-    def create_payment_preference(self, user_id: str, course_id: str, 
-                                success_url: str = None, failure_url: str = None) -> Optional[Dict[str, Any]]:
+    def create_payment_preference(self, user_id: str = None, course_id: str = None, 
+                                success_url: str = None, failure_url: str = None,
+                                course_name: str = None, course_price: float = None,
+                                course_description: str = None) -> Optional[Dict[str, Any]]:
         """Cria uma preferência de pagamento no Mercado Pago"""
         try:
-            if course_id not in self.available_courses:
-                raise ValueError(f"Curso {course_id} não encontrado")
+            print(f"🔄 Criando preferência de pagamento...")
+            print(f"📋 Parâmetros: user_id={user_id}, course_id={course_id}")
+            print(f"💰 Dados do curso: name={course_name}, price={course_price}")
             
-            course = self.available_courses[course_id]
+            # Verificar se o access_token está configurado
+            if not self.access_token:
+                raise ValueError("MERCADO_PAGO_ACCESS_TOKEN não configurado")
+            
+            # Verificar se temos dados do curso (para checkout público)
+            if course_name and course_price and course_description:
+                course = {
+                    'name': course_name,
+                    'price': course_price,
+                    'description': course_description
+                }
+                print(f"✅ Usando dados do curso fornecidos: {course['name']}")
+            elif course_id and course_id in self.available_courses:
+                course = self.available_courses[course_id]
+                print(f"✅ Usando curso do catálogo: {course['name']}")
+            else:
+                error_msg = f"Dados do curso não fornecidos ou curso {course_id} não encontrado"
+                print(f"❌ Erro: {error_msg}")
+                raise ValueError(error_msg)
             
             # Dados da preferência
             preference_data = {
@@ -89,7 +110,7 @@ class PaymentManager:
                     "unit_price": course['price']
                 }],
                 "payer": {
-                    "email": self._get_user_email(user_id)
+                    "email": self._get_user_email(user_id) if user_id else "guest@1crypten.com"
                 },
                 "back_urls": {
                     "success": success_url or f"{os.getenv('FRONTEND_URL', 'http://localhost:3000')}/payment/success",
@@ -112,23 +133,30 @@ class PaymentManager:
                 'Content-Type': 'application/json'
             }
             
+            print(f"🌐 Enviando requisição para: {self.base_url}/checkout/preferences")
+            print(f"📦 Dados da preferência: {preference_data}")
+            
             response = requests.post(
                 f'{self.base_url}/checkout/preferences',
                 headers=headers,
                 json=preference_data
             )
             
+            print(f"📡 Resposta do Mercado Pago: {response.status_code}")
+            print(f"📄 Conteúdo da resposta: {response.text}")
+            
             if response.status_code == 201:
                 preference = response.json()
                 
-                # Salvar a compra como pendente
-                self._create_purchase_record(
-                    user_id=user_id,
-                    course_id=course_id,
-                    payment_id=preference['id'],
-                    amount=course['price'],
-                    status='pending'
-                )
+                # Salvar a compra como pendente (apenas se tiver user_id)
+                if user_id and course_id:
+                    self._create_purchase_record(
+                        user_id=user_id,
+                        course_id=course_id,
+                        payment_id=preference['id'],
+                        amount=course['price'],
+                        status='pending'
+                    )
                 
                 return {
                     'preference_id': preference['id'],
