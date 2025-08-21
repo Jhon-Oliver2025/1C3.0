@@ -318,13 +318,13 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
     checkCourseAccess();
   }, [courseId]);
 
-  // Inicializar checkout transparente quando tiver preferência
+  // Inicializar Payment Brick quando tiver preferência e instância MP
   useEffect(() => {
-    if (preferenceId && !hasAccess) {
-      console.log('Iniciando checkout com preferenceId:', preferenceId);
+    if (preferenceId && mpInstance && !hasAccess) {
+      console.log('Iniciando Payment Brick com preferenceId:', preferenceId);
       initializeTransparentCheckout();
     }
-  }, [preferenceId, hasAccess]);
+  }, [preferenceId, mpInstance, hasAccess]);
 
   /**
    * Carrega o SDK do Mercado Pago Bricks (versão mais recente)
@@ -461,90 +461,155 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   };
 
   /**
-   * Inicializa o checkout integrado do Mercado Pago (dentro do container)
+   * Inicializa o Payment Brick do Mercado Pago (conforme documentação oficial)
    */
-  const initializeTransparentCheckout = () => {
-    if (!preferenceId) {
-      console.log('Aguardando preferenceId:', preferenceId);
+  const initializeTransparentCheckout = async () => {
+    if (!preferenceId || !mpInstance) {
+      console.log('Aguardando preferenceId e mpInstance:', { preferenceId, mpInstance: !!mpInstance });
       return;
     }
 
     try {
-      console.log('Inicializando checkout integrado com preferenceId:', preferenceId);
+      console.log('Inicializando Payment Brick com preferenceId:', preferenceId);
       
       // Limpar container antes de renderizar
       const container = document.getElementById('mercadopago-checkout');
       if (container) {
         container.innerHTML = '';
-        
-        // Criar iframe com o checkout do Mercado Pago integrado
-        const iframe = document.createElement('iframe');
-        iframe.src = `https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`;
-        iframe.style.cssText = `
-          width: 100%;
-          height: 700px;
-          border: none;
-          border-radius: 8px;
-          background: transparent;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        `;
-        
-        // Adicionar eventos para controle do iframe
-        iframe.onload = () => {
-          console.log('Checkout integrado carregado com sucesso');
-          setIsLoading(false);
-          
-          // Adicionar estilo para melhor integração
-          iframe.style.opacity = '1';
-          iframe.style.transition = 'opacity 0.3s ease';
-        };
-        
-        iframe.onerror = () => {
-          console.error('Erro ao carregar checkout integrado');
-          setStatusMessage({
-            type: 'error',
-            message: 'Erro ao carregar sistema de pagamento'
-          });
-          setIsLoading(false);
-        };
-        
-        // Configurar iframe para melhor experiência
-        iframe.setAttribute('allowfullscreen', 'true');
-        iframe.setAttribute('allow', 'payment');
-        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation');
-        
-        // Adicionar iframe ao container
-        container.appendChild(iframe);
-        
-        // Adicionar listener para mensagens do iframe (para detectar conclusão do pagamento)
-        window.addEventListener('message', (event) => {
-          if (event.origin === 'https://sandbox.mercadopago.com.br' || event.origin === 'https://www.mercadopago.com.br') {
-            console.log('Mensagem recebida do Mercado Pago:', event.data);
-            
-            // Verificar se o pagamento foi concluído
-            if (event.data && (event.data.type === 'payment_success' || event.data.status === 'approved')) {
-              setStatusMessage({
-                type: 'success',
-                message: 'Pagamento realizado com sucesso!'
-              });
-              
-              // Opcional: redirecionar ou atualizar a página após sucesso
-              setTimeout(() => {
-                window.location.href = '/payment/success';
-              }, 2000);
+      }
+      
+      // Criar Payment Brick conforme documentação oficial
+      const bricksBuilder = mpInstance.bricks();
+      
+      const settings = {
+        initialization: {
+          amount: course.price, // Valor total a ser pago
+          preferenceId: preferenceId, // ID da preferência criada
+        },
+        customization: {
+          paymentMethods: {
+            creditCard: 'all',
+            debitCard: 'all',
+            ticket: 'all', // Boleto
+            bankTransfer: 'all', // PIX
+            mercadoPago: 'all' // Conta Mercado Pago
+          },
+          visual: {
+            style: {
+              theme: 'dark', // Tema escuro para combinar com nosso design
+              customVariables: {
+                formBackgroundColor: 'rgba(255, 255, 255, 0.05)',
+                inputBackgroundColor: 'rgba(255, 255, 255, 0.1)',
+                inputFocusedBackgroundColor: 'rgba(255, 255, 255, 0.15)',
+                inputBorderColor: 'rgba(255, 255, 255, 0.2)',
+                inputFocusedBorderColor: '#2196f3',
+                inputTextColor: '#ffffff',
+                baseColor: '#2196f3',
+                baseColorFirstVariant: '#1976d2',
+                baseColorSecondVariant: '#00bcd4',
+                errorColor: '#f44336',
+                successColor: '#4caf50',
+                outlinePrimaryColor: '#2196f3',
+                outlineSecondaryColor: 'rgba(255, 255, 255, 0.2)',
+                buttonTextColor: '#ffffff',
+                placeholderColor: 'rgba(255, 255, 255, 0.5)',
+                secondaryColor: 'rgba(255, 255, 255, 0.8)'
+              }
             }
           }
-        });
-        
-        console.log('Checkout integrado criado com sucesso');
-        setIsLoading(false);
-      }
+        },
+        callbacks: {
+          onReady: () => {
+            console.log('Payment Brick pronto');
+            setIsLoading(false);
+          },
+          onSubmit: ({ selectedPaymentMethod, formData }: any) => {
+            console.log('Dados do pagamento:', { selectedPaymentMethod, formData });
+            setIsLoading(true);
+            
+            // Processar pagamento no backend
+            return processPayment(selectedPaymentMethod, formData);
+          },
+          onError: (error: any) => {
+            console.error('Erro no Payment Brick:', error);
+            setStatusMessage({
+              type: 'error',
+              message: 'Erro no processamento do pagamento'
+            });
+            setIsLoading(false);
+          }
+        }
+      };
+      
+      // Renderizar o Payment Brick
+      const paymentBrickController = await bricksBuilder.create(
+        'payment',
+        'mercadopago-checkout',
+        settings
+      );
+      
+      setCardForm(paymentBrickController);
+      console.log('Payment Brick inicializado com sucesso');
+      
     } catch (error) {
-      console.error('Erro ao inicializar checkout integrado:', error);
+      console.error('Erro ao inicializar Payment Brick:', error);
       setStatusMessage({
         type: 'error',
         message: 'Erro ao inicializar sistema de pagamento'
       });
+      setIsLoading(false);
+    }
+  };
+  
+  /**
+   * Processa o pagamento no backend
+   */
+  const processPayment = async (selectedPaymentMethod: any, formData: any) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const token = localStorage.getItem('authToken');
+      
+      const paymentData = {
+        ...formData,
+        course_id: courseId,
+        payment_method_id: selectedPaymentMethod,
+        amount: course.price
+      };
+      
+      const response = await fetch(`${apiUrl}/api/payments/process`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(paymentData)
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.status === 'approved') {
+        setStatusMessage({
+          type: 'success',
+          message: 'Pagamento aprovado com sucesso!'
+        });
+        onSuccess?.(result);
+        
+        // Redirecionar após sucesso
+        setTimeout(() => {
+          window.location.href = '/payment/success';
+        }, 2000);
+      } else {
+        throw new Error(result.message || 'Pagamento não aprovado');
+      }
+      
+    } catch (error) {
+      console.error('Erro ao processar pagamento:', error);
+      setStatusMessage({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Erro ao processar pagamento'
+      });
+      onError?.(error instanceof Error ? error.message : 'Erro ao processar pagamento');
+    } finally {
       setIsLoading(false);
     }
   };
