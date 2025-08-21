@@ -398,35 +398,57 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         </StatusMessage>
       )}
 
-      <CheckoutButton 
-        onClick={handleCheckout} 
-        disabled={isLoading || hasAccess}
-        $loading={isLoading}
-      >
-        {isLoading ? (
-          <>
-            <LoadingSpinner />
-            Processando...
-          </>
-        ) : hasAccess ? (
-          <>
-            <CheckCircle size={20} />
-            Você já tem acesso
-          </>
-        ) : (
-          <>
-            <ShoppingCart size={20} />
-            Comprar Agora
-          </>
-        )}
-      </CheckoutButton>
-      
-      {!hasAccess && (
-        <SecurityBadge>
-          <Lock size={16} />
-          Pagamento 100% seguro via Mercado Pago
-          <CreditCard size={16} />
-        </SecurityBadge>
+      {hasAccess ? (
+        <StatusMessage type="success">
+          <CheckCircle size={20} />
+          Você já tem acesso a este curso
+        </StatusMessage>
+      ) : (
+        <>
+          {/* Formulário de pagamento direto do Mercado Pago */}
+          <div id="mercadopago-checkout" style={{
+            minHeight: '400px',
+            background: 'rgba(255, 255, 255, 0.03)',
+            borderRadius: '12px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            padding: '1rem',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+            {isLoading ? (
+              <>
+                <LoadingSpinner />
+                <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginTop: '1rem' }}>
+                  Carregando formulário de pagamento...
+                </p>
+              </>
+            ) : (
+              <>
+                <CreditCard size={48} style={{ color: '#2196f3', marginBottom: '1rem' }} />
+                <h3 style={{ color: '#ffffff', marginBottom: '0.5rem' }}>Finalizar Pagamento</h3>
+                <p style={{ color: 'rgba(255, 255, 255, 0.8)', textAlign: 'center', marginBottom: '1rem' }}>
+                  Escolha sua forma de pagamento preferida
+                </p>
+                <CheckoutButton 
+                  onClick={handleCheckout} 
+                  disabled={isLoading}
+                  $loading={isLoading}
+                >
+                  <CreditCard size={20} />
+                  Ir para Pagamento
+                </CheckoutButton>
+              </>
+            )}
+          </div>
+          
+          <SecurityBadge>
+            <Lock size={16} />
+            Pagamento 100% seguro via Mercado Pago
+            <CreditCard size={16} />
+          </SecurityBadge>
+        </>
       )}
     </CheckoutContainer>
   );
