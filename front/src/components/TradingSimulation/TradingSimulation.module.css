@@ -111,6 +111,24 @@
   margin-bottom: 40px;
 }
 
+/* Responsividade para tablets */
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+}
+
+/* Responsividade para mobile */
+@media (max-width: 480px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+}
+
 .statCard {
   background: linear-gradient(135deg, rgba(16, 34, 64, 0.8), rgba(30, 41, 59, 0.6));
   border: 1px solid rgba(100, 255, 218, 0.2);
@@ -120,6 +138,32 @@
   align-items: center;
   gap: 16px;
   transition: all 0.3s ease;
+}
+
+/* Responsividade para cards em mobile */
+@media (max-width: 480px) {
+  .statCard {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .statIcon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+  }
+  
+  .statContent h3 {
+    font-size: 0.8rem;
+  }
+  
+  .statValue {
+    font-size: 1.3rem;
+  }
+  
+  .statSubvalue {
+    font-size: 0.8rem;
+  }
 }
 
 .statCard:hover {
