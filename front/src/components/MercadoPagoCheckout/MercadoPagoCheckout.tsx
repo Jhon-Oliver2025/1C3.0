@@ -460,74 +460,53 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   };
 
   /**
-   * Inicializa o checkout transparente do Mercado Pago
+   * Inicializa o checkout usando iframe (funciona em dev e produção)
    */
   const initializeTransparentCheckout = () => {
-    if (!mpInstance || !preferenceId) {
-      console.log('Aguardando mpInstance e preferenceId:', { mpInstance: !!mpInstance, preferenceId });
+    if (!preferenceId) {
+      console.log('Aguardando preferenceId:', preferenceId);
       return;
     }
 
     try {
-      console.log('Inicializando checkout transparente com preferenceId:', preferenceId);
+      console.log('Inicializando checkout via iframe com preferenceId:', preferenceId);
       
       // Limpar container antes de renderizar
       const container = document.getElementById('mercadopago-checkout');
       if (container) {
         container.innerHTML = '';
+        
+        // Criar iframe com o checkout do Mercado Pago
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`;
+        iframe.style.width = '100%';
+        iframe.style.height = '600px';
+        iframe.style.border = 'none';
+        iframe.style.borderRadius = '8px';
+        iframe.style.backgroundColor = 'transparent';
+        
+        // Adicionar evento de load
+        iframe.onload = () => {
+          console.log('Checkout iframe carregado com sucesso');
+          setIsLoading(false);
+        };
+        
+        iframe.onerror = () => {
+          console.error('Erro ao carregar checkout iframe');
+          setStatusMessage({
+            type: 'error',
+            message: 'Erro ao carregar sistema de pagamento'
+          });
+          setIsLoading(false);
+        };
+        
+        // Adicionar iframe ao container
+        container.appendChild(iframe);
+        
+        console.log('Iframe do checkout adicionado ao container');
       }
-      
-      // Usar checkout transparente padrão do Mercado Pago
-      const checkout = mpInstance.checkout({
-        preference: {
-          id: preferenceId
-        },
-        render: {
-          container: '#mercadopago-checkout',
-          label: 'Finalizar Pagamento'
-        },
-        theme: {
-          elementsColor: '#2196f3',
-          headerColor: '#2196f3'
-        },
-        callbacks: {
-          onFormMounted: (error: any) => {
-            if (error) {
-              console.error('Erro ao montar checkout:', error);
-              setStatusMessage({
-                type: 'error',
-                message: 'Erro ao carregar formulário de pagamento'
-              });
-            } else {
-              console.log('Checkout montado com sucesso');
-            }
-            setIsLoading(false);
-          },
-          onSubmit: (event: any) => {
-            event.preventDefault();
-            console.log('Formulário submetido');
-            setIsLoading(true);
-            // O Mercado Pago processará automaticamente
-          },
-          onReady: () => {
-            console.log('Checkout pronto');
-            setIsLoading(false);
-          },
-          onError: (error: any) => {
-            console.error('Erro no checkout:', error);
-            setStatusMessage({
-              type: 'error',
-              message: 'Erro no processamento do pagamento'
-            });
-            setIsLoading(false);
-          }
-        }
-      });
-
-      setCardForm(checkout);
-      console.log('Checkout transparente inicializado:', checkout);
     } catch (error) {
-      console.error('Erro ao inicializar checkout transparente:', error);
+      console.error('Erro ao inicializar checkout iframe:', error);
       setStatusMessage({
         type: 'error',
         message: 'Erro ao inicializar sistema de pagamento'
