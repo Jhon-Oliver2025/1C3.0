@@ -363,9 +363,9 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
       const response = await fetch(`${apiUrl}/api/payments/config`);
       const config = await response.json();
       
-      if (config.public_key) {
-        console.log('Inicializando Mercado Pago com chave pública');
-        const mp = new window.MercadoPago(config.public_key, {
+      if (config.config && config.config.public_key) {
+        console.log('Inicializando Mercado Pago com chave pública:', config.config.public_key);
+        const mp = new window.MercadoPago(config.config.public_key, {
           locale: 'pt-BR'
         });
         setMpInstance(mp);
@@ -373,7 +373,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         // Criar preferência automaticamente
         await createPaymentPreference();
       } else {
-        throw new Error('Chave pública não encontrada');
+        throw new Error('Chave pública não encontrada na resposta da API');
       }
     } catch (error) {
       console.error('Erro ao inicializar Mercado Pago:', error);
