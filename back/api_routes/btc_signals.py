@@ -8,6 +8,7 @@ from core.binance_client import BinanceClient
 from core.btc_correlation_analyzer import BTCCorrelationAnalyzer
 import traceback
 from datetime import datetime
+import pytz
 
 # Criar blueprint
 btc_signals_bp = Blueprint('btc_signals', __name__, url_prefix='/api/btc-signals')
@@ -454,7 +455,7 @@ def confirm_signal_manually(signal_id):
                 'data': {
                     'signal_id': signal_id,
                     'confirmed_by': user_data.get('email', 'admin'),
-                    'confirmed_at': datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+                    'confirmed_at': datetime.now(pytz.timezone('America/Sao_Paulo')).strftime('%d/%m/%Y %H:%M:%S')
                 }
             })
         else:

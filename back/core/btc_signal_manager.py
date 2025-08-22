@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import time
 import threading
 import uuid
+import pytz
 from .database import Database
 from .binance_client import BinanceClient
 from .btc_correlation_analyzer import BTCCorrelationAnalyzer
@@ -709,9 +710,12 @@ class BTCSignalManager:
             
             # Criar sinal confirmado com todos os campos necessários
             confirmed_signal = signal['original_data'].copy()
+            # Usar timezone de São Paulo para data de confirmação
+            sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
+            now_sp = datetime.now(sao_paulo_tz)
             confirmed_signal.update({
                 'confirmation_id': signal['id'],
-                'confirmed_at': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+                'confirmed_at': now_sp.strftime('%d/%m/%Y %H:%M:%S'),
                 'confirmation_reasons': ', '.join(reasons) if reasons else '',
                 'confirmation_attempts': signal['confirmation_attempts'],
                 'btc_correlation': signal.get('btc_correlation', 0.0),
@@ -1063,7 +1067,7 @@ class BTCSignalManager:
                 'signal_class': confirmed_signal['signal_class'],
                 'status': 'CONFIRMED',
                 'created_at': original_signal['created_at'].strftime('%d/%m/%Y %H:%M:%S'),
-                'confirmed_at': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+                'confirmed_at': datetime.now(pytz.timezone('America/Sao_Paulo')).strftime('%d/%m/%Y %H:%M:%S'),
                 'confirmation_reasons': ', '.join(reasons) if reasons else '',
                 'confirmation_attempts': original_signal.get('confirmation_attempts', 0),
                 'btc_correlation': original_signal.get('btc_correlation', 0.0),
