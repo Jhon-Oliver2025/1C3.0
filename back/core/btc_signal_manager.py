@@ -403,6 +403,14 @@ class BTCSignalManager:
             if momentum_result['confirmed']:
                 confirmations.append(ConfirmationReason.MOMENTUM_SUSTAINED)
             
+            # Registrar histórico desta verificação
+            self._record_confirmation_check(signal, current_data, {
+                'breakout_result': breakout_result,
+                'volume_result': volume_result,
+                'btc_result': btc_result,
+                'momentum_result': momentum_result
+            }, confirmations, rejections)
+            
             # Decidir ação baseada nas confirmações
             if len(rejections) >= 2:  # 2+ rejeições = rejeitar
                 return {
@@ -423,6 +431,124 @@ class BTCSignalManager:
         except Exception as e:
             print(f"❌ Erro na verificação de confirmação: {e}")
             return {'action': 'wait', 'reasons': []}
+    
+    def _record_confirmation_check(self, signal: PendingSignal, current_data: Dict[str, Any], 
+                                  check_results: Dict[str, Dict], confirmations: List[str], 
+                                  rejections: List[str]) -> None:
+        """
+        Registra o histórico detalhado de uma verificação de confirmação
+        
+        Args:
+            signal: Sinal sendo verificado
+            current_data: Dados atuais do mercado
+            check_results: Resultados das verificações individuais
+            confirmations: Lista de confirmações encontradas
+            rejections: Lista de rejeições encontradas
+        """
+        try:
+            # Obter análise BTC atual
+            btc_analysis = self.btc_analyzer.get_current_btc_analysis()
+            
+            # Criar registro da verificação
+            check_record = {
+                'timestamp': datetime.now(),
+                'attempt_number': signal['confirmation_attempts'],
+                'time_since_creation': (datetime.now() - signal['created_at']).total_seconds() / 60,  # em minutos
+                
+                # Condições de mercado no momento da verificação
+                'market_conditions': {
+                    'symbol_price': current_data.get('price', 0),
+                    'symbol_volume_24h': current_data.get('volume', 0),
+                    'price_change_24h': current_data.get('price_change_24h', 0),
+                    'btc_trend': btc_analysis.get('trend', 'NEUTRAL'),
+                    'btc_strength': btc_analysis.get('strength', 0),
+                    'btc_volatility': btc_analysis.get('volatility', 0)
+                },
+                
+                # Resultados detalhados de cada verificação
+                'detailed_checks': {
+                    'price_breakout': {
+                        'confirmed': check_results['breakout_result'].get('confirmed', False),
+                        'rejected': check_results['breakout_result'].get('rejected', False),
+                        'percentage': check_results['breakout_result'].get('percentage', 0),
+                        'required': self.config.get('min_breakout_percentage', 0.5)
+                    },
+                    'volume_confirmation': {
+                        'confirmed': check_results['volume_result'].get('confirmed', False),
+                        'rejected': check_results['volume_result'].get('rejected', False),
+                        'ratio': check_results['volume_result'].get('ratio', 1.0),
+                        'required': self.config.get('min_volume_increase', 1.2)
+                    },
+                    'btc_alignment': {
+                        'confirmed': check_results['btc_result'].get('confirmed', False),
+                        'rejected': check_results['btc_result'].get('rejected', False),
+                        'alignment_score': check_results['btc_result'].get('alignment_score', 0),
+                        'threshold': self.config.get('btc_alignment_threshold', 0.3)
+                    },
+                    'momentum_sustainability': {
+                        'confirmed': check_results['momentum_result'].get('confirmed', False),
+                        'rejected': check_results['momentum_result'].get('rejected', False),
+                        'candles_count': check_results['momentum_result'].get('candles_count', 0),
+                        'required': 2
+                    }
+                },
+                
+                # Resumo da verificação
+                'verification_summary': {
+                    'confirmations_found': confirmations.copy(),
+                    'rejections_found': rejections.copy(),
+                    'confirmations_count': len(confirmations),
+                    'rejections_count': len(rejections),
+                    'status': self._get_check_status(len(confirmations), len(rejections))
+                },
+                
+                # Próximos passos
+                'next_steps': {
+                    'action_recommended': self._get_recommended_action(len(confirmations), len(rejections)),
+                    'time_to_next_check': self.config.get('check_interval', 300),  # segundos
+                    'attempts_remaining': self.config['max_confirmation_attempts'] - signal['confirmation_attempts']
+                }
+            }
+            
+            # Adicionar ao histórico do sinal
+            signal['confirmation_checks'].append(check_record)
+            
+            # Log para debug
+            print(f"📋 [{signal['symbol']}] Verificação #{signal['confirmation_attempts']}: "
+                  f"{len(confirmations)} confirmações, {len(rejections)} rejeições")
+            
+        except Exception as e:
+            print(f"❌ Erro ao registrar verificação: {e}")
+            # Adicionar registro básico em caso de erro
+            signal['confirmation_checks'].append({
+                'timestamp': datetime.now(),
+                'attempt_number': signal['confirmation_attempts'],
+                'error': str(e),
+                'confirmations_count': len(confirmations),
+                'rejections_count': len(rejections)
+            })
+    
+    def _get_check_status(self, confirmations_count: int, rejections_count: int) -> str:
+        """Determina o status da verificação baseado nas contagens"""
+        if rejections_count >= 2:
+            return 'READY_TO_REJECT'
+        elif confirmations_count >= 3:
+            return 'READY_TO_CONFIRM'
+        elif confirmations_count > rejections_count:
+            return 'LEANING_POSITIVE'
+        elif rejections_count > confirmations_count:
+            return 'LEANING_NEGATIVE'
+        else:
+            return 'NEUTRAL'
+    
+    def _get_recommended_action(self, confirmations_count: int, rejections_count: int) -> str:
+        """Retorna a ação recomendada baseada nas contagens"""
+        if rejections_count >= 2:
+            return 'REJECT'
+        elif confirmations_count >= 3:
+            return 'CONFIRM'
+        else:
+            return 'WAIT'
     
     def _get_current_symbol_data(self, symbol: str) -> Optional[Dict[str, Any]]:
         """Obtém dados atuais do símbolo"""
@@ -570,6 +696,11 @@ class BTCSignalManager:
             print(f"✅ CONFIRMANDO SINAL: {signal['symbol']} - {signal['type']}")
             print(f"   🎯 Motivos: {', '.join(reasons)}")
             
+            # Capturar motivos finais da confirmação
+            signal['final_decision_reason'] = self._capture_final_decision_reason(
+                signal, 'CONFIRMED', reasons
+            )
+            
             # Adicionar à lista de sinais confirmados hoje (controle de duplicação)
             signal_key = (signal['symbol'], signal['type'])
             self.daily_confirmed_signals.add(signal_key)
@@ -627,6 +758,11 @@ class BTCSignalManager:
             print(f"❌ REJEITANDO SINAL: {signal['symbol']} - {signal['type']}")
             print(f"   🚫 Motivos: {', '.join(reasons)}")
             
+            # Capturar motivos finais da rejeição
+            signal['final_decision_reason'] = self._capture_final_decision_reason(
+                signal, 'REJECTED', reasons
+            )
+            
             # Criar sinal rejeitado
             rejected_signal = {
                 'id': signal['id'],
@@ -651,6 +787,232 @@ class BTCSignalManager:
         except Exception as e:
             print(f"❌ Erro ao rejeitar sinal: {e}")
             traceback.print_exc()
+    
+    def _capture_final_decision_reason(self, signal: PendingSignal, decision: str, 
+                                      reasons: List[str]) -> Dict[str, Any]:
+        """
+        Captura os motivos detalhados da decisão final (confirmação ou rejeição)
+        
+        Args:
+            signal: Sinal que teve a decisão tomada
+            decision: Tipo da decisão ('CONFIRMED' ou 'REJECTED')
+            reasons: Lista de motivos da decisão
+            
+        Returns:
+            Dicionário com motivos detalhados da decisão final
+        """
+        try:
+            # Obter dados atuais do mercado
+            current_data = self._get_current_symbol_data(signal['symbol'])
+            btc_analysis = self.btc_analyzer.get_current_btc_analysis()
+            
+            # Calcular tempo total de processamento
+            total_time_minutes = (datetime.now() - signal['created_at']).total_seconds() / 60
+            
+            # Analisar o histórico de verificações
+            verification_summary = self._analyze_verification_history(signal['confirmation_checks'])
+            
+            # Determinar fatores decisivos
+            decisive_factors = self._identify_decisive_factors(signal, reasons, current_data)
+            
+            return {
+                'decision': decision,
+                'timestamp': datetime.now(),
+                'total_processing_time_minutes': round(total_time_minutes, 2),
+                
+                # Motivos principais
+                'primary_reasons': reasons.copy(),
+                'decisive_factors': decisive_factors,
+                
+                # Snapshot do mercado no momento da decisão
+                'market_snapshot': {
+                    'symbol_price': current_data.get('price', 0) if current_data else 0,
+                    'price_change_from_entry': self._calculate_price_change(
+                        signal['entry_price'], 
+                        current_data.get('price', 0) if current_data else 0
+                    ),
+                    'volume_24h': current_data.get('volume', 0) if current_data else 0,
+                    'btc_trend': btc_analysis.get('trend', 'NEUTRAL'),
+                    'btc_strength': btc_analysis.get('strength', 0),
+                    'market_session': self._get_current_market_session()
+                },
+                
+                # Estatísticas do processo de confirmação
+                'confirmation_stats': {
+                    'total_attempts': signal['confirmation_attempts'],
+                    'verification_history_summary': verification_summary,
+                    'average_time_between_checks': self._calculate_avg_check_interval(signal),
+                    'final_quality_assessment': self._assess_final_quality(signal, decision)
+                },
+                
+                # Análise de performance (se confirmado)
+                'performance_prediction': self._predict_signal_performance(signal, decision) if decision == 'CONFIRMED' else None,
+                
+                # Lições aprendidas
+                'lessons_learned': self._extract_lessons_learned(signal, decision, reasons),
+                
+                # Contexto adicional
+                'additional_context': {
+                    'signal_generation_quality': signal.get('quality_score', 0),
+                    'signal_class': signal.get('signal_class', 'UNKNOWN'),
+                    'btc_correlation': signal.get('btc_correlation', 0),
+                    'ranking_info': self._get_symbol_ranking_context(signal['symbol'])
+                }
+            }
+            
+        except Exception as e:
+            print(f"❌ Erro ao capturar motivos da decisão final: {e}")
+            return {
+                'decision': decision,
+                'timestamp': datetime.now(),
+                'error': str(e),
+                'basic_reasons': reasons.copy()
+            }
+    
+    def _analyze_verification_history(self, checks: List[Dict]) -> Dict[str, Any]:
+        """Analisa o histórico de verificações para extrair padrões"""
+        if not checks:
+            return {'total_checks': 0, 'patterns': []}
+        
+        confirmations_over_time = [check['verification_summary']['confirmations_count'] for check in checks]
+        rejections_over_time = [check['verification_summary']['rejections_count'] for check in checks]
+        
+        return {
+            'total_checks': len(checks),
+            'confirmations_trend': 'increasing' if len(confirmations_over_time) > 1 and confirmations_over_time[-1] > confirmations_over_time[0] else 'stable',
+            'rejections_trend': 'increasing' if len(rejections_over_time) > 1 and rejections_over_time[-1] > rejections_over_time[0] else 'stable',
+            'peak_confirmations': max(confirmations_over_time) if confirmations_over_time else 0,
+            'peak_rejections': max(rejections_over_time) if rejections_over_time else 0,
+            'final_confirmation_count': confirmations_over_time[-1] if confirmations_over_time else 0,
+            'final_rejection_count': rejections_over_time[-1] if rejections_over_time else 0
+        }
+    
+    def _identify_decisive_factors(self, signal: PendingSignal, reasons: List[str], 
+                                  current_data: Optional[Dict]) -> List[str]:
+        """Identifica os fatores mais decisivos para a confirmação/rejeição"""
+        factors = []
+        
+        # Analisar motivos específicos
+        if 'BREAKOUT_CONFIRMED' in reasons:
+            factors.append('Rompimento de preço confirmado')
+        if 'VOLUME_CONFIRMED' in reasons:
+            factors.append('Volume elevado sustentado')
+        if 'BTC_ALIGNED' in reasons:
+            factors.append('Alinhamento favorável com BTC')
+        if 'MOMENTUM_SUSTAINED' in reasons:
+            factors.append('Momentum técnico sustentado')
+        
+        # Fatores de rejeição
+        if 'REVERSAL_DETECTED' in reasons:
+            factors.append('Reversão de preço detectada')
+        if 'VOLUME_INSUFFICIENT' in reasons:
+            factors.append('Volume insuficiente')
+        if 'BTC_OPPOSITE' in reasons:
+            factors.append('BTC em direção oposta')
+        if 'TIMEOUT_EXPIRED' in reasons:
+            factors.append('Tempo limite excedido')
+        
+        return factors
+    
+    def _calculate_price_change(self, entry_price: float, current_price: float) -> float:
+        """Calcula a mudança percentual do preço"""
+        if entry_price == 0:
+            return 0
+        return ((current_price - entry_price) / entry_price) * 100
+    
+    def _get_current_market_session(self) -> str:
+        """Determina a sessão de mercado atual"""
+        hour = datetime.now().hour
+        if 0 <= hour < 8:
+            return 'Asiática'
+        elif 8 <= hour < 16:
+            return 'Europeia'
+        else:
+            return 'Americana'
+    
+    def _calculate_avg_check_interval(self, signal: PendingSignal) -> float:
+        """Calcula o intervalo médio entre verificações"""
+        checks = signal.get('confirmation_checks', [])
+        if len(checks) < 2:
+            return 0
+        
+        intervals = []
+        for i in range(1, len(checks)):
+            prev_time = checks[i-1]['timestamp']
+            curr_time = checks[i]['timestamp']
+            interval = (curr_time - prev_time).total_seconds() / 60  # em minutos
+            intervals.append(interval)
+        
+        return sum(intervals) / len(intervals) if intervals else 0
+    
+    def _assess_final_quality(self, signal: PendingSignal, decision: str) -> str:
+        """Avalia a qualidade final do processo de decisão"""
+        attempts = signal['confirmation_attempts']
+        quality_score = signal.get('quality_score', 0)
+        
+        if decision == 'CONFIRMED':
+            if attempts <= 3 and quality_score >= 80:
+                return 'EXCELLENT'
+            elif attempts <= 6 and quality_score >= 75:
+                return 'GOOD'
+            else:
+                return 'ACCEPTABLE'
+        else:  # REJECTED
+            if attempts <= 3:
+                return 'EFFICIENT_REJECTION'
+            elif attempts <= 6:
+                return 'STANDARD_REJECTION'
+            else:
+                return 'SLOW_REJECTION'
+    
+    def _predict_signal_performance(self, signal: PendingSignal, decision: str) -> Dict[str, Any]:
+        """Prediz a performance esperada do sinal (apenas para confirmados)"""
+        quality_score = signal.get('quality_score', 0)
+        signal_class = signal.get('signal_class', 'STANDARD')
+        
+        # Estimativa baseada na qualidade
+        if quality_score >= 90:
+            success_probability = 0.85
+        elif quality_score >= 80:
+            success_probability = 0.75
+        elif quality_score >= 75:
+            success_probability = 0.65
+        else:
+            success_probability = 0.55
+        
+        return {
+            'estimated_success_probability': success_probability,
+            'risk_level': 'LOW' if quality_score >= 85 else 'MEDIUM' if quality_score >= 75 else 'HIGH',
+            'expected_timeframe': '2-6 horas' if signal_class in ['ELITE', 'PREMIUM+'] else '4-12 horas'
+        }
+    
+    def _extract_lessons_learned(self, signal: PendingSignal, decision: str, reasons: List[str]) -> List[str]:
+        """Extrai lições aprendidas do processo"""
+        lessons = []
+        
+        attempts = signal['confirmation_attempts']
+        quality_score = signal.get('quality_score', 0)
+        
+        if decision == 'CONFIRMED':
+            if attempts <= 2:
+                lessons.append('Sinal de alta qualidade confirmado rapidamente')
+            if quality_score >= 85:
+                lessons.append('Pontuação alta correlaciona com confirmação rápida')
+        else:
+            if 'REVERSAL_DETECTED' in reasons:
+                lessons.append('Reversão de preço é um forte indicador de rejeição')
+            if attempts > 8:
+                lessons.append('Sinais que demoram muito para confirmar tendem a ser rejeitados')
+        
+        return lessons
+    
+    def _get_symbol_ranking_context(self, symbol: str) -> Dict[str, Any]:
+        """Obtém contexto de ranking da moeda"""
+        try:
+            from .coin_ranking import coin_ranking
+            return coin_ranking.get_ranking_info(symbol)
+        except Exception:
+            return {'error': 'Ranking info not available'}
     
     def _expire_signal(self, signal: PendingSignal) -> None:
         """Expira um sinal por timeout"""
