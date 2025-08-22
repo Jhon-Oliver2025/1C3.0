@@ -20,6 +20,7 @@ import {
   FaDot
 } from 'react-icons/fa';
 import '../Dashboard/DashboardMobile.css';
+import SignalTraceability from '../../components/SignalTraceability/SignalTraceability';
 
 // Interfaces
 interface PendingSignal {
@@ -1443,6 +1444,9 @@ const BTCAnalysisPage: React.FC = () => {
                       <DetailValue>{signal.confirmation_attempts}</DetailValue>
                     </SignalDetail>
                   </SignalDetails>
+                  
+                  {/* Componente de Rastreabilidade */}
+                  <SignalTraceability signal={signal} />
                 </SignalCard>
               ))
             )}
@@ -1502,6 +1506,9 @@ const BTCAnalysisPage: React.FC = () => {
                       </SignalDetail>
                     )}
                   </SignalDetails>
+                  
+                  {/* Componente de Rastreabilidade */}
+                  <SignalTraceability signal={signal} />
                 </SignalCard>
               ))
             )}
@@ -1555,6 +1562,9 @@ const BTCAnalysisPage: React.FC = () => {
                       </ReasonsList>
                     </SignalDetail>
                   </SignalDetails>
+                  
+                  {/* Componente de Rastreabilidade */}
+                  <SignalTraceability signal={signal} />
                 </SignalCard>
               ))
             )}
