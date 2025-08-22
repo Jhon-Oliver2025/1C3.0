@@ -10,7 +10,7 @@ import {
   FaChartLine,
   FaVolumeUp,
   FaBitcoin,
-  FaTrendingUp,
+  FaArrowUp,
   FaEye,
   FaLightbulb,
   FaTrophy,

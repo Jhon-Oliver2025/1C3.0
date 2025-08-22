@@ -17,7 +17,7 @@ import {
   FaPlay,
   FaPause,
   FaRedo,
-  FaDot
+  FaCircle
 } from 'react-icons/fa';
 import '../Dashboard/DashboardMobile.css';
 import SignalTraceability from '../../components/SignalTraceability/SignalTraceability';
@@ -37,6 +37,7 @@ interface PendingSignal {
   confirmation_attempts: number;
   btc_correlation: number;
   btc_trend: string;
+  status: string;
 }
 
 interface RejectedSignal {
@@ -50,6 +51,7 @@ interface RejectedSignal {
   rejected_at: string;
   rejection_reasons: string[];
   confirmation_attempts: number;
+  status: string;
 }
 
 interface ConfirmedSignal {
@@ -67,7 +69,7 @@ interface ConfirmedSignal {
   confirmation_attempts?: number;
   btc_correlation?: number;
   btc_trend?: string;
-  status?: string;
+  status: string;
   entry_time?: string;
 }
 
@@ -1957,13 +1959,16 @@ const BTCAnalysisPage: React.FC = () => {
                     </ConfirmationGrid>
                     
                     {/* Motivos de Confirmação */}
-                    {signal.confirmation_reasons && signal.confirmation_reasons.length > 0 && (
+                    {signal.confirmation_reasons && (
                       <div>
                         <ConfirmationLabel style={{display: 'block', marginBottom: '8px'}}>✅ Motivos da Confirmação:</ConfirmationLabel>
                         <ReasonsList>
-                          {signal.confirmation_reasons.map((reason, index) => (
-                            <ReasonTag key={index}>{reason}</ReasonTag>
-                          ))}
+                          {Array.isArray(signal.confirmation_reasons) 
+                            ? signal.confirmation_reasons.map((reason, index) => (
+                                <ReasonTag key={`reason-${signal.id}-${index}`}>{reason}</ReasonTag>
+                              ))
+                            : <ReasonTag key={`reason-${signal.id}-single`}>{signal.confirmation_reasons}</ReasonTag>
+                          }
                         </ReasonsList>
                       </div>
                     )}
