@@ -317,6 +317,52 @@ def delete_signals_manually():
                         'deleted_count': 0,
                         'message': 'Arquivo de sinais não encontrado - nenhum sinal para deletar'
                     })
+                
+                # Também deletar do Supabase
+                try:
+                    from supabase import create_client, Client
+                    supabase_url = os.getenv('SUPABASE_URL')
+                    supabase_key = os.getenv('SUPABASE_ANON_KEY')
+                    
+                    if supabase_url and supabase_key:
+                        supabase: Client = create_client(supabase_url, supabase_key)
+                        
+                        # Buscar todos os sinais
+                        all_signals = supabase.table('signals').select('id').execute()
+                        supabase_count = len(all_signals.data)
+                        
+                        if supabase_count > 0:
+                            # Deletar todos os sinais do Supabase
+                            for signal in all_signals.data:
+                                supabase.table('signals').delete().eq('id', signal['id']).execute()
+                            
+                            results.append({
+                                'type': 'supabase_signals',
+                                'success': True,
+                                'deleted_count': supabase_count,
+                                'message': f'Todos os {supabase_count} sinais foram deletados do Supabase'
+                            })
+                        else:
+                            results.append({
+                                'type': 'supabase_signals',
+                                'success': True,
+                                'deleted_count': 0,
+                                'message': 'Nenhum sinal encontrado no Supabase'
+                            })
+                    else:
+                        results.append({
+                            'type': 'supabase_signals',
+                            'success': False,
+                            'deleted_count': 0,
+                            'message': 'Supabase não configurado'
+                        })
+                except Exception as e:
+                    results.append({
+                        'type': 'supabase_signals',
+                        'success': False,
+                        'deleted_count': 0,
+                        'message': f'Erro ao deletar do Supabase: {str(e)}'
+                    })
                     
             except Exception as e:
                 results.append({

@@ -915,12 +915,12 @@ const BTCAnalysisPage: React.FC = () => {
     try {
       setIsRefreshing(true);
       
-      const response = await fetch('/api/scheduler/manual-cleanup', {
+      const response = await fetch('/api/scheduler/delete-signals', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ type: 'both' })
+        body: JSON.stringify({ type: 'all' })
       });
 
       const result = await response.json();
