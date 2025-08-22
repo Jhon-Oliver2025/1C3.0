@@ -474,8 +474,24 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
       return;
     }
 
+    // Garantir que temos uma preferência de pagamento
+    if (!preferenceId) {
+      console.log('🔄 Criando preferência de pagamento...');
+      await createPaymentPreference();
+      if (!preferenceId) {
+        console.error('❌ Não foi possível criar preferência de pagamento');
+        setStatusMessage({
+          type: 'error',
+          message: 'Erro ao configurar pagamento. Tente novamente.'
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
+
     try {
       console.log('Inicializando Card Payment Brick oficial');
+      console.log('🆔 Preference ID:', preferenceId);
       
       // Limpar container antes de renderizar
       const container = document.getElementById('mercadopago-checkout');
@@ -566,15 +582,97 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         console.log('📋 Settings:', settings);
         console.log('📦 Container ID: mercadopago-checkout');
         
-        // Timeout para detectar se o Brick não carrega
+        // Timeout para detectar se o Brick não carrega e criar fallback
         const timeoutId = setTimeout(() => {
           console.warn('⚠️ Card Payment Brick demorou mais de 10s para carregar');
-          setStatusMessage({
-            type: 'error',
-            message: 'Timeout ao carregar formulário de pagamento. Tente recarregar a página.'
-          });
+          console.log('🔄 Criando fallback com botões simples...');
+          createSimpleFallback(container);
           setIsLoading(false);
         }, 10000);
+        
+        // Função de fallback com botões simples
+        const createSimpleFallback = (container: HTMLElement) => {
+          container.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
+              <div style="text-align: center; color: rgba(255, 255, 255, 0.8); margin-bottom: 1rem;">
+                <p>💳 Escolha sua forma de pagamento</p>
+              </div>
+              
+              <button id="pix-btn" style="
+                background: linear-gradient(135deg, #00C851, #00A041);
+                color: white; border: none; padding: 1rem 2rem; border-radius: 8px;
+                font-size: 1rem; font-weight: 600; cursor: pointer;
+                transition: all 0.3s ease; width: 100%;
+              ">
+                🔥 Pagar com PIX - Instantâneo
+              </button>
+              
+              <button id="card-btn" style="
+                background: linear-gradient(135deg, #2196f3, #1976d2);
+                color: white; border: none; padding: 1rem 2rem; border-radius: 8px;
+                font-size: 1rem; font-weight: 600; cursor: pointer;
+                transition: all 0.3s ease; width: 100%;
+              ">
+                💳 Cartão de Crédito - 12x sem juros
+              </button>
+              
+              <button id="boleto-btn" style="
+                background: linear-gradient(135deg, #FF6B35, #F7931E);
+                color: white; border: none; padding: 1rem 2rem; border-radius: 8px;
+                font-size: 1rem; font-weight: 600; cursor: pointer;
+                transition: all 0.3s ease; width: 100%;
+              ">
+                📄 Boleto Bancário
+              </button>
+            </div>
+          `;
+          
+          // Adicionar eventos aos botões
+          const pixBtn = container.querySelector('#pix-btn');
+          const cardBtn = container.querySelector('#card-btn');
+          const boletoBtn = container.querySelector('#boleto-btn');
+          
+          if (pixBtn) {
+            pixBtn.addEventListener('click', () => {
+              console.log('🔥 PIX selecionado');
+              window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank');
+            });
+            pixBtn.addEventListener('mouseenter', (e) => {
+              (e.target as HTMLElement).style.transform = 'translateY(-2px)';
+            });
+            pixBtn.addEventListener('mouseleave', (e) => {
+              (e.target as HTMLElement).style.transform = 'translateY(0)';
+            });
+          }
+          
+          if (cardBtn) {
+            cardBtn.addEventListener('click', () => {
+              console.log('💳 Cartão selecionado');
+              window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank');
+            });
+            cardBtn.addEventListener('mouseenter', (e) => {
+              (e.target as HTMLElement).style.transform = 'translateY(-2px)';
+            });
+            cardBtn.addEventListener('mouseleave', (e) => {
+              (e.target as HTMLElement).style.transform = 'translateY(0)';
+            });
+          }
+          
+          if (boletoBtn) {
+            boletoBtn.addEventListener('click', () => {
+              console.log('📄 Boleto selecionado');
+              window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank');
+            });
+            boletoBtn.addEventListener('mouseenter', (e) => {
+              (e.target as HTMLElement).style.transform = 'translateY(-2px)';
+            });
+            boletoBtn.addEventListener('mouseleave', (e) => {
+              (e.target as HTMLElement).style.transform = 'translateY(0)';
+            });
+          }
+          
+          console.log('✅ Fallback criado com sucesso!');
+        };
         
         const cardPaymentBrick = await bricksBuilder.create(
           'cardPayment',
