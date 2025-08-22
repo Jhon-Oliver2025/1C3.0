@@ -892,16 +892,7 @@ const BTCAnalysisPage: React.FC = () => {
     }
   };
 
-  // Função para formatar horário asiático
-  const formatAsianTime = (): string => {
-    const now = new Date();
-    return now.toLocaleString('pt-BR', {
-      timeZone: 'Asia/Tokyo',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
+
 
   // Função para traduzir motivos de rejeição
   const translateRejectionReasons = (reasons: string[]) => {
@@ -952,16 +943,7 @@ const BTCAnalysisPage: React.FC = () => {
     return reasonsArray.map(reason => translations[reason] || reason);
   };
 
-  // Estado para horário asiático
-  const [asianTime, setAsianTime] = useState(formatAsianTime());
 
-  // Atualizar horário asiático a cada segundo
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAsianTime(formatAsianTime());
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Função auxiliar para verificar autenticação
   const checkAuthAndRedirect = (response: Response) => {
@@ -1337,10 +1319,7 @@ const BTCAnalysisPage: React.FC = () => {
                 ({btcAnalysis?.change_24h >= 0 ? '+' : ''}{btcAnalysis?.change_24h?.toFixed(2) || '0'}%)
               </span>
             </div>
-            <div>
-              <strong style={{ color: '#f59e0b' }}>Horário Ásia:</strong> 
-              <span style={{ color: '#10b981', marginLeft: '5px' }}>{asianTime}</span>
-            </div>
+
           </div>
         </div>
         <RefreshControls>
