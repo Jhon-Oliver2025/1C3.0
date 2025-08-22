@@ -903,7 +903,7 @@ const BTCAnalysisPage: React.FC = () => {
       'timeout_expired': '⏰ Tempo Esgotado',
       'support_resistance_hold': '📊 Suporte/Resistência Mantido'
     };
-    return reasonsArray.map(reason => translations[reason] || reason);
+    return reasons.map(reason => translations[reason] || reason);
   };
 
   // Função para executar restart manual do sistema
@@ -928,7 +928,7 @@ const BTCAnalysisPage: React.FC = () => {
       if (result.success) {
         alert('✅ Sistema reiniciado com sucesso! Todos os sinais foram limpos e o sistema está pronto para gerar novos sinais.');
         // Recarregar dados após restart
-        await loadAllData();
+        await loadData();
       } else {
         throw new Error(result.message || 'Erro desconhecido');
       }
@@ -1671,12 +1671,12 @@ const BTCAnalysisPage: React.FC = () => {
                       width: '100%'
                     }}
                     onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = '#dc2626';
-                      e.target.style.transform = 'translateY(-1px)';
+                      (e.target as HTMLButtonElement).style.backgroundColor = '#dc2626';
+                      (e.target as HTMLButtonElement).style.transform = 'translateY(-1px)';
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = '#ef4444';
-                      e.target.style.transform = 'translateY(0)';
+                      (e.target as HTMLButtonElement).style.backgroundColor = '#ef4444';
+                      (e.target as HTMLButtonElement).style.transform = 'translateY(0)';
                     }}
                   >
                     🔄 Reiniciar Agora
