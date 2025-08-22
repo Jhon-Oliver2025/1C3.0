@@ -34,7 +34,7 @@ class ConfirmationReason:
     SUPPORT_RESISTANCE_HOLD = "support_resistance_hold"
 
 class PendingSignal(TypedDict):
-    """Estrutura de um sinal pendente"""
+    """Estrutura de um sinal pendente com rastreabilidade completa"""
     id: str
     symbol: str
     type: str  # COMPRA ou VENDA
@@ -50,6 +50,11 @@ class PendingSignal(TypedDict):
     btc_correlation: float
     btc_trend: str
     original_data: Dict[str, Any]
+    
+    # Campos de rastreabilidade
+    generation_reasons: Dict[str, Any]     # Por que foi gerado
+    confirmation_checks: List[Dict]        # Histórico de verificações
+    final_decision_reason: Optional[Dict[str, Any]]  # Por que foi confirmado/rejeitado
 
 class BTCSignalManager:
     """Gerenciador central de sinais BTC e sistema de confirmação"""
@@ -263,7 +268,12 @@ class BTCSignalManager:
                 'last_check': datetime.now(),
                 'btc_correlation': signal_data.get('btc_correlation', 0),
                 'btc_trend': signal_data.get('btc_trend', 'NEUTRAL'),
-                'original_data': signal_data
+                'original_data': signal_data,
+                
+                # Campos de rastreabilidade
+                'generation_reasons': signal_data.get('generation_reasons', {}),
+                'confirmation_checks': [],  # Inicializar lista vazia
+                'final_decision_reason': None  # Será preenchido na confirmação/rejeição
             }
             
             # Adicionar à lista de pendentes

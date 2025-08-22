@@ -20,6 +20,7 @@ from .gerenciar_sinais import GerenciadorSinais
 from .telegram_notifier import TelegramNotifier
 from .btc_correlation_analyzer import BTCCorrelationAnalyzer
 from .klines_cache import CacheManager
+from .coin_ranking import coin_ranking
 
 # Initialize colorama
 init()
@@ -449,16 +450,27 @@ class TechnicalAnalysis:
             
             quality_score = sum(scores.values())
             
-            # 5. Filtro de qualidade básico (ajustado para nova escala)
-            if quality_score < 60.0:  # Threshold mais baixo para pré-sinais
+            # 4.5. Aplicar bonus/penalização por ranking da moeda
+            ranking_info = coin_ranking.get_ranking_info(symbol)
+            ranking_bonus = ranking_info['ranking_bonus']
+            quality_score += ranking_bonus
+            
+            # Log do ranking para debug
+            if ranking_info['position']:
+                print(f"   🏆 {symbol}: Posição #{ranking_info['position']} ({ranking_info['tier']}) - Bonus: {ranking_bonus:+d} pts")
+            else:
+                print(f"   ⚠️ {symbol}: Fora do Top 40 - Penalização: {ranking_bonus:+d} pts")
+            
+            # 5. Filtro de qualidade básico (AUMENTADO PARA MAIOR RIGOR)
+            if quality_score < 75.0:  # Threshold aumentado de 60 para 75 pontos
                 return None
             
-            # 6. Classificação (ajustada para nova escala)
-            if quality_score >= 85:
+            # 6. Classificação (ajustada para maior rigor)
+            if quality_score >= 90:
                 signal_class = 'ELITE'
-            elif quality_score >= 75:
+            elif quality_score >= 85:
                 signal_class = 'PREMIUM+'
-            elif quality_score >= 65:
+            elif quality_score >= 80:
                 signal_class = 'PREMIUM'
             else:
                 signal_class = 'STANDARD'
@@ -480,7 +492,13 @@ class TechnicalAnalysis:
             btc_analysis = btc_analyzer.get_current_btc_analysis()
             btc_trend = btc_analysis.get('trend', 'NEUTRAL')
             
-            # 10. Montar sinal para confirmação BTC
+            # 10. Capturar motivos detalhados de geração
+            generation_reasons = self._capture_generation_reasons(
+                symbol, signal_type, scores, trend_analysis, entry_analysis, 
+                quality_score, ranking_info, ranking_bonus
+            )
+            
+            # 11. Montar sinal para confirmação BTC
             signal = {
                 'symbol': symbol,
                 'type': signal_type,
@@ -500,10 +518,11 @@ class TechnicalAnalysis:
                 'trend_analysis': trend_analysis,
                 'entry_analysis': entry_analysis,
                 'btc_correlation': btc_correlation,
-                'btc_trend': btc_trend
+                'btc_trend': btc_trend,
+                'generation_reasons': generation_reasons  # Adicionar motivos de geração
             }
             
-            # 11. Enviar para sistema de confirmação BTC
+            # 12. Enviar para sistema de confirmação BTC
             signal_id = self.btc_signal_manager.add_pending_signal(signal)
             
             # Não retornar sinal diretamente - será confirmado pelo BTCSignalManager
@@ -512,6 +531,156 @@ class TechnicalAnalysis:
         except Exception as e:
             print(f"❌ Erro ao analisar {symbol}: {e}")
             return None
+    
+    def _capture_generation_reasons(self, symbol: str, signal_type: str, scores: Dict[str, float],
+                                   trend_analysis: Dict, entry_analysis: Dict, quality_score: float,
+                                   ranking_info: Dict, ranking_bonus: int) -> Dict[str, Any]:
+        """
+        Captura motivos detalhados de por que um sinal foi gerado
+        
+        Args:
+            symbol: Símbolo da moeda
+            signal_type: Tipo do sinal (COMPRA/VENDA)
+            scores: Pontuações técnicas
+            trend_analysis: Análise de tendência
+            entry_analysis: Análise de entrada
+            quality_score: Pontuação final de qualidade
+            ranking_info: Informações de ranking da moeda
+            ranking_bonus: Bonus/penalização por ranking
+            
+        Returns:
+            Dicionário com motivos detalhados de geração
+        """
+        try:
+            # Obter zona do RSI
+            rsi_value = entry_analysis.get('rsi', 50)
+            rsi_zone = self._get_rsi_zone(rsi_value)
+            
+            # Determinar condições que dispararam o sinal
+            trigger_conditions = []
+            
+            # Condições de tendência
+            if scores['trend'] >= 20:
+                trend_strength = abs(trend_analysis.get('trend_strength', 0))
+                trigger_conditions.append(f"Tendência {signal_type.lower()} forte ({trend_strength:.1f})")
+            elif scores['trend'] >= 10:
+                trigger_conditions.append(f"Tendência {signal_type.lower()} moderada")
+            
+            # Condições de entrada
+            if scores['entry'] >= 15:
+                volume_ratio = entry_analysis.get('volume_ratio', 1.0)
+                trigger_conditions.append(f"Volume elevado ({volume_ratio:.1f}x média)")
+            
+            # Condições de RSI
+            if scores['rsi'] >= 15:
+                trigger_conditions.append(f"RSI {rsi_value:.0f} em zona {rsi_zone}")
+            
+            # Condições de padrões
+            if scores['pattern'] >= 10:
+                trigger_conditions.append("Padrões técnicos favoráveis")
+            
+            # MACD
+            macd_signal = trend_analysis.get('macd_signal', 0)
+            if macd_signal != 0:
+                macd_direction = 'positivo' if macd_signal > 0 else 'negativo'
+                trigger_conditions.append(f"MACD {macd_direction}")
+            
+            # Informações de ranking
+            ranking_description = ""
+            if ranking_info['position']:
+                ranking_description = f"Top {ranking_info['position']} ({ranking_info['tier']})"
+            else:
+                ranking_description = "Fora do Top 40"
+            
+            return {
+                'timestamp': datetime.now(),
+                'symbol': symbol,
+                'signal_type': signal_type,
+                'technical_scores': {
+                    'trend_score': scores['trend'],
+                    'entry_score': scores['entry'],
+                    'rsi_score': scores['rsi'],
+                    'pattern_score': scores['pattern'],
+                    'base_total': sum(scores.values())
+                },
+                'key_indicators': {
+                    'rsi_value': rsi_value,
+                    'rsi_zone': rsi_zone,
+                    'trend_strength': abs(trend_analysis.get('trend_strength', 0)),
+                    'volume_ratio': entry_analysis.get('volume_ratio', 1.0),
+                    'macd_signal': macd_signal,
+                    'price_change': entry_analysis.get('price_change', 0)
+                },
+                'trigger_conditions': trigger_conditions,
+                'ranking_info': {
+                    'coin': ranking_info['coin'],
+                    'position': ranking_info['position'],
+                    'tier': ranking_info['tier'],
+                    'description': ranking_description,
+                    'bonus_applied': ranking_bonus
+                },
+                'quality_breakdown': {
+                    'base_score': sum(scores.values()),
+                    'ranking_bonus': ranking_bonus,
+                    'final_score': quality_score,
+                    'classification': self._get_signal_classification(quality_score),
+                    'threshold_passed': quality_score >= 75.0
+                },
+                'market_context': {
+                    'timeframe_trend': self.config['trend_timeframe'],
+                    'timeframe_entry': self.config['entry_timeframe'],
+                    'btc_trend': trend_analysis.get('btc_trend', 'NEUTRAL'),
+                    'market_session': self._get_market_session()
+                }
+            }
+            
+        except Exception as e:
+            print(f"❌ Erro ao capturar motivos de geração: {e}")
+            return {
+                'timestamp': datetime.now(),
+                'error': str(e),
+                'basic_info': {
+                    'symbol': symbol,
+                    'signal_type': signal_type,
+                    'quality_score': quality_score
+                }
+            }
+    
+    def _get_rsi_zone(self, rsi_value: float) -> str:
+        """Determina a zona do RSI"""
+        if rsi_value <= 30:
+            return 'sobrevenda'
+        elif rsi_value >= 70:
+            return 'sobrecompra'
+        elif 30 < rsi_value <= 45:
+            return 'baixa'
+        elif 55 <= rsi_value < 70:
+            return 'alta'
+        else:
+            return 'neutra'
+    
+    def _get_signal_classification(self, quality_score: float) -> str:
+        """Retorna a classificação baseada na pontuação"""
+        if quality_score >= 90:
+            return 'ELITE'
+        elif quality_score >= 85:
+            return 'PREMIUM+'
+        elif quality_score >= 80:
+            return 'PREMIUM'
+        else:
+            return 'STANDARD'
+    
+    def _get_market_session(self) -> str:
+        """Determina a sessão de mercado atual"""
+        from datetime import datetime
+        hour = datetime.now().hour
+        
+        if 0 <= hour < 8:
+            return 'Asiática'
+        elif 8 <= hour < 16:
+            return 'Europeia'
+        else:
+            return 'Americana'
     
     def _calculate_signal_scores(self, trend_analysis: Dict, entry_analysis: Dict, 
                            signal_type: str, entry_df: pd.DataFrame) -> Dict[str, float]:
