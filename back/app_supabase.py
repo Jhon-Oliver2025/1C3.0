@@ -33,6 +33,7 @@ from api_routes.market_status import market_status_bp
 from api_routes.cleanup_status import cleanup_status_bp
 from api_routes.debug import debug_bp
 from api_routes.payments import payments_bp
+from api_routes.customers import customers_bp
 from api_routes.btc_signals import btc_signals_bp, init_btc_signals_routes
 from api_routes.signal_monitoring import signal_monitoring_bp, init_signal_monitoring_routes
 from api_routes.restart_system import restart_system_bp
@@ -260,6 +261,7 @@ def create_app():
     server.register_blueprint(cleanup_status_bp, url_prefix='/api')
     server.register_blueprint(debug_bp, url_prefix='/api/debug')
     server.register_blueprint(payments_bp, url_prefix='/api/payments')
+    server.register_blueprint(customers_bp, url_prefix='/api/customers')
     server.register_blueprint(binance_prices_bp)
     try:
         server.register_blueprint(restart_system_bp)

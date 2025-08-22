@@ -47,6 +47,40 @@ class PaymentManager:
     def _ensure_payment_tables(self):
         """Garante que as tabelas de pagamento existam no banco de dados"""
         try:
+            # Tabela de clientes para capturar dados do checkout
+            self.db.execute_query("""
+                CREATE TABLE IF NOT EXISTS customers (
+                    id SERIAL PRIMARY KEY,
+                    email VARCHAR(255) UNIQUE NOT NULL,
+                    first_name VARCHAR(100),
+                    last_name VARCHAR(100),
+                    full_name VARCHAR(200),
+                    phone VARCHAR(20),
+                    identification_type VARCHAR(10),
+                    identification_number VARCHAR(20),
+                    address TEXT,
+                    course_id VARCHAR(50),
+                    course_name VARCHAR(200),
+                    course_price DECIMAL(10,2),
+                    payment_method VARCHAR(50),
+                    status VARCHAR(20) DEFAULT 'lead',
+                    source VARCHAR(50) DEFAULT 'checkout_form',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Tabela de eventos dos clientes
+            self.db.execute_query("""
+                CREATE TABLE IF NOT EXISTS customer_events (
+                    id SERIAL PRIMARY KEY,
+                    customer_id INTEGER REFERENCES customers(id),
+                    event_type VARCHAR(50) NOT NULL,
+                    event_data TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
             # Tabela de compras
             purchases_file = os.path.join(os.path.dirname(__file__), '..', 'purchases.csv')
             if not os.path.exists(purchases_file):

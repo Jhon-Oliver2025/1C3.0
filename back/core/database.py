@@ -790,27 +790,41 @@ class Database:
         return None
 
     def save_signal_to_database(self, signal_data):
-        """Salva sinal no banco de dados com correção do warning pandas"""
+        """
+        Salva um sinal no banco de dados (CSV)
+        """
         try:
-            # ... existing code ...
-            
-            # Corrigir warning do pandas concat
-            if not existing_df.empty and not new_signal_df.empty:
-                # Verificar se há colunas vazias antes do concat
-                existing_df = existing_df.dropna(how='all', axis=1)
-                new_signal_df = new_signal_df.dropna(how='all', axis=1)
-                updated_df = pd.concat([existing_df, new_signal_df], ignore_index=True)
-            elif not new_signal_df.empty:
-                updated_df = new_signal_df.copy()
-            else:
-                updated_df = existing_df.copy()
-                
-            # Salva o DataFrame atualizado de volta no arquivo
-            updated_df.to_csv(self.signals_list_file, index=False)
-            print(f"✅ Sinal adicionado para {signal_data.get('symbol')}")
-            return True # Sinal adicionado com sucesso
-
+            # Adicionar o sinal à lista de sinais
+            return self.add_signal(signal_data)
         except Exception as e:
-            print(f"❌ Erro ao adicionar sinal: {e}")
-            traceback.print_exc()
+            print(f"Erro ao salvar sinal no banco: {e}")
             return False
+    
+    def execute_query(self, query: str, params: tuple = None) -> Any:
+        """
+        Método de compatibilidade para execução de queries SQL
+        Como estamos usando CSV, este método apenas simula a execução
+        Para um banco real, implementar a lógica SQL apropriada
+        """
+        try:
+            print(f"📝 Simulando execução de query: {query[:100]}...")
+            # Para CSV, não executamos queries SQL reais
+            # Este método existe apenas para compatibilidade
+            return True
+        except Exception as e:
+            print(f"❌ Erro na simulação de query: {e}")
+            return False
+    
+    def fetch_one(self, query: str, params: tuple = None) -> Optional[Dict[str, Any]]:
+        """
+        Método de compatibilidade para buscar um registro
+        """
+        print(f"🔍 Simulando fetch_one: {query[:50]}...")
+        return None
+    
+    def fetch_all(self, query: str, params: tuple = None) -> List[Dict[str, Any]]:
+        """
+        Método de compatibilidade para buscar múltiplos registros
+        """
+        print(f"🔍 Simulando fetch_all: {query[:50]}...")
+        return []
