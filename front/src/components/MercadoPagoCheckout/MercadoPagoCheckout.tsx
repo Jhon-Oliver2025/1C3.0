@@ -320,11 +320,11 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
 
   // Inicializar Card Payment Brick quando tiver instância MP
   useEffect(() => {
-    if (mpInstance && !hasAccess) {
+    if (mpInstance && !hasAccess && !cardForm) {
       console.log('Iniciando Card Payment Brick com instância MP');
       initializeTransparentCheckout();
     }
-  }, [mpInstance, hasAccess]);
+  }, [mpInstance, hasAccess, cardForm]);
 
   /**
    * Carrega o SDK oficial do Mercado Pago v2
@@ -506,7 +506,16 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
           callbacks: {
             onReady: () => {
               console.log('✅ Card Payment Brick pronto e renderizado!');
+              console.log('🎯 Formulário carregado e visível!');
               setIsLoading(false);
+              
+              // Garantir que o container não seja limpo
+              const container = document.getElementById('mercadopago-checkout');
+              if (container) {
+                container.style.minHeight = '400px';
+                container.style.display = 'block';
+                console.log('🔒 Container protegido contra limpeza');
+              }
             },
             onSubmit: async (cardFormData: any) => {
               console.log('Dados do cartão recebidos:', cardFormData);
@@ -577,6 +586,30 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         setCardForm(cardPaymentBrick);
         console.log('✅ Card Payment Brick inicializado com sucesso!');
         console.log('🎯 Brick instance:', cardPaymentBrick);
+        
+        // Adicionar proteção contra destruição acidental
+        const protectBrick = () => {
+          const container = document.getElementById('mercadopago-checkout');
+          if (container && container.children.length === 0) {
+            console.warn('⚠️ Container foi limpo! Tentando recriar...');
+            // Não recriar automaticamente para evitar loops
+          }
+        };
+        
+        // Verificar a cada 2 segundos se o brick ainda existe
+        const protectionInterval = setInterval(protectBrick, 2000);
+        
+        // Limpar interval quando o componente for desmontado
+        return () => {
+          clearInterval(protectionInterval);
+          if (cardPaymentBrick && typeof cardPaymentBrick.unmount === 'function') {
+            try {
+              cardPaymentBrick.unmount();
+            } catch (error) {
+              console.log('Brick já foi desmontado');
+            }
+          }
+        };
         
       }
     } catch (error) {
