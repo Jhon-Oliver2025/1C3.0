@@ -213,11 +213,12 @@ const StatusMessage = styled.div<{ type: 'success' | 'error' | 'info' }>`
 
 // Container para o checkout transparente
 const TransparentCheckoutContainer = styled.div`
-  background: rgba(255, 255, 255, 0.03);
+  background: #ffffff;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #dee2e6;
   padding: 1.5rem;
   margin: 1rem 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   
   .mp-form {
     background: transparent !important;
@@ -318,13 +319,37 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
     checkCourseAccess();
   }, [courseId]);
 
-  // Inicializar checkout simples IMEDIATAMENTE
+  // Inicializar Card Payment Brick quando SDK estiver pronto
   useEffect(() => {
-    if (!hasAccess) {
-      console.log('🚀 Iniciando checkout simples IMEDIATAMENTE!');
-      initializeTransparentCheckout();
+    if (!hasAccess && mpInstance) {
+      console.log('🚀 SDK carregado, aguardando DOM estar pronto...');
+      // Aguardar o DOM estar completamente renderizado
+      const timer = setTimeout(() => {
+        initializeTransparentCheckout();
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
-  }, [hasAccess]);
+  }, [hasAccess, mpInstance]);
+  
+  // Aguardar DOM estar pronto para inicializar checkout
+  useEffect(() => {
+    if (!hasAccess && mpInstance) {
+      const checkContainer = () => {
+        const container = document.getElementById('mercadopago-checkout');
+        if (container) {
+          console.log('✅ Container encontrado, inicializando Card Payment Brick...');
+          initializeTransparentCheckout();
+        } else {
+          console.log('⏳ Container ainda não existe, tentando novamente...');
+          setTimeout(checkContainer, 500);
+        }
+      };
+      
+      // Verificar se o container já existe
+      setTimeout(checkContainer, 200);
+    }
+  }, [hasAccess, mpInstance]);
 
   /**
    * Carrega o SDK oficial do Mercado Pago v2
@@ -466,147 +491,205 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   };
 
   /**
-   * Cria botões de pagamento simples que funcionam SEMPRE
+   * Salva dados do cliente para automações e disparos de email
+   * Integração com Supabase para capturar leads e dados de checkout
+   */
+  const saveCustomerData = async (customerData: any) => {
+    try {
+      console.log('💾 Salvando dados do cliente...', customerData);
+      
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      const token = localStorage.getItem('authToken');
+      
+      const response = await fetch(`${apiUrl}/api/customers/save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        body: JSON.stringify(customerData)
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erro ao salvar dados do cliente');
+      }
+      
+      const result = await response.json();
+      console.log('✅ Dados do cliente salvos com sucesso:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('❌ Erro ao salvar dados do cliente:', error);
+      // Não bloquear o checkout por erro de salvamento
+      return null;
+    }
+  };
+
+  /**
+   * Inicializa o Card Payment Brick oficial do Mercado Pago v2 (2024)
+   * Implementação baseada na documentação oficial mais recente
    */
   const initializeTransparentCheckout = async () => {
-    console.log('🚀 Criando checkout simples que FUNCIONA!');
+    console.log('🚀 Inicializando Card Payment Brick oficial v2');
     
-    // Garantir que temos uma preferência de pagamento
-    if (!preferenceId) {
-      console.log('🔄 Criando preferência de pagamento...');
-      await createPaymentPreference();
+    // Evitar múltiplas inicializações
+    if (cardForm) {
+      console.log('⚠️ Card Payment Brick já foi inicializado');
+      return;
+    }
+    
+    // Aguardar instância do Mercado Pago
+    if (!mpInstance) {
+      console.log('⏳ Aguardando SDK do Mercado Pago carregar...');
+      return;
     }
     
     const container = document.getElementById('mercadopago-checkout');
     if (!container) {
-      console.error('❌ Container não encontrado');
+      console.error('❌ Container #mercadopago-checkout não encontrado');
+      console.log('🔍 Elementos disponíveis:', document.querySelectorAll('[id*="mercado"]'));
       return;
     }
     
-    // Limpar container
-    container.innerHTML = '';
+    console.log('✅ Container encontrado:', container);
     
-    // Criar botões funcionais IMEDIATAMENTE
-    container.innerHTML = `
-      <div style="display: flex; flex-direction: column; gap: 1.5rem; width: 100%; padding: 1rem;">
-        <div style="text-align: center; color: rgba(255, 255, 255, 0.9); margin-bottom: 1rem;">
-          <h3 style="margin: 0; font-size: 1.2rem; color: #2196f3;">💳 Escolha sua forma de pagamento</h3>
-          <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.8;">Redirecionamento seguro para o Mercado Pago</p>
-        </div>
-        
-        <button id="pix-btn" style="
-          background: linear-gradient(135deg, #00C851, #00A041);
-          color: white; border: none; padding: 1.2rem 2rem; border-radius: 12px;
-          font-size: 1.1rem; font-weight: 700; cursor: pointer;
-          transition: all 0.3s ease; width: 100%; box-shadow: 0 4px 15px rgba(0, 200, 81, 0.3);
-          display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-        ">
-          <span style="font-size: 1.3rem;">🔥</span>
-          <span>Pagar com PIX - Instantâneo</span>
-        </button>
-        
-        <button id="card-btn" style="
-          background: linear-gradient(135deg, #2196f3, #1976d2);
-          color: white; border: none; padding: 1.2rem 2rem; border-radius: 12px;
-          font-size: 1.1rem; font-weight: 700; cursor: pointer;
-          transition: all 0.3s ease; width: 100%; box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
-          display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-        ">
-          <span style="font-size: 1.3rem;">💳</span>
-          <span>Cartão de Crédito - 12x sem juros</span>
-        </button>
-        
-        <button id="boleto-btn" style="
-          background: linear-gradient(135deg, #FF6B35, #F7931E);
-          color: white; border: none; padding: 1.2rem 2rem; border-radius: 12px;
-          font-size: 1.1rem; font-weight: 700; cursor: pointer;
-          transition: all 0.3s ease; width: 100%; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
-          display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-        ">
-          <span style="font-size: 1.3rem;">📄</span>
-          <span>Boleto Bancário</span>
-        </button>
-        
-        <div style="text-align: center; margin-top: 1rem; padding: 1rem; background: rgba(76, 175, 80, 0.1); border-radius: 8px; border: 1px solid rgba(76, 175, 80, 0.3);">
-          <div style="color: #4caf50; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-            <span>🔒</span>
-            <span>Pagamento 100% seguro via Mercado Pago</span>
-            <span>💳</span>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    // Adicionar eventos aos botões
-    const pixBtn = container.querySelector('#pix-btn') as HTMLElement;
-    const cardBtn = container.querySelector('#card-btn') as HTMLElement;
-    const boletoBtn = container.querySelector('#boleto-btn') as HTMLElement;
-    
-    // Função para criar URL de pagamento
-    const createPaymentUrl = (method: string) => {
-      const baseUrl = preferenceId 
-        ? `https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`
-        : `https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=TEMP_ID`;
-      return baseUrl;
-    };
-    
-    if (pixBtn) {
-      pixBtn.addEventListener('click', () => {
-        console.log('🔥 PIX selecionado - Redirecionando...');
-        const url = createPaymentUrl('pix');
-        window.open(url, '_blank');
-      });
+    try {
+      console.log('🔧 Configurando Card Payment Brick...');
       
-      pixBtn.addEventListener('mouseenter', () => {
-        pixBtn.style.transform = 'translateY(-3px)';
-        pixBtn.style.boxShadow = '0 8px 25px rgba(0, 200, 81, 0.4)';
-      });
+      // Limpar container
+      container.innerHTML = '';
       
-      pixBtn.addEventListener('mouseleave', () => {
-        pixBtn.style.transform = 'translateY(0)';
-        pixBtn.style.boxShadow = '0 4px 15px rgba(0, 200, 81, 0.3)';
+      // Criar instância do Bricks Builder
+      const bricksBuilder = mpInstance.bricks();
+      
+      // Configurações do Card Payment Brick conforme documentação 2024
+       const settings = {
+         initialization: {
+           amount: course.price, // Valor do pagamento
+           payer: {
+             firstName: '',
+             lastName: '',
+             email: ''
+           }
+         },
+         customization: {
+           visual: {
+             style: {
+               theme: 'bootstrap', // Tema mais compatível
+               customVariables: {
+                 formBackgroundColor: '#ffffff', // Fundo branco para melhor legibilidade
+                 inputBackgroundColor: '#ffffff',
+                 inputFocusedBackgroundColor: '#f8f9fa',
+                 inputBorderColor: '#dee2e6',
+                 inputFocusedBorderColor: '#2196f3',
+                 inputTextColor: '#212529', // Texto escuro para contraste
+                 baseColor: '#2196f3',
+                 baseColorFirstVariant: '#1976d2',
+                 baseColorSecondVariant: '#00bcd4',
+                 textPrimaryColor: '#212529', // Cor primária do texto
+                 textSecondaryColor: '#6c757d', // Cor secundária do texto
+                 inputLabelColor: '#495057' // Cor dos labels
+               }
+             }
+           },
+          paymentMethods: {
+            creditCard: 'all',
+            debitCard: 'all',
+            ticket: 'all', // Boleto
+            bankTransfer: 'all', // PIX
+            mercadoPago: 'all', // Conta Mercado Pago
+            maxInstallments: 12
+          }
+        },
+        callbacks: {
+          onReady: () => {
+            console.log('✅ Card Payment Brick renderizado com sucesso!');
+            setIsLoading(false);
+          },
+          onSubmit: async (formData: any) => {
+            console.log('📤 Dados do formulário recebidos:', formData);
+            setIsLoading(true);
+            
+            try {
+              // Capturar dados do cliente para Supabase
+              const customerData = {
+                email: formData.payer?.email || '',
+                firstName: formData.payer?.firstName || '',
+                lastName: formData.payer?.lastName || '',
+                identification: formData.payer?.identification || {},
+                phone: formData.payer?.phone || '',
+                address: formData.payer?.address || {},
+                courseId: courseId,
+                courseName: course.name,
+                coursePrice: course.price,
+                paymentMethod: formData.payment_method_id || 'unknown',
+                timestamp: new Date().toISOString()
+              };
+              
+              console.log('👤 Dados do cliente capturados:', customerData);
+              
+              // Salvar dados do cliente no Supabase (implementar depois)
+              await saveCustomerData(customerData);
+              
+              // Processar pagamento no backend
+              const result = await processCardPayment(formData);
+              
+              if (result.status === 'approved') {
+                setStatusMessage({
+                  type: 'success',
+                  message: 'Pagamento aprovado com sucesso!'
+                });
+                onSuccess?.(result);
+                
+                // Redirecionar após sucesso
+                setTimeout(() => {
+                  window.location.href = '/payment/success';
+                }, 2000);
+              } else {
+                throw new Error(result.message || 'Pagamento não aprovado');
+              }
+            } catch (error) {
+              console.error('❌ Erro ao processar pagamento:', error);
+              setStatusMessage({
+                type: 'error',
+                message: error instanceof Error ? error.message : 'Erro ao processar pagamento'
+              });
+              onError?.(error instanceof Error ? error.message : 'Erro ao processar pagamento');
+            } finally {
+              setIsLoading(false);
+            }
+          },
+          onError: (error: any) => {
+            console.error('❌ Erro no Card Payment Brick:', error);
+            setStatusMessage({
+              type: 'error',
+              message: 'Erro no formulário de pagamento. Tente novamente.'
+            });
+            setIsLoading(false);
+          }
+        }
+      };
+      
+      console.log('🎯 Criando Card Payment Brick...');
+      
+      // Criar o Card Payment Brick
+      const cardPaymentBrick = await bricksBuilder.create(
+        'cardPayment',
+        'mercadopago-checkout',
+        settings
+      );
+      
+      setCardForm(cardPaymentBrick);
+      console.log('✅ Card Payment Brick inicializado com sucesso!');
+      
+    } catch (error) {
+      console.error('❌ Erro ao inicializar Card Payment Brick:', error);
+      setStatusMessage({
+        type: 'error',
+        message: 'Erro ao carregar formulário de pagamento. Recarregue a página.'
       });
+      setIsLoading(false);
     }
-    
-    if (cardBtn) {
-      cardBtn.addEventListener('click', () => {
-        console.log('💳 Cartão selecionado - Redirecionando...');
-        const url = createPaymentUrl('card');
-        window.open(url, '_blank');
-      });
-      
-      cardBtn.addEventListener('mouseenter', () => {
-        cardBtn.style.transform = 'translateY(-3px)';
-        cardBtn.style.boxShadow = '0 8px 25px rgba(33, 150, 243, 0.4)';
-      });
-      
-      cardBtn.addEventListener('mouseleave', () => {
-        cardBtn.style.transform = 'translateY(0)';
-        cardBtn.style.boxShadow = '0 4px 15px rgba(33, 150, 243, 0.3)';
-      });
-    }
-    
-    if (boletoBtn) {
-      boletoBtn.addEventListener('click', () => {
-        console.log('📄 Boleto selecionado - Redirecionando...');
-        const url = createPaymentUrl('boleto');
-        window.open(url, '_blank');
-      });
-      
-      boletoBtn.addEventListener('mouseenter', () => {
-        boletoBtn.style.transform = 'translateY(-3px)';
-        boletoBtn.style.boxShadow = '0 8px 25px rgba(255, 107, 53, 0.4)';
-      });
-      
-      boletoBtn.addEventListener('mouseleave', () => {
-        boletoBtn.style.transform = 'translateY(0)';
-        boletoBtn.style.boxShadow = '0 4px 15px rgba(255, 107, 53, 0.3)';
-      });
-    }
-    
-    setIsLoading(false);
-    console.log('✅ Checkout simples criado e FUNCIONANDO!');
-    console.log('🎯 Botões PIX, Cartão e Boleto prontos para uso!');
   };
   
   /**
@@ -743,7 +826,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
                    marginBottom: '1.5rem' 
                  }}>
                    <CreditCard size={24} style={{ color: '#2196f3', marginRight: '0.5rem' }} />
-                   <h3 style={{ color: '#ffffff', margin: 0 }}>Escolha sua forma de pagamento</h3>
+                   <h3 style={{ color: '#212529', margin: 0 }}>Escolha sua forma de pagamento</h3>
                  </div>
                  
                  {/* Container onde o Mercado Pago renderizará o checkout */}
