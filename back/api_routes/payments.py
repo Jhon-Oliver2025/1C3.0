@@ -3,6 +3,7 @@ from middleware.auth_middleware import jwt_required, get_current_user
 from core.database import Database
 from core.payments import PaymentManager
 import os
+from datetime import datetime
 
 payments_bp = Blueprint('payments', __name__)
 
@@ -225,6 +226,21 @@ def get_payment_status(payment_id):
 def get_payment_config():
     """Retorna configurações públicas do Mercado Pago"""
     try:
+        print(f"🔧 [CONFIG] Verificando configurações do Mercado Pago...")
+        print(f"📋 [CONFIG] Public Key: {payment_manager.public_key}")
+        print(f"📋 [CONFIG] Access Token configurado: {'Sim' if payment_manager.access_token else 'Não'}")
+        
+        if not payment_manager.public_key:
+            print(f"❌ [CONFIG] Public Key não encontrada!")
+            return jsonify({
+                'success': False,
+                'error': 'Public Key não configurada',
+                'debug': {
+                    'public_key_exists': bool(payment_manager.public_key),
+                    'access_token_exists': bool(payment_manager.access_token)
+                }
+            }), 500
+        
         return jsonify({
             'success': True,
             'config': {
@@ -235,8 +251,55 @@ def get_payment_config():
         }), 200
         
     except Exception as e:
+        print(f"❌ [CONFIG] Erro ao buscar configurações: {str(e)}")
         current_app.logger.error(f"Erro ao buscar configurações: {str(e)}")
-        return jsonify({'error': 'Erro interno do servidor'}), 500
+        return jsonify({
+            'success': False,
+            'error': 'Erro interno do servidor',
+            'details': str(e)
+        }), 500
+
+@payments_bp.route('/debug', methods=['GET'])
+def debug_payment_config():
+    """Endpoint de debug para verificar configurações em produção"""
+    try:
+        import os
+        
+        # Verificar variáveis de ambiente
+        env_vars = {
+            'MERCADO_PAGO_ACCESS_TOKEN': bool(os.getenv('MERCADO_PAGO_ACCESS_TOKEN')),
+            'MERCADO_PAGO_PUBLIC_KEY': bool(os.getenv('MERCADO_PAGO_PUBLIC_KEY')),
+            'MERCADO_PAGO_WEBHOOK_SECRET': bool(os.getenv('MERCADO_PAGO_WEBHOOK_SECRET')),
+            'FRONTEND_URL': os.getenv('FRONTEND_URL', 'Não configurado'),
+            'BACKEND_URL': os.getenv('BACKEND_URL', 'Não configurado')
+        }
+        
+        # Verificar instância do payment_manager
+        manager_config = {
+            'access_token_exists': bool(payment_manager.access_token),
+            'public_key_exists': bool(payment_manager.public_key),
+            'webhook_secret_exists': bool(payment_manager.webhook_secret),
+            'base_url': payment_manager.base_url,
+            'available_courses_count': len(payment_manager.available_courses)
+        }
+        
+        # Logs detalhados
+        print(f"🔍 [DEBUG] Variáveis de ambiente: {env_vars}")
+        print(f"🔍 [DEBUG] Configuração do manager: {manager_config}")
+        
+        return jsonify({
+            'success': True,
+            'environment_variables': env_vars,
+            'payment_manager_config': manager_config,
+            'timestamp': datetime.now().isoformat()
+        }), 200
+        
+    except Exception as e:
+        print(f"❌ [DEBUG] Erro no debug: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
 
 # Middleware para verificar acesso a aulas
 def require_lesson_access(lesson_id):

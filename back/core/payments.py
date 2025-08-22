@@ -110,13 +110,22 @@ class PaymentManager:
                                 course_description: str = None) -> Optional[Dict[str, Any]]:
         """Cria uma preferência de pagamento no Mercado Pago"""
         try:
-            print(f"🔄 Criando preferência de pagamento...")
-            print(f"📋 Parâmetros: user_id={user_id}, course_id={course_id}")
-            print(f"💰 Dados do curso: name={course_name}, price={course_price}")
+            print(f"🔄 [PREFERENCE] Criando preferência de pagamento...")
+            print(f"📋 [PREFERENCE] Parâmetros: user_id={user_id}, course_id={course_id}")
+            print(f"💰 [PREFERENCE] Dados do curso: name={course_name}, price={course_price}")
+            print(f"🔑 [PREFERENCE] Access Token configurado: {'Sim' if self.access_token else 'Não'}")
+            print(f"🔑 [PREFERENCE] Public Key configurado: {'Sim' if self.public_key else 'Não'}")
             
             # Verificar se o access_token está configurado
             if not self.access_token:
-                raise ValueError("MERCADO_PAGO_ACCESS_TOKEN não configurado")
+                error_msg = "MERCADO_PAGO_ACCESS_TOKEN não configurado"
+                print(f"❌ [PREFERENCE] {error_msg}")
+                raise ValueError(error_msg)
+            
+            if not self.public_key:
+                error_msg = "MERCADO_PAGO_PUBLIC_KEY não configurado"
+                print(f"❌ [PREFERENCE] {error_msg}")
+                raise ValueError(error_msg)
             
             # Verificar se temos dados do curso (para checkout público)
             if course_name and course_price and course_description:
