@@ -209,7 +209,7 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
           <FaEye /> Rastreabilidade do Sinal
         </HeaderTitle>
         <StatusBadge $color={getStatusColor(signal.status)}>
-          {signal.status.toUpperCase()}
+          {signal.status?.toUpperCase() || 'UNKNOWN'}
         </StatusBadge>
       </TraceabilityHeader>
 
