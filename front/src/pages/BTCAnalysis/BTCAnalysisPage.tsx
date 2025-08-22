@@ -903,7 +903,41 @@ const BTCAnalysisPage: React.FC = () => {
       'timeout_expired': '⏰ Tempo Esgotado',
       'support_resistance_hold': '📊 Suporte/Resistência Mantido'
     };
-    return reasons.map(reason => translations[reason] || reason);
+    return reasonsArray.map(reason => translations[reason] || reason);
+  };
+
+  // Função para executar restart manual do sistema
+  const handleManualRestart = async () => {
+    if (!window.confirm('⚠️ ATENÇÃO: Isso irá deletar todos os sinais atuais e reiniciar o sistema. Deseja continuar?')) {
+      return;
+    }
+
+    try {
+      setIsRefreshing(true);
+      
+      const response = await fetch('/api/scheduler/manual-cleanup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ type: 'both' })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        alert('✅ Sistema reiniciado com sucesso! Todos os sinais foram limpos e o sistema está pronto para gerar novos sinais.');
+        // Recarregar dados após restart
+        await loadAllData();
+      } else {
+        throw new Error(result.message || 'Erro desconhecido');
+      }
+    } catch (error) {
+      console.error('Erro ao executar restart manual:', error);
+      alert('❌ Erro ao executar restart manual. Tente novamente.');
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   // Função para traduzir motivos de confirmação
@@ -1621,6 +1655,32 @@ const BTCAnalysisPage: React.FC = () => {
                   <TechnicalSubtext>
                     {restartInfo?.restart_info?.schedule || 'Agendamento não definido'}
                   </TechnicalSubtext>
+                  <button
+                    onClick={handleManualRestart}
+                    style={{
+                      marginTop: '10px',
+                      padding: '8px 16px',
+                      backgroundColor: '#ef4444',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '0.85em',
+                      fontWeight: '600',
+                      transition: 'all 0.3s ease',
+                      width: '100%'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = '#dc2626';
+                      e.target.style.transform = 'translateY(-1px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = '#ef4444';
+                      e.target.style.transform = 'translateY(0)';
+                    }}
+                  >
+                    🔄 Reiniciar Agora
+                  </button>
                 </TechnicalCard>
                 
                 <TechnicalCard>
