@@ -318,13 +318,13 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
     checkCourseAccess();
   }, [courseId]);
 
-  // Inicializar Payment Brick quando tiver preferência e instância MP
+  // Inicializar checkout simples quando tiver preferência
   useEffect(() => {
-    if (preferenceId && mpInstance && !hasAccess) {
-      console.log('Iniciando Payment Brick com preferenceId:', preferenceId);
+    if (preferenceId && !hasAccess) {
+      console.log('Iniciando checkout simples com preferenceId:', preferenceId);
       initializeTransparentCheckout();
     }
-  }, [preferenceId, mpInstance, hasAccess]);
+  }, [preferenceId, hasAccess]);
 
   /**
    * Carrega o SDK do Mercado Pago Bricks (versão mais recente)
@@ -461,98 +461,122 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   };
 
   /**
-   * Inicializa o Payment Brick do Mercado Pago (conforme documentação oficial)
+   * Inicializa o checkout simples do Mercado Pago
    */
-  const initializeTransparentCheckout = async () => {
-    if (!preferenceId || !mpInstance) {
-      console.log('Aguardando preferenceId e mpInstance:', { preferenceId, mpInstance: !!mpInstance });
+  const initializeTransparentCheckout = () => {
+    if (!preferenceId) {
+      console.log('Aguardando preferenceId:', preferenceId);
       return;
     }
 
     try {
-      console.log('Inicializando Payment Brick com preferenceId:', preferenceId);
+      console.log('Inicializando checkout simples com preferenceId:', preferenceId);
       
       // Limpar container antes de renderizar
       const container = document.getElementById('mercadopago-checkout');
       if (container) {
         container.innerHTML = '';
+        
+        // Criar botões de pagamento simples
+        const checkoutContainer = document.createElement('div');
+        checkoutContainer.style.cssText = `
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          width: 100%;
+        `;
+        
+        // Botão PIX
+        const pixButton = document.createElement('button');
+        pixButton.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <span style="font-size: 1.2rem;">🔥</span>
+            <span>Pagar com PIX - Instantâneo</span>
+          </div>
+        `;
+        pixButton.style.cssText = `
+          background: linear-gradient(135deg, #00C851, #00A041);
+          color: white;
+          border: none;
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          width: 100%;
+        `;
+        pixButton.onmouseover = () => pixButton.style.transform = 'translateY(-2px)';
+        pixButton.onmouseout = () => pixButton.style.transform = 'translateY(0)';
+        pixButton.onclick = () => {
+          window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank');
+        };
+        
+        // Botão Cartão
+        const cardButton = document.createElement('button');
+        cardButton.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <span>💳</span>
+            <span>Cartão de Crédito - 12x sem juros</span>
+          </div>
+        `;
+        cardButton.style.cssText = `
+          background: linear-gradient(135deg, #2196f3, #1976d2);
+          color: white;
+          border: none;
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          width: 100%;
+        `;
+        cardButton.onmouseover = () => cardButton.style.transform = 'translateY(-2px)';
+        cardButton.onmouseout = () => cardButton.style.transform = 'translateY(0)';
+        cardButton.onclick = () => {
+          window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank');
+        };
+        
+        // Botão Boleto
+        const boletoButton = document.createElement('button');
+        boletoButton.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <span style="font-size: 1.2rem;">📄</span>
+            <span>Boleto Bancário</span>
+          </div>
+        `;
+        boletoButton.style.cssText = `
+          background: linear-gradient(135deg, #FF6B35, #F7931E);
+          color: white;
+          border: none;
+          padding: 1rem 2rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          width: 100%;
+        `;
+        boletoButton.onmouseover = () => boletoButton.style.transform = 'translateY(-2px)';
+        boletoButton.onmouseout = () => boletoButton.style.transform = 'translateY(0)';
+        boletoButton.onclick = () => {
+          window.open(`https://sandbox.mercadopago.com.br/checkout/v1/redirect?pref_id=${preferenceId}`, '_blank');
+        };
+        
+        // Adicionar botões ao container
+        checkoutContainer.appendChild(pixButton);
+        checkoutContainer.appendChild(cardButton);
+        checkoutContainer.appendChild(boletoButton);
+        
+        // Adicionar ao container principal
+        container.appendChild(checkoutContainer);
+        
+        console.log('Checkout simples criado com sucesso');
+        setIsLoading(false);
       }
-      
-      // Criar Payment Brick conforme documentação oficial
-      const bricksBuilder = mpInstance.bricks();
-      
-      const settings = {
-        initialization: {
-          amount: course.price, // Valor total a ser pago
-          preferenceId: preferenceId, // ID da preferência criada
-        },
-        customization: {
-          paymentMethods: {
-            creditCard: 'all',
-            debitCard: 'all',
-            ticket: 'all', // Boleto
-            bankTransfer: 'all', // PIX
-            mercadoPago: 'all' // Conta Mercado Pago
-          },
-          visual: {
-            style: {
-              theme: 'dark', // Tema escuro para combinar com nosso design
-              customVariables: {
-                formBackgroundColor: 'rgba(255, 255, 255, 0.05)',
-                inputBackgroundColor: 'rgba(255, 255, 255, 0.1)',
-                inputFocusedBackgroundColor: 'rgba(255, 255, 255, 0.15)',
-                inputBorderColor: 'rgba(255, 255, 255, 0.2)',
-                inputFocusedBorderColor: '#2196f3',
-                inputTextColor: '#ffffff',
-                baseColor: '#2196f3',
-                baseColorFirstVariant: '#1976d2',
-                baseColorSecondVariant: '#00bcd4',
-                errorColor: '#f44336',
-                successColor: '#4caf50',
-                outlinePrimaryColor: '#2196f3',
-                outlineSecondaryColor: 'rgba(255, 255, 255, 0.2)',
-                buttonTextColor: '#ffffff',
-                placeholderColor: 'rgba(255, 255, 255, 0.5)',
-                secondaryColor: 'rgba(255, 255, 255, 0.8)'
-              }
-            }
-          }
-        },
-        callbacks: {
-          onReady: () => {
-            console.log('Payment Brick pronto');
-            setIsLoading(false);
-          },
-          onSubmit: ({ selectedPaymentMethod, formData }: any) => {
-            console.log('Dados do pagamento:', { selectedPaymentMethod, formData });
-            setIsLoading(true);
-            
-            // Processar pagamento no backend
-            return processPayment(selectedPaymentMethod, formData);
-          },
-          onError: (error: any) => {
-            console.error('Erro no Payment Brick:', error);
-            setStatusMessage({
-              type: 'error',
-              message: 'Erro no processamento do pagamento'
-            });
-            setIsLoading(false);
-          }
-        }
-      };
-      
-      // Renderizar o Payment Brick
-      const paymentBrickController = await bricksBuilder.create(
-        'payment',
-        'mercadopago-checkout',
-        settings
-      );
-      
-      setCardForm(paymentBrickController);
-      console.log('Payment Brick inicializado com sucesso');
-      
     } catch (error) {
-      console.error('Erro ao inicializar Payment Brick:', error);
+      console.error('Erro ao inicializar checkout simples:', error);
       setStatusMessage({
         type: 'error',
         message: 'Erro ao inicializar sistema de pagamento'
