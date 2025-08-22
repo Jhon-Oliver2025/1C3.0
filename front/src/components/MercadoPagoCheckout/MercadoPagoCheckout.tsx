@@ -492,25 +492,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
           customization: {
             visual: {
               style: {
-                theme: 'dark', // Tema escuro para combinar com o design
-                customVariables: {
-                  formBackgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  inputBackgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  inputFocusedBackgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  inputBorderColor: 'rgba(255, 255, 255, 0.2)',
-                  inputFocusedBorderColor: '#2196f3',
-                  inputTextColor: '#ffffff',
-                  baseColor: '#2196f3',
-                  baseColorFirstVariant: '#1976d2',
-                  baseColorSecondVariant: '#00bcd4',
-                  errorColor: '#f44336',
-                  successColor: '#4caf50',
-                  outlinePrimaryColor: '#2196f3',
-                  outlineSecondaryColor: 'rgba(255, 255, 255, 0.2)',
-                  buttonTextColor: '#ffffff',
-                  placeholderColor: 'rgba(255, 255, 255, 0.5)',
-                  secondaryColor: 'rgba(255, 255, 255, 0.8)'
-                }
+                theme: 'bootstrap' // Usar tema bootstrap que é mais compatível
               }
             },
             paymentMethods: {
@@ -523,7 +505,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
           },
           callbacks: {
             onReady: () => {
-              console.log('Card Payment Brick pronto');
+              console.log('✅ Card Payment Brick pronto e renderizado!');
               setIsLoading(false);
             },
             onSubmit: async (cardFormData: any) => {
@@ -571,14 +553,30 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         };
         
         // Renderizar o Card Payment Brick
+        console.log('🔄 Criando Card Payment Brick...');
+        console.log('📋 Settings:', settings);
+        console.log('📦 Container ID: mercadopago-checkout');
+        
+        // Timeout para detectar se o Brick não carrega
+        const timeoutId = setTimeout(() => {
+          console.warn('⚠️ Card Payment Brick demorou mais de 10s para carregar');
+          setStatusMessage({
+            type: 'error',
+            message: 'Timeout ao carregar formulário de pagamento. Tente recarregar a página.'
+          });
+          setIsLoading(false);
+        }, 10000);
+        
         const cardPaymentBrick = await bricksBuilder.create(
           'cardPayment',
           'mercadopago-checkout',
           settings
         );
         
+        clearTimeout(timeoutId);
         setCardForm(cardPaymentBrick);
-        console.log('Card Payment Brick inicializado com sucesso');
+        console.log('✅ Card Payment Brick inicializado com sucesso!');
+        console.log('🎯 Brick instance:', cardPaymentBrick);
         
       }
     } catch (error) {
