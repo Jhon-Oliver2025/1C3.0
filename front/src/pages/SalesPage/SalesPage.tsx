@@ -397,11 +397,9 @@ const SalesPage: React.FC = () => {
       
       // Ajustar configurações baseado na conexão
       if (isSlow) {
-        // Para conexões lentas, usar vídeo de menor qualidade
-        setVideoConfig(prev => ({
-          ...prev,
-          videoUrl: prev.videoUrl.replace('.mp4', '_low.mp4') // Fallback para versão de baixa qualidade
-        }));
+        // Para conexões lentas, manter o mesmo vídeo mas com configurações otimizadas
+        console.log('Conexão lenta detectada - mantendo vídeo original');
+        // Removido fallback para versão de baixa qualidade pois não existe vsl01_low.mp4
       }
     } else {
       // Fallback: detectar baseado no tempo de carregamento
