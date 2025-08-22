@@ -11,12 +11,23 @@
 
 /* Header */
 .header {
-  text-align: center;
   margin-bottom: 30px;
   padding: 20px;
   background: linear-gradient(135deg, rgba(100, 255, 218, 0.1), rgba(16, 34, 64, 0.3));
   border-radius: 16px;
   border: 1px solid rgba(100, 255, 218, 0.2);
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+}
+
+.titleSection {
+  text-align: left;
+  flex: 1;
 }
 
 .title {
@@ -39,6 +50,162 @@
   color: #94A3B8;
   margin: 0;
   opacity: 0.8;
+}
+
+/* Controles de Atualização */
+.controlsSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 15px;
+}
+
+.autoUpdateControls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.statusIndicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.statusDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.statusDot.active {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+  animation: pulse 2s infinite;
+}
+
+.statusDot.inactive {
+  background: #6b7280;
+}
+
+.statusText {
+  color: #B8D4E3;
+  font-weight: 500;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+}
+
+.controlButton {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.startButton {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.startButton:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.stopButton {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+.stopButton:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.refreshButton {
+  padding: 10px 20px;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  border-radius: 8px;
+  background: rgba(100, 255, 218, 0.1);
+  color: #64FFDA;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: rgba(100, 255, 218, 0.2);
+  border-color: rgba(100, 255, 218, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(100, 255, 218, 0.2);
+}
+
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .headerContent {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .titleSection {
+    text-align: center;
+  }
+  
+  .controlsSection {
+    align-items: center;
+  }
+  
+  .autoUpdateControls {
+    align-items: center;
+  }
+  
+  .buttonGroup {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .controlButton,
+  .refreshButton {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Loading */

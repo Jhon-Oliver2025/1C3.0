@@ -56,6 +56,8 @@ const TradingSimulation: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [isAutoUpdateEnabled, setIsAutoUpdateEnabled] = useState(false);
+  const [updateInterval, setUpdateInterval] = useState<NodeJS.Timeout | null>(null);
 
   /**
    * Busca dados de simulação da API
@@ -296,12 +298,21 @@ const TradingSimulation: React.FC = () => {
   // Carregar dados na inicialização
   useEffect(() => {
     fetchSimulationData();
-    
-    // Atualizar dados a cada 10 segundos para preços em tempo real
-    const interval = setInterval(fetchSimulationData, 10000);
-    
-    return () => clearInterval(interval);
   }, []);
+
+  // Controlar atualização automática
+  useEffect(() => {
+    if (isAutoUpdateEnabled) {
+      const interval = setInterval(fetchSimulationData, 10000);
+      setUpdateInterval(interval);
+      return () => clearInterval(interval);
+    } else {
+      if (updateInterval) {
+        clearInterval(updateInterval);
+        setUpdateInterval(null);
+      }
+    }
+  }, [isAutoUpdateEnabled]);
 
   /**
    * Atualiza preços em tempo real
@@ -318,6 +329,33 @@ const TradingSimulation: React.FC = () => {
      setLoading(true);
      updateRealTimePrices();
    };
+
+  /**
+   * Inicia a atualização automática
+   */
+  const startAutoUpdate = () => {
+    setIsAutoUpdateEnabled(true);
+    console.log('✅ Atualização automática iniciada');
+  };
+
+  /**
+   * Para a atualização automática
+   */
+  const stopAutoUpdate = () => {
+    setIsAutoUpdateEnabled(false);
+    console.log('⏹️ Atualização automática parada');
+  };
+
+  /**
+   * Alterna entre start/stop da atualização automática
+   */
+  const toggleAutoUpdate = () => {
+    if (isAutoUpdateEnabled) {
+      stopAutoUpdate();
+    } else {
+      startAutoUpdate();
+    }
+  };
 
   if (loading) {
     return (
@@ -407,13 +445,45 @@ const TradingSimulation: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>💰 Investimentos Simulados</h2>
-        <p className={styles.subtitle}>
-          Simulação com investimento de $1.000 USD por sinal
-        </p>
-        <p className={styles.lastUpdated}>
-          Última atualização: {lastUpdated}
-        </p>
+        <div className={styles.headerContent}>
+          <div className={styles.titleSection}>
+            <h2 className={styles.title}>💰 Investimentos Simulados</h2>
+            <p className={styles.subtitle}>
+              Simulação com investimento de $1.000 USD por sinal
+            </p>
+            <p className={styles.lastUpdated}>
+              Última atualização: {lastUpdated}
+            </p>
+          </div>
+          
+          <div className={styles.controlsSection}>
+            <div className={styles.autoUpdateControls}>
+              <div className={styles.statusIndicator}>
+                <span className={`${styles.statusDot} ${isAutoUpdateEnabled ? styles.active : styles.inactive}`}></span>
+                <span className={styles.statusText}>
+                  {isAutoUpdateEnabled ? 'Atualização Automática Ativa' : 'Atualização Manual'}
+                </span>
+              </div>
+              
+              <div className={styles.buttonGroup}>
+                <button 
+                  className={`${styles.controlButton} ${isAutoUpdateEnabled ? styles.stopButton : styles.startButton}`}
+                  onClick={toggleAutoUpdate}
+                >
+                  {isAutoUpdateEnabled ? '⏹️ Parar' : '▶️ Iniciar'}
+                </button>
+                
+                <button 
+                  className={styles.refreshButton}
+                  onClick={handleRefresh}
+                  disabled={loading}
+                >
+                  🔄 {loading ? 'Atualizando...' : 'Atualizar Agora'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Estatísticas Gerais */}
