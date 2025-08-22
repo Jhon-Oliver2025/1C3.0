@@ -1,6 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import styled from 'styled-components';
-import vsl01Video from '../../assets/Vsl/vsl01.mp4';
 
 // Lazy loading para componentes não críticos
 const LazyFooter = lazy(() => Promise.resolve({ default: () => (
@@ -148,7 +147,7 @@ const SalesPage: React.FC = () => {
   const [showVideoOverlay, setShowVideoOverlay] = useState(true);
   const [activeVideoOverlay, setActiveVideoOverlay] = useState<VideoOverlayConfig | null>(null);
   const [videoConfig, setVideoConfig] = useState<VideoConfig>({
-    videoUrl: vsl01Video,
+    videoUrl: '/vsl01.mp4',
     autoplay: true,
     muted: true,
     showOverlay: true
