@@ -20,7 +20,7 @@ from .gerenciar_sinais import GerenciadorSinais
 from .telegram_notifier import TelegramNotifier
 from .btc_correlation_analyzer import BTCCorrelationAnalyzer
 from .klines_cache import CacheManager
-from .coin_ranking import coin_ranking
+# from .coin_ranking import coin_ranking  # Removido - sistema de ranking desabilitado
 
 # Initialize colorama
 init()
@@ -450,16 +450,9 @@ class TechnicalAnalysis:
             
             quality_score = sum(scores.values())
             
-            # 4.5. Aplicar bonus/penalização por ranking da moeda
-            ranking_info = coin_ranking.get_ranking_info(symbol)
-            ranking_bonus = ranking_info['ranking_bonus']
-            quality_score += ranking_bonus
-            
-            # Log do ranking para debug
-            if ranking_info['position']:
-                print(f"   🏆 {symbol}: Posição #{ranking_info['position']} ({ranking_info['tier']}) - Bonus: {ranking_bonus:+d} pts")
-            else:
-                print(f"   ⚠️ {symbol}: Fora do Top 40 - Penalização: {ranking_bonus:+d} pts")
+            # 4.5. Sistema de ranking removido - todas as moedas são elegíveis
+            # Mantendo apenas a pontuação base da análise técnica
+            print(f"   📊 {symbol}: Pontuação base: {quality_score:.1f} pts (sem filtro de ranking)")
             
             # 5. Filtro de qualidade básico (AJUSTADO PARA EQUILIBRIO)
             if quality_score < 70.0:  # Threshold ajustado para 70 pontos
@@ -494,8 +487,7 @@ class TechnicalAnalysis:
             
             # 10. Capturar motivos detalhados de geração
             generation_reasons = self._capture_generation_reasons(
-                symbol, signal_type, scores, trend_analysis, entry_analysis, 
-                quality_score, ranking_info, ranking_bonus
+                symbol, signal_type, scores, trend_analysis, entry_analysis, quality_score
             )
             
             # 11. Montar sinal para confirmação BTC
@@ -533,8 +525,7 @@ class TechnicalAnalysis:
             return None
     
     def _capture_generation_reasons(self, symbol: str, signal_type: str, scores: Dict[str, float],
-                                   trend_analysis: Dict, entry_analysis: Dict, quality_score: float,
-                                   ranking_info: Dict, ranking_bonus: int) -> Dict[str, Any]:
+                                   trend_analysis: Dict, entry_analysis: Dict, quality_score: float) -> Dict[str, Any]:
         """
         Captura motivos detalhados de por que um sinal foi gerado
         
@@ -545,8 +536,6 @@ class TechnicalAnalysis:
             trend_analysis: Análise de tendência
             entry_analysis: Análise de entrada
             quality_score: Pontuação final de qualidade
-            ranking_info: Informações de ranking da moeda
-            ranking_bonus: Bonus/penalização por ranking
             
         Returns:
             Dicionário com motivos detalhados de geração
@@ -585,12 +574,8 @@ class TechnicalAnalysis:
                 macd_direction = 'positivo' if macd_signal > 0 else 'negativo'
                 trigger_conditions.append(f"MACD {macd_direction}")
             
-            # Informações de ranking
-            ranking_description = ""
-            if ranking_info['position']:
-                ranking_description = f"Top {ranking_info['position']} ({ranking_info['tier']})"
-            else:
-                ranking_description = "Fora do Top 40"
+            # Sistema de ranking removido - todas as moedas são elegíveis
+            coin_name = symbol.replace('USDT', '').replace('BUSD', '').replace('USDC', '')
             
             return {
                 'timestamp': datetime.now(),
@@ -613,18 +598,18 @@ class TechnicalAnalysis:
                 },
                 'trigger_conditions': trigger_conditions,
                 'ranking_info': {
-                    'coin': ranking_info['coin'],
-                    'position': ranking_info['position'],
-                    'tier': ranking_info['tier'],
-                    'description': ranking_description,
-                    'bonus_applied': ranking_bonus
+                    'coin': coin_name,
+                    'position': None,
+                    'tier': 'N/A',
+                    'description': 'Sistema de ranking removido',
+                    'bonus_applied': 0
                 },
                 'quality_breakdown': {
                     'base_score': sum(scores.values()),
-                    'ranking_bonus': ranking_bonus,
+                    'ranking_bonus': 0,
                     'final_score': quality_score,
                     'classification': self._get_signal_classification(quality_score),
-                    'threshold_passed': quality_score >= 75.0
+                    'threshold_passed': quality_score >= 70.0
                 },
                 'market_context': {
                     'timeframe_trend': self.config['trend_timeframe'],
