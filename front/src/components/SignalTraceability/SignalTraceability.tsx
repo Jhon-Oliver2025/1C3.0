@@ -289,11 +289,11 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
                 <SubSectionTitle>⚡ Condições que Dispararam</SubSectionTitle>
                 <ConditionsList>
                   {signal.generation_reasons.trigger_conditions?.map((condition, index) => (
-                    <ConditionItem key={index}>
+                    <ConditionItem key={`condition-${signal.id}-${index}-${condition.slice(0, 10)}`}>
                       <FaCheckCircle /> {condition}
                     </ConditionItem>
                   )) || (
-                    <ConditionItem>
+                    <ConditionItem key={`no-conditions-${signal.id}`}>
                       <FaCheckCircle /> Dados não disponíveis
                     </ConditionItem>
                   )}
@@ -345,7 +345,7 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
           {expandedSections.verification && (
             <SectionContent>
               {signal.confirmation_checks.map((check, index) => (
-                <VerificationItem key={index}>
+                <VerificationItem key={`check-${signal.id}-${check.timestamp}-${check.attempt_number}`}>
                   <VerificationHeader>
                     <VerificationTitle>
                       Tentativa #{check.attempt_number}
@@ -445,7 +445,7 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
                 <SubSectionTitle>🎯 Fatores Decisivos</SubSectionTitle>
                 <FactorsList>
                   {signal.final_decision_reason.decisive_factors.map((factor, index) => (
-                    <FactorItem key={index}>
+                    <FactorItem key={`factor-${signal.id}-${index}-${factor.slice(0, 10)}`}>
                       <FaCheckCircle /> {factor}
                     </FactorItem>
                   ))}
@@ -517,7 +517,7 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
                   <SubSectionTitle>💡 Lições Aprendidas</SubSectionTitle>
                   <LessonsList>
                     {signal.final_decision_reason.lessons_learned.map((lesson, index) => (
-                      <LessonItem key={index}>
+                      <LessonItem key={`lesson-${signal.id}-${index}-${lesson.slice(0, 10)}`}>
                         <FaLightbulb /> {lesson}
                       </LessonItem>
                     ))}
