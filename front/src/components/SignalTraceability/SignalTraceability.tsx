@@ -183,6 +183,7 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
   };
 
   const getStatusColor = (status: string) => {
+    if (!status) return '#94a3b8';
     switch (status.toLowerCase()) {
       case 'confirmed': return '#10b981';
       case 'rejected': return '#ef4444';
@@ -219,7 +220,7 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
             <SectionTitle>
               <FaChartLine /> Por que foi gerado?
               <ScoreBadge>
-                {signal.generation_reasons.quality_breakdown.final_score.toFixed(0)} pts
+                {signal.generation_reasons.quality_breakdown?.final_score?.toFixed(0) || 'N/A'} pts
               </ScoreBadge>
             </SectionTitle>
             {expandedSections.generation ? <FaChevronUp /> : <FaChevronDown />}
@@ -233,19 +234,19 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
                 <ScoreGrid>
                   <ScoreItem>
                     <ScoreLabel>Tendência</ScoreLabel>
-                    <ScoreValue>{signal.generation_reasons.technical_scores.trend_score}/35</ScoreValue>
+                    <ScoreValue>{signal.generation_reasons.technical_scores?.trend_score || 0}/35</ScoreValue>
                   </ScoreItem>
                   <ScoreItem>
                     <ScoreLabel>Entrada</ScoreLabel>
-                    <ScoreValue>{signal.generation_reasons.technical_scores.entry_score}/25</ScoreValue>
+                    <ScoreValue>{signal.generation_reasons.technical_scores?.entry_score || 0}/25</ScoreValue>
                   </ScoreItem>
                   <ScoreItem>
                     <ScoreLabel>RSI</ScoreLabel>
-                    <ScoreValue>{signal.generation_reasons.technical_scores.rsi_score}/20</ScoreValue>
+                    <ScoreValue>{signal.generation_reasons.technical_scores?.rsi_score || 0}/20</ScoreValue>
                   </ScoreItem>
                   <ScoreItem>
                     <ScoreLabel>Padrões</ScoreLabel>
-                    <ScoreValue>{signal.generation_reasons.technical_scores.pattern_score}/20</ScoreValue>
+                    <ScoreValue>{signal.generation_reasons.technical_scores?.pattern_score || 0}/20</ScoreValue>
                   </ScoreItem>
                 </ScoreGrid>
               </SubSection>
@@ -257,26 +258,27 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
                   <IndicatorItem>
                     <IndicatorLabel>RSI</IndicatorLabel>
                     <IndicatorValue>
-                      {signal.generation_reasons.key_indicators.rsi_value.toFixed(0)} 
-                      ({signal.generation_reasons.key_indicators.rsi_zone})
+                      {signal.generation_reasons.key_indicators?.rsi_value?.toFixed(0) || 'N/A'} 
+                      ({signal.generation_reasons.key_indicators?.rsi_zone || 'N/A'})
                     </IndicatorValue>
                   </IndicatorItem>
                   <IndicatorItem>
                     <IndicatorLabel>Volume</IndicatorLabel>
                     <IndicatorValue>
-                      {signal.generation_reasons.key_indicators.volume_ratio.toFixed(1)}x média
+                      {signal.generation_reasons.key_indicators?.volume_ratio?.toFixed(1) || 'N/A'}x média
                     </IndicatorValue>
                   </IndicatorItem>
                   <IndicatorItem>
                     <IndicatorLabel>Tendência</IndicatorLabel>
                     <IndicatorValue>
-                      {signal.generation_reasons.key_indicators.trend_strength.toFixed(1)}
+                      {signal.generation_reasons.key_indicators?.trend_strength?.toFixed(1) || 'N/A'}
                     </IndicatorValue>
                   </IndicatorItem>
                   <IndicatorItem>
                     <IndicatorLabel>MACD</IndicatorLabel>
-                    <IndicatorValue $positive={signal.generation_reasons.key_indicators.macd_signal > 0}>
-                      {signal.generation_reasons.key_indicators.macd_signal > 0 ? 'Positivo' : 'Negativo'}
+                    <IndicatorValue $positive={signal.generation_reasons.key_indicators?.macd_signal ? signal.generation_reasons.key_indicators.macd_signal > 0 : undefined}>
+                      {signal.generation_reasons.key_indicators?.macd_signal !== undefined ? 
+                        (signal.generation_reasons.key_indicators.macd_signal > 0 ? 'Positivo' : 'Negativo') : 'N/A'}
                     </IndicatorValue>
                   </IndicatorItem>
                 </IndicatorGrid>
@@ -286,11 +288,15 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
               <SubSection>
                 <SubSectionTitle>⚡ Condições que Dispararam</SubSectionTitle>
                 <ConditionsList>
-                  {signal.generation_reasons.trigger_conditions.map((condition, index) => (
+                  {signal.generation_reasons.trigger_conditions?.map((condition, index) => (
                     <ConditionItem key={index}>
                       <FaCheckCircle /> {condition}
                     </ConditionItem>
-                  ))}
+                  )) || (
+                    <ConditionItem>
+                      <FaCheckCircle /> Dados não disponíveis
+                    </ConditionItem>
+                  )}
                 </ConditionsList>
               </SubSection>
 
@@ -301,20 +307,21 @@ const SignalTraceability: React.FC<SignalTraceabilityProps> = ({ signal }) => {
                   <RankingItem>
                     <RankingLabel>Posição:</RankingLabel>
                     <RankingValue>
-                      {signal.generation_reasons.ranking_info.position 
+                      {signal.generation_reasons.ranking_info?.position 
                         ? `#${signal.generation_reasons.ranking_info.position}` 
                         : 'Fora do Top 40'}
                     </RankingValue>
                   </RankingItem>
                   <RankingItem>
                     <RankingLabel>Tier:</RankingLabel>
-                    <RankingValue>{signal.generation_reasons.ranking_info.tier}</RankingValue>
+                    <RankingValue>{signal.generation_reasons.ranking_info?.tier || 'N/A'}</RankingValue>
                   </RankingItem>
                   <RankingItem>
                     <RankingLabel>Bonus:</RankingLabel>
-                    <RankingValue $color={signal.generation_reasons.ranking_info.bonus_applied >= 0 ? '#10b981' : '#ef4444'}>
-                      {signal.generation_reasons.ranking_info.bonus_applied >= 0 ? '+' : ''}
-                      {signal.generation_reasons.ranking_info.bonus_applied} pts
+                    <RankingValue $color={signal.generation_reasons.ranking_info?.bonus_applied !== undefined ? 
+                      (signal.generation_reasons.ranking_info.bonus_applied >= 0 ? '#10b981' : '#ef4444') : '#94a3b8'}>
+                      {signal.generation_reasons.ranking_info?.bonus_applied !== undefined ? 
+                        `${signal.generation_reasons.ranking_info.bonus_applied >= 0 ? '+' : ''}${signal.generation_reasons.ranking_info.bonus_applied} pts` : 'N/A'}
                     </RankingValue>
                   </RankingItem>
                 </RankingInfo>
