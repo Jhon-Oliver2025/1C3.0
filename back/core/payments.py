@@ -487,3 +487,98 @@ class PaymentManager:
     def get_available_courses(self) -> Dict[str, Any]:
         """Retorna lista de cursos disponíveis para compra"""
         return self.available_courses
+    
+    def process_card_payment(self, payment_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Processa pagamento com cartão de crédito via API do Mercado Pago"""
+        try:
+            print(f"🔄 [CARD_PAYMENT] Iniciando processamento...")
+            print(f"📋 [CARD_PAYMENT] Dados: {payment_data}")
+            
+            # Verificar se o access_token está configurado
+            if not self.access_token:
+                error_msg = "MERCADO_PAGO_ACCESS_TOKEN não configurado"
+                print(f"❌ [CARD_PAYMENT] {error_msg}")
+                return {'success': False, 'error': error_msg}
+            
+            # Preparar dados do pagamento
+            payment_payload = {
+                "token": payment_data.get('token'),
+                "payment_method_id": payment_data.get('payment_method_id'),
+                "transaction_amount": float(payment_data.get('transaction_amount')),
+                "installments": int(payment_data.get('installments', 1)),
+                "description": payment_data.get('description', 'Pagamento de curso'),
+                "payer": {
+                    "email": payment_data.get('payer', {}).get('email', 'guest@1crypten.com'),
+                    "identification": {
+                        "type": payment_data.get('payer', {}).get('identification', {}).get('type', 'CPF'),
+                        "number": payment_data.get('payer', {}).get('identification', {}).get('number', '12345678901')
+                    }
+                },
+                "external_reference": f"course_{payment_data.get('course_id', 'unknown')}_{datetime.now().timestamp()}",
+                "notification_url": f"{os.getenv('BACKEND_URL', 'http://localhost:5000')}/api/payments/webhook",
+                "statement_descriptor": "1CRYPTEN CURSO"
+            }
+            
+            # Adicionar issuer_id se fornecido
+            if payment_data.get('issuer_id'):
+                payment_payload['issuer_id'] = payment_data.get('issuer_id')
+            
+            headers = {
+                'Authorization': f'Bearer {self.access_token}',
+                'Content-Type': 'application/json',
+                'X-Idempotency-Key': str(uuid.uuid4())
+            }
+            
+            print(f"🌐 [CARD_PAYMENT] Enviando para: {self.base_url}/v1/payments")
+            print(f"📦 [CARD_PAYMENT] Payload: {payment_payload}")
+            
+            response = requests.post(
+                f'{self.base_url}/v1/payments',
+                headers=headers,
+                json=payment_payload
+            )
+            
+            print(f"📡 [CARD_PAYMENT] Status: {response.status_code}")
+            print(f"📄 [CARD_PAYMENT] Resposta: {response.text}")
+            
+            if response.status_code in [200, 201]:
+                payment_result = response.json()
+                
+                # Salvar registro do pagamento
+                if payment_data.get('course_id'):
+                    self._create_purchase_record(
+                        user_id=payment_data.get('user_id', 'guest'),
+                        course_id=payment_data.get('course_id'),
+                        payment_id=payment_result.get('id'),
+                        amount=payment_result.get('transaction_amount'),
+                        status=payment_result.get('status', 'pending')
+                    )
+                
+                return {
+                    'success': True,
+                    'payment_id': payment_result.get('id'),
+                    'status': payment_result.get('status'),
+                    'status_detail': payment_result.get('status_detail'),
+                    'transaction_amount': payment_result.get('transaction_amount'),
+                    'currency_id': payment_result.get('currency_id'),
+                    'date_created': payment_result.get('date_created'),
+                    'external_reference': payment_result.get('external_reference')
+                }
+            else:
+                error_response = response.json() if response.content else {}
+                error_msg = error_response.get('message', f'Erro HTTP {response.status_code}')
+                print(f"❌ [CARD_PAYMENT] Erro na API: {error_msg}")
+                return {
+                    'success': False,
+                    'error': error_msg,
+                    'details': error_response
+                }
+                
+        except Exception as e:
+            print(f"❌ [CARD_PAYMENT] Erro no processamento: {e}")
+            import traceback
+            print(f"📋 [CARD_PAYMENT] Traceback: {traceback.format_exc()}")
+            return {
+                'success': False,
+                'error': str(e)
+            }

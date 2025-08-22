@@ -301,6 +301,49 @@ def debug_payment_config():
             'error': str(e)
         }), 500
 
+@payments_bp.route('/process-card', methods=['POST'])
+def process_card_payment():
+    """Processa pagamento com cartão de crédito via Mercado Pago"""
+    try:
+        print(f"🔄 [CARD_PAYMENT] Recebendo requisição POST /process-card")
+        print(f"📋 [CARD_PAYMENT] Headers: {dict(request.headers)}")
+        
+        data = request.get_json()
+        print(f"📊 [CARD_PAYMENT] Dados recebidos: {data}")
+        
+        if not data:
+            print(f"❌ [CARD_PAYMENT] Nenhum dado JSON recebido")
+            return jsonify({'error': 'Dados não fornecidos'}), 400
+        
+        # Validar dados obrigatórios
+        required_fields = ['token', 'payment_method_id', 'transaction_amount', 'installments']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Campo obrigatório: {field}'}), 400
+        
+        # Processar pagamento
+        result = payment_manager.process_card_payment(data)
+        
+        if result and result.get('success'):
+            print(f"✅ [CARD_PAYMENT] Pagamento processado com sucesso: {result.get('payment_id')}")
+            return jsonify(result), 200
+        else:
+            print(f"❌ [CARD_PAYMENT] Falha no processamento: {result}")
+            return jsonify({
+                'success': False,
+                'error': result.get('error', 'Erro no processamento do pagamento')
+            }), 400
+        
+    except Exception as e:
+        print(f"❌ [CARD_PAYMENT] Erro no processamento: {str(e)}")
+        import traceback
+        print(f"📋 [CARD_PAYMENT] Traceback: {traceback.format_exc()}")
+        current_app.logger.error(f"Erro ao processar pagamento com cartão: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Erro interno do servidor'
+        }), 500
+
 # Middleware para verificar acesso a aulas
 def require_lesson_access(lesson_id):
     """Decorator para verificar acesso a aulas específicas"""
