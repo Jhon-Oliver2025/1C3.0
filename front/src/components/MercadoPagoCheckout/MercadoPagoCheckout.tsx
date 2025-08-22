@@ -614,38 +614,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
     }
   };
 
-  /**
-   * Processa o pagamento
-   */
-  const processPayment = async (cardFormInstance: any) => {
-    try {
-      setIsLoading(true);
-      
-      const cardFormData = await cardFormInstance.getCardFormData();
-      
-      // Aqui você enviaria os dados para seu backend processar o pagamento
-      console.log('Dados do formulário:', cardFormData);
-      
-      // Simular sucesso por enquanto
-      setStatusMessage({
-        type: 'success',
-        message: 'Pagamento processado com sucesso!'
-      });
-      
-      onSuccess?.(cardFormData);
-    } catch (error) {
-      console.error('Erro ao processar pagamento:', error);
-      setStatusMessage({
-        type: 'error',
-        message: 'Erro ao processar pagamento'
-      });
-      onError?.('Erro ao processar pagamento');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Função handleCheckout removida - agora usamos checkout transparente
+  // Função handleCheckout removida - agora usamos Payment Brick
 
   const installmentValue = course.price / 12;
   const discountPercentage = 0; // Pode ser calculado se houver desconto
