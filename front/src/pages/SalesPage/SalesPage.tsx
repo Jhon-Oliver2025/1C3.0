@@ -153,6 +153,11 @@ const SalesPage: React.FC = () => {
     showOverlay: true
   });
   
+  // Debug: Log da configuração do vídeo
+  useEffect(() => {
+    console.log('🎬 Configuração atual do vídeo:', videoConfig);
+  }, [videoConfig]);
+  
   // Novos estados para funcionalidades avançadas
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [showPauseBanner, setShowPauseBanner] = useState(false);
@@ -580,9 +585,13 @@ const SalesPage: React.FC = () => {
           }
         }
         
-        // Carrega configurações de vídeo
+        // Carrega configurações de vídeo (sempre forçar vsl01.mp4)
         if (config.videoConfig) {
-          setVideoConfig(config.videoConfig);
+          // Força o vídeo correto independente da configuração salva
+          setVideoConfig({
+            ...config.videoConfig,
+            videoUrl: '/vsl01.mp4'
+          });
         }
         
         // Carrega configurações da barra de progresso
@@ -851,7 +860,23 @@ const SalesPage: React.FC = () => {
               onClick={handleVideoPlayPause}
               isFullscreen={isFullscreen}
               isMobile={isMobile}
-              onLoadedData={() => setIsVideoLoaded(true)}
+              onLoadedData={() => {
+                console.log('✅ Vídeo carregado com sucesso!');
+                setIsVideoLoaded(true);
+              }}
+              onLoadStart={() => {
+                console.log('🎬 Iniciando carregamento do vídeo:', videoConfig.videoUrl);
+              }}
+              onError={(e) => {
+                console.error('❌ Erro ao carregar vídeo:', e.target.error);
+                console.log('🔍 URL do vídeo:', videoConfig.videoUrl);
+              }}
+              onAbort={() => {
+                console.warn('⚠️ Carregamento do vídeo foi abortado');
+              }}
+              onCanPlay={() => {
+                console.log('▶️ Vídeo pronto para reproduzir');
+              }}
             />
             
             {/* Botão de fechar fullscreen removido conforme solicitado */}
