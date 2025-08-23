@@ -1107,7 +1107,7 @@ const ProgressBar = styled.div`
   left: 0;
   width: 100%;
   height: 4px;
-  z-index: 10;
+  z-index: 10010; /* Z-index alto para funcionar em fullscreen */
 `;
 
 const ProgressBarBackground = styled.div.withConfig({
@@ -1150,7 +1150,7 @@ const PauseBanner = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 15;
+  z-index: 10015; /* Z-index alto para funcionar em fullscreen */
   cursor: pointer;
   backdrop-filter: blur(5px);
 `;
@@ -1376,7 +1376,7 @@ const CTAOverlay = styled.div`
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 20;
+  z-index: 10020; /* Z-index alto para funcionar em fullscreen */
   width: 90%;
   max-width: 400px;
   
