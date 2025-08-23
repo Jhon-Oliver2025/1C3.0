@@ -148,7 +148,7 @@ const SalesPage: React.FC = () => {
   const [activeVideoOverlay, setActiveVideoOverlay] = useState<VideoOverlayConfig | null>(null);
   const [videoConfig, setVideoConfig] = useState<VideoConfig>({
     videoUrl: '/vsl01.mp4',
-    autoplay: true,
+    autoplay: false, // Desabilitar autoplay - vídeo só inicia com clique do usuário
     muted: true,
     showOverlay: true
   });
@@ -426,8 +426,9 @@ const SalesPage: React.FC = () => {
       enterFullscreen();
     }
     
-    // Inicia o vídeo
+    // SEMPRE reinicia o vídeo do início quando usuário clica
     if (videoRef) {
+      videoRef.currentTime = 0; // Reinicia do início
       videoRef.play();
     }
   };
