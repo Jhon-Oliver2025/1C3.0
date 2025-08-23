@@ -253,6 +253,10 @@ class BTCSignalManager:
             # Gerar ID único para o sinal
             signal_id = str(uuid.uuid4())
             
+            # Usar timezone de São Paulo para timestamps
+            sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
+            now_sp = datetime.now(sao_paulo_tz)
+            
             # Criar sinal pendente
             pending_signal: PendingSignal = {
                 'id': signal_id,
@@ -263,10 +267,10 @@ class BTCSignalManager:
                 'projection_percentage': signal_data['projection_percentage'],
                 'quality_score': signal_data['quality_score'],
                 'signal_class': signal_data['signal_class'],
-                'created_at': datetime.now(),
-                'expires_at': datetime.now() + timedelta(seconds=self.config['confirmation_timeout']),
+                'created_at': now_sp,
+                'expires_at': now_sp + timedelta(seconds=self.config['confirmation_timeout']),
                 'confirmation_attempts': 0,
-                'last_check': datetime.now(),
+                'last_check': now_sp,
                 'btc_correlation': signal_data.get('btc_correlation', 0),
                 'btc_trend': signal_data.get('btc_trend', 'NEUTRAL'),
                 'original_data': signal_data,
@@ -301,7 +305,9 @@ class BTCSignalManager:
         while self.is_monitoring:
             try:
                 cycle_start = time.time()
-                current_time = datetime.now()
+                # Usar timezone de São Paulo
+                sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
+                current_time = datetime.now(sao_paulo_tz)
                 
                 if self.pending_signals:
                     print(f"\n⏰ {current_time.strftime('%d/%m/%Y %H:%M:%S')}")
@@ -349,7 +355,9 @@ class BTCSignalManager:
     def _check_signal_confirmation(self, signal: PendingSignal) -> Dict[str, Any]:
         """Verifica se um sinal deve ser confirmado, rejeitado ou continuar pendente"""
         try:
-            current_time = datetime.now()
+            # Usar timezone de São Paulo
+            sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
+            current_time = datetime.now(sao_paulo_tz)
             
             # Verificar se expirou
             if current_time > signal['expires_at']:
@@ -450,11 +458,15 @@ class BTCSignalManager:
             # Obter análise BTC atual
             btc_analysis = self.btc_analyzer.get_current_btc_analysis()
             
+            # Usar timezone de São Paulo para timestamps
+            sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
+            current_time = datetime.now(sao_paulo_tz)
+            
             # Criar registro da verificação
             check_record = {
-                'timestamp': datetime.now(),
+                'timestamp': current_time,
                 'attempt_number': signal['confirmation_attempts'],
-                'time_since_creation': (datetime.now() - signal['created_at']).total_seconds() / 60,  # em minutos
+                'time_since_creation': (current_time - signal['created_at']).total_seconds() / 60,  # em minutos
                 
                 # Condições de mercado no momento da verificação
                 'market_conditions': {
@@ -521,8 +533,9 @@ class BTCSignalManager:
         except Exception as e:
             print(f"❌ Erro ao registrar verificação: {e}")
             # Adicionar registro básico em caso de erro
+            sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
             signal['confirmation_checks'].append({
-                'timestamp': datetime.now(),
+                'timestamp': datetime.now(sao_paulo_tz),
                 'attempt_number': signal['confirmation_attempts'],
                 'error': str(e),
                 'confirmations_count': len(confirmations),
@@ -767,6 +780,9 @@ class BTCSignalManager:
                 signal, 'REJECTED', reasons
             )
             
+            # Usar timezone de São Paulo
+            sao_paulo_tz = pytz.timezone('America/Sao_Paulo')
+            
             # Criar sinal rejeitado
             rejected_signal = {
                 'id': signal['id'],
@@ -776,7 +792,7 @@ class BTCSignalManager:
                 'quality_score': signal['quality_score'],
                 'signal_class': signal['signal_class'],
                 'created_at': signal['created_at'],
-                'rejected_at': datetime.now(),
+                'rejected_at': datetime.now(sao_paulo_tz),
                 'rejection_reasons': reasons,
                 'confirmation_attempts': signal['confirmation_attempts'],
                 'original_data': signal['original_data']
