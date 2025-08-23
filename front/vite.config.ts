@@ -62,9 +62,9 @@ export default defineConfig(({ mode }) => {
             router: ['react-router-dom']
           },
           assetFileNames: (assetInfo) => {
-            // Manter estrutura de pastas para vídeos
+            // Manter nome original para vídeos na pasta public
             if (assetInfo.name && assetInfo.name.endsWith('.mp4')) {
-              return 'assets/videos/[name]-[hash][extname]';
+              return '[name][extname]';
             }
             return 'assets/[name]-[hash][extname]';
           }
