@@ -48,7 +48,7 @@ class TechnicalAnalysis:
         self.config = {
             'trend_timeframe': '4h',
             'entry_timeframe': '1h',
-            'quality_score_minimum': 70.0,  # Mínimo 70 pontos para sinais de qualidade
+            'quality_score_minimum': 65.0,  # Mínimo 65 pontos para sinais de qualidade
             'scan_interval': 60,  # 60 segundos
             'pairs_update_interval': 1200,  # 20 minutos
             'target_percentage_min': 6.0,
@@ -455,7 +455,7 @@ class TechnicalAnalysis:
             print(f"   📊 {symbol}: Pontuação base: {quality_score:.1f} pts (sem filtro de ranking)")
             
             # 5. Filtro de qualidade básico (AJUSTADO PARA EQUILIBRIO)
-            if quality_score < 70.0:  # Threshold ajustado para 70 pontos
+            if quality_score < 65.0:  # Threshold ajustado para 65 pontos
                 return None
             
             # 6. Classificação (ajustada para maior rigor)
@@ -609,7 +609,7 @@ class TechnicalAnalysis:
                     'ranking_bonus': 0,
                     'final_score': quality_score,
                     'classification': self._get_signal_classification(quality_score),
-                    'threshold_passed': quality_score >= 70.0
+                    'threshold_passed': quality_score >= 65.0
                 },
                 'market_context': {
                     'timeframe_trend': self.config['trend_timeframe'],
