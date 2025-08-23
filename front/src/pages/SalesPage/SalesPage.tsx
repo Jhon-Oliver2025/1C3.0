@@ -882,7 +882,7 @@ const SalesPage: React.FC = () => {
             {/* Botão de fechar fullscreen removido conforme solicitado */}
           
           {/* Barra de progresso inteligente */}
-          <ProgressBar>
+          <ProgressBar isFullscreen={isFullscreen} isMobile={isMobile}>
             <ProgressBarBackground backgroundColor={progressBarConfig.backgroundColor}>
               <ProgressBarFill 
                 progress={videoProgress}
@@ -947,7 +947,7 @@ const SalesPage: React.FC = () => {
           
           {/* CTA Overlay - aparece sobreposto na parte inferior do vídeo */}
           {showButton && (
-            <CTAOverlay>
+            <CTAOverlay isFullscreen={isFullscreen} isMobile={isMobile}>
               <CTAButton
                 as="a"
                 href={activeButton?.link || '/checkout/despertar-crypto'}
@@ -1094,12 +1094,14 @@ const VideoContainer = styled.div.withConfig({
     top: 0;
     left: 0;
     width: 100vw;
-    height: 100vh;
+    height: calc(100vh - 100px);
     max-width: none;
     aspect-ratio: unset;
     border-radius: 0;
     border: none;
     z-index: 9999;
+    display: flex;
+    flex-direction: column;
   `}
 `;
 
@@ -1119,13 +1121,22 @@ const VideoPlayer = styled.video.withConfig({
 `;
 
 // Barra de progresso inteligente
-const ProgressBar = styled.div`
+const ProgressBar = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isFullscreen' && prop !== 'isMobile'
+})<{ isFullscreen?: boolean; isMobile?: boolean }>`
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 4px;
-  z-index: 10010; /* Z-index alto para funcionar em fullscreen */
+  z-index: 10010;
+  
+  ${props => props.isFullscreen && props.isMobile && `
+    position: fixed;
+    bottom: 80px;
+    z-index: 10020;
+  `}
+`; /* Z-index alto para funcionar em fullscreen */
 `;
 
 const ProgressBarBackground = styled.div.withConfig({
@@ -1420,7 +1431,9 @@ const CloseFullscreenButton = styled.button`
   }
 `;
 
-const CTAOverlay = styled.div`
+const CTAOverlay = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isFullscreen' && prop !== 'isMobile'
+})<{ isFullscreen?: boolean; isMobile?: boolean }>`
   position: absolute;
   bottom: 20px;
   left: 50%;
@@ -1428,6 +1441,14 @@ const CTAOverlay = styled.div`
   z-index: 10020; /* Z-index alto para funcionar em fullscreen */
   width: 90%;
   max-width: 400px;
+  
+  ${props => props.isFullscreen && props.isMobile && `
+    position: fixed;
+    bottom: 10px;
+    z-index: 10020;
+    width: 90%;
+    max-width: 350px;
+  `}
   
   @media (max-width: 768px) {
     bottom: 15px;
