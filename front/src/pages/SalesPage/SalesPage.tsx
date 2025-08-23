@@ -913,7 +913,7 @@ const SalesPage: React.FC = () => {
           
           {/* Banner de incentivo quando pausar */}
           {showPauseBanner && !showVideoOverlay && (
-            <PauseBanner onClick={() => setShowPauseBanner(false)}>
+            <PauseBanner>
               <PauseBannerContent>
                 <PauseBannerIcon>⏸️</PauseBannerIcon>
                 <PauseBannerTitle>Vídeo Pausado</PauseBannerTitle>
@@ -926,12 +926,11 @@ const SalesPage: React.FC = () => {
               </PauseBannerContent>
             </PauseBanner>
           )}
-          </VideoContainer>
-        )}
-        
-        {/* Botão com delay - aparece apenas quando o tempo acabar */}
-        {showButton ? (
-           <CTAButton
+          
+          {/* CTA Overlay - aparece sobreposto na parte inferior do vídeo */}
+          {showButton && (
+            <CTAOverlay>
+              <CTAButton
                 as="a"
                 href={activeButton?.link || '/checkout/despertar-crypto'}
                 buttonColor={activeButton?.backgroundColor || '#ff6b35'}
@@ -940,9 +939,13 @@ const SalesPage: React.FC = () => {
                   <CTAButtonText>{activeButton?.text || '🚀 QUERO ACESSO AGORA'}</CTAButtonText>
                 </CTAButtonContent>
               </CTAButton>
-         ) : (
-           <ButtonPlaceholder />
-         )}
+            </CTAOverlay>
+          )}
+          </VideoContainer>
+        )}
+        
+        {/* Placeholder para manter espaçamento quando botão não aparece */}
+        {!showButton && <ButtonPlaceholder />}
       </VideoSection>
 
       {/* Rodapé com Lazy Loading */}
@@ -1367,6 +1370,28 @@ const OverlayMessage = styled.div.withConfig({
 `;
 
 
+
+const CTAOverlay = styled.div`
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  width: 90%;
+  max-width: 400px;
+  
+  @media (max-width: 768px) {
+    bottom: 15px;
+    width: 85%;
+    max-width: 350px;
+  }
+  
+  @media (max-width: 480px) {
+    bottom: 10px;
+    width: 80%;
+    max-width: 300px;
+  }
+`;
 
 const CTAButton = styled.button.withConfig({
   shouldForwardProp: (prop) => prop !== 'buttonColor'
