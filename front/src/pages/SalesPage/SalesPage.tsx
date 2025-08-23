@@ -836,21 +836,7 @@ const SalesPage: React.FC = () => {
           <VideoSkeleton />
         ) : (
           <VideoContainer isFullscreen={isFullscreen} isMobile={isMobile}>
-            {isSlowConnection && (
-              <div style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                background: 'rgba(255, 165, 0, 0.9)',
-                color: 'white',
-                padding: '4px 8px',
-                borderRadius: '4px',
-                fontSize: '0.8rem',
-                zIndex: 20
-              }}>
-                Conexão lenta detectada
-              </div>
-            )}
+            {/* Banner de conexão lenta removido conforme solicitado */}
             <VideoPlayer
               ref={(ref) => setVideoRef(ref)}
               src={videoConfig.videoUrl}
@@ -868,12 +854,7 @@ const SalesPage: React.FC = () => {
               onLoadedData={() => setIsVideoLoaded(true)}
             />
             
-            {/* Botão de fechar fullscreen */}
-            {isFullscreen && isMobile && (
-              <CloseFullscreenButton onClick={exitFullscreen}>
-                ✕
-              </CloseFullscreenButton>
-            )}
+            {/* Botão de fechar fullscreen removido conforme solicitado */}
           
           {/* Barra de progresso inteligente */}
           <ProgressBar>
