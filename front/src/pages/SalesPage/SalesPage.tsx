@@ -434,23 +434,25 @@ const SalesPage: React.FC = () => {
   };
 
   /**
-   * Função para entrar em fullscreen no mobile
+   * Função para entrar em fullscreen customizado no mobile
+   * Usa fullscreen customizado para manter todos os controles da página de vendas
    */
   const enterFullscreen = () => {
-    if (videoRef && videoRef.requestFullscreen) {
-      videoRef.requestFullscreen();
-      setIsFullscreen(true);
-    }
+    // Usar fullscreen customizado ao invés do nativo para manter controles
+    setIsFullscreen(true);
+    
+    // Desabilitar scroll do body quando em fullscreen
+    document.body.style.overflow = 'hidden';
   };
 
   /**
-   * Função para sair do fullscreen
+   * Função para sair do fullscreen customizado
    */
   const exitFullscreen = () => {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
+    setIsFullscreen(false);
+    
+    // Restaurar scroll do body
+    document.body.style.overflow = 'auto';
   };
 
   /**
@@ -857,11 +859,21 @@ const SalesPage: React.FC = () => {
               loop
               playsInline
               controls={false}
+              controlsList="nodownload nofullscreen noremoteplayback"
+              disablePictureInPicture
+              disableRemotePlayback
               onClick={handleVideoPlayPause}
               isFullscreen={isFullscreen}
               isMobile={isMobile}
               onLoadedData={() => setIsVideoLoaded(true)}
             />
+            
+            {/* Botão de fechar fullscreen */}
+            {isFullscreen && isMobile && (
+              <CloseFullscreenButton onClick={exitFullscreen}>
+                ✕
+              </CloseFullscreenButton>
+            )}
           
           {/* Barra de progresso inteligente */}
           <ProgressBar>
@@ -1370,6 +1382,37 @@ const OverlayMessage = styled.div.withConfig({
 `;
 
 
+
+const CloseFullscreenButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10025; /* Acima de todos os outros elementos */
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  
+  &:hover {
+    background: rgba(255, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+`;
 
 const CTAOverlay = styled.div`
   position: absolute;
