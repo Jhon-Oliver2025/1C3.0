@@ -1147,31 +1147,143 @@ class BTCSignalManager:
         } for signal in recent_rejected]
     
     def get_confirmed_signals(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
-        """Retorna lista de sinais confirmados para a API"""
-        # Retornar os mais recentes primeiro
-        recent_confirmed = sorted(self.confirmed_signals, 
-                                key=lambda x: x.get('confirmed_at', ''), reverse=True)
-        
-        # Aplicar limite apenas se especificado
-        if limit is not None:
-            recent_confirmed = recent_confirmed[:limit]
-        
-        return [{
-            'id': signal.get('confirmation_id', signal.get('id', '')),
-            'symbol': signal['symbol'],
-            'type': signal['type'],
-            'entry_price': signal['entry_price'],
-            'target_price': signal['target_price'],
-            'projection_percentage': signal['projection_percentage'],
-            'quality_score': signal['quality_score'],
-            'signal_class': signal['signal_class'],
-            'created_at': signal.get('timestamp', signal.get('created_at', '')),
-            'confirmed_at': signal.get('confirmed_at', ''),
-            'confirmation_reasons': signal.get('confirmation_reasons', []),
-            'confirmation_attempts': signal.get('confirmation_attempts', 0),
-            'btc_correlation': signal.get('btc_correlation', 0),
-            'btc_trend': signal.get('btc_trend', 'NEUTRAL')
-        } for signal in recent_confirmed]
+        """Retorna lista de sinais confirmados para a API (busca do Supabase + memória)"""
+        try:
+            # Buscar sinais confirmados do Supabase
+            supabase_signals = self._get_confirmed_signals_from_supabase(limit)
+            
+            # Combinar com sinais em memória (para sinais recém-confirmados)
+            memory_signals = sorted(self.confirmed_signals, 
+                                  key=lambda x: x.get('confirmed_at', ''), reverse=True)
+            
+            # Aplicar limite aos sinais em memória se especificado
+            if limit is not None:
+                memory_signals = memory_signals[:limit]
+            
+            # Converter sinais em memória para o formato padrão
+            memory_formatted = [{
+                'id': signal.get('confirmation_id', signal.get('id', '')),
+                'symbol': signal['symbol'],
+                'type': signal['type'],
+                'entry_price': signal['entry_price'],
+                'target_price': signal['target_price'],
+                'projection_percentage': signal['projection_percentage'],
+                'quality_score': signal['quality_score'],
+                'signal_class': signal['signal_class'],
+                'created_at': signal.get('timestamp', signal.get('created_at', '')),
+                'confirmed_at': signal.get('confirmed_at', ''),
+                'confirmation_reasons': signal.get('confirmation_reasons', []),
+                'confirmation_attempts': signal.get('confirmation_attempts', 0),
+                'btc_correlation': signal.get('btc_correlation', 0),
+                'btc_trend': signal.get('btc_trend', 'NEUTRAL')
+            } for signal in memory_signals]
+            
+            # Combinar e remover duplicatas (priorizar Supabase)
+            all_signals = supabase_signals + memory_formatted
+            
+            # Remover duplicatas baseado no símbolo e tipo
+            seen = set()
+            unique_signals = []
+            for signal in all_signals:
+                key = (signal['symbol'], signal['type'])
+                if key not in seen:
+                    seen.add(key)
+                    unique_signals.append(signal)
+            
+            # Ordenar por data de confirmação (mais recente primeiro)
+            unique_signals.sort(key=lambda x: x.get('confirmed_at', ''), reverse=True)
+            
+            # Aplicar limite final se especificado
+            if limit is not None:
+                unique_signals = unique_signals[:limit]
+            
+            print(f"📊 Retornando {len(unique_signals)} sinais confirmados ({len(supabase_signals)} do Supabase, {len(memory_formatted)} da memória)")
+            return unique_signals
+            
+        except Exception as e:
+            print(f"❌ Erro ao buscar sinais confirmados: {e}")
+            # Fallback para sinais em memória apenas
+            recent_confirmed = sorted(self.confirmed_signals, 
+                                    key=lambda x: x.get('confirmed_at', ''), reverse=True)
+            
+            if limit is not None:
+                recent_confirmed = recent_confirmed[:limit]
+            
+            return [{
+                'id': signal.get('confirmation_id', signal.get('id', '')),
+                'symbol': signal['symbol'],
+                'type': signal['type'],
+                'entry_price': signal['entry_price'],
+                'target_price': signal['target_price'],
+                'projection_percentage': signal['projection_percentage'],
+                'quality_score': signal['quality_score'],
+                'signal_class': signal['signal_class'],
+                'created_at': signal.get('timestamp', signal.get('created_at', '')),
+                'confirmed_at': signal.get('confirmed_at', ''),
+                'confirmation_reasons': signal.get('confirmation_reasons', []),
+                'confirmation_attempts': signal.get('confirmation_attempts', 0),
+                'btc_correlation': signal.get('btc_correlation', 0),
+                'btc_trend': signal.get('btc_trend', 'NEUTRAL')
+            } for signal in recent_confirmed]
+    
+    def _get_confirmed_signals_from_supabase(self, limit: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Busca sinais confirmados diretamente do Supabase"""
+        try:
+            # Importar Supabase
+            import os
+            from supabase import create_client, Client
+            
+            supabase_url = os.getenv('SUPABASE_URL')
+            supabase_key = os.getenv('SUPABASE_ANON_KEY')
+            
+            if not supabase_url or not supabase_key:
+                print("⚠️ Supabase não configurado para buscar sinais confirmados")
+                return []
+            
+            supabase: Client = create_client(supabase_url, supabase_key)
+            
+            # Buscar sinais confirmados, ordenados por data de confirmação
+            query = supabase.table('signals').select('*').eq('status', 'CONFIRMED').order('confirmed_at', desc=True)
+            
+            if limit is not None:
+                query = query.limit(limit)
+            
+            result = query.execute()
+            
+            if not result.data:
+                return []
+            
+            # Converter para formato padrão
+            formatted_signals = []
+            for signal in result.data:
+                try:
+                    formatted_signal = {
+                        'id': signal.get('id', ''),
+                        'symbol': signal.get('symbol', ''),
+                        'type': signal.get('type', ''),
+                        'entry_price': float(signal.get('entry_price', 0)),
+                        'target_price': float(signal.get('target_price', 0)),
+                        'projection_percentage': float(signal.get('projection_percentage', 0)),
+                        'quality_score': float(signal.get('quality_score', 0)),
+                        'signal_class': signal.get('signal_class', ''),
+                        'created_at': signal.get('created_at', ''),
+                        'confirmed_at': signal.get('confirmed_at', ''),
+                        'confirmation_reasons': signal.get('confirmation_reasons', ''),
+                        'confirmation_attempts': int(signal.get('confirmation_attempts', 0)),
+                        'btc_correlation': float(signal.get('btc_correlation', 0)),
+                        'btc_trend': signal.get('btc_trend', 'NEUTRAL')
+                    }
+                    formatted_signals.append(formatted_signal)
+                except Exception as e:
+                    print(f"⚠️ Erro ao formatar sinal {signal.get('id', 'unknown')}: {e}")
+                    continue
+            
+            print(f"📊 Encontrados {len(formatted_signals)} sinais confirmados no Supabase")
+            return formatted_signals
+            
+        except Exception as e:
+            print(f"❌ Erro ao buscar sinais confirmados do Supabase: {e}")
+            return []
     
     def get_confirmation_metrics(self) -> Dict[str, Any]:
         """Retorna métricas de confirmação para a API"""

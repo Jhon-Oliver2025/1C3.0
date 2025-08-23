@@ -82,7 +82,7 @@ class SignalCleanup:
             traceback.print_exc()
     
     def cleanup_old_signals(self) -> None:
-        """Remove todos os sinais antigos do banco de dados"""
+        """Remove apenas sinais pendentes e rejeitados antigos, preservando sinais confirmados até às 21:00"""
         try:
             if not self.supabase_url or not self.supabase_key:
                 print("⚠️ Supabase não configurado para limpeza")
@@ -91,36 +91,67 @@ class SignalCleanup:
             supabase: Client = create_client(self.supabase_url, self.supabase_key)
             now_sp = datetime.now(self.sao_paulo_tz)
             
-            # Remover todos os sinais anteriores ao restart (24h atrás)
-            cutoff_time = now_sp - timedelta(hours=24)
-            cutoff_time_utc = cutoff_time.astimezone(pytz.UTC)
+            # Definir horário de corte para sinais pendentes/rejeitados (24h atrás)
+            cutoff_time_pending = now_sp - timedelta(hours=24)
+            cutoff_time_pending_utc = cutoff_time_pending.astimezone(pytz.UTC)
             
-            print(f"🗑️ Removendo sinais anteriores a: {cutoff_time.strftime('%d/%m/%Y %H:%M')} (SP)")
+            # Para sinais confirmados, só remover os do dia anterior às 21:00
+            # Se ainda não passou das 21:00 hoje, manter sinais confirmados de ontem
+            if now_sp.hour < 21:
+                # Ainda não passou das 21:00, manter sinais confirmados de ontem
+                yesterday_21h = (now_sp - timedelta(days=1)).replace(hour=21, minute=0, second=0, microsecond=0)
+            else:
+                # Já passou das 21:00, pode remover sinais confirmados de hoje às 21:00
+                yesterday_21h = now_sp.replace(hour=21, minute=0, second=0, microsecond=0)
             
-            # Buscar sinais para remoção
-            old_signals = supabase.table('signals').select('id, symbol, created_at').lt('created_at', cutoff_time_utc.isoformat()).execute()
+            cutoff_time_confirmed_utc = yesterday_21h.astimezone(pytz.UTC)
             
-            if old_signals.data:
-                signal_count = len(old_signals.data)
-                print(f"📊 Encontrados {signal_count} sinais para remoção")
+            print(f"🗑️ Removendo sinais pendentes/rejeitados anteriores a: {cutoff_time_pending.strftime('%d/%m/%Y %H:%M')} (SP)")
+            print(f"🗑️ Removendo sinais confirmados anteriores a: {yesterday_21h.strftime('%d/%m/%Y %H:%M')} (SP)")
+            
+            # 1. Buscar e remover sinais pendentes e rejeitados antigos
+            old_pending_signals = supabase.table('signals').select('id, symbol, status, created_at').in_('status', ['PENDING', 'REJECTED']).lt('created_at', cutoff_time_pending_utc.isoformat()).execute()
+            
+            pending_removed = 0
+            if old_pending_signals.data:
+                print(f"📊 Encontrados {len(old_pending_signals.data)} sinais pendentes/rejeitados para remoção")
                 
-                # Remover sinais antigos
-                for signal in old_signals.data:
+                for signal in old_pending_signals.data:
                     try:
                         supabase.table('signals').delete().eq('id', signal['id']).execute()
-                        print(f"🗑️ Removido: {signal['symbol']} (ID: {signal['id']})")
+                        print(f"🗑️ Removido {signal['status']}: {signal['symbol']} (ID: {signal['id']})")
+                        pending_removed += 1
                     except Exception as e:
                         print(f"❌ Erro ao remover sinal {signal['id']}: {e}")
+            
+            # 2. Buscar e remover apenas sinais confirmados muito antigos (anteriores ao horário de corte)
+            old_confirmed_signals = supabase.table('signals').select('id, symbol, status, created_at').eq('status', 'CONFIRMED').lt('created_at', cutoff_time_confirmed_utc.isoformat()).execute()
+            
+            confirmed_removed = 0
+            if old_confirmed_signals.data:
+                print(f"📊 Encontrados {len(old_confirmed_signals.data)} sinais confirmados antigos para remoção")
                 
-                print(f"✅ Limpeza concluída: {signal_count} sinais removidos")
-            else:
-                print("📭 Nenhum sinal antigo encontrado para remoção")
+                for signal in old_confirmed_signals.data:
+                    try:
+                        supabase.table('signals').delete().eq('id', signal['id']).execute()
+                        print(f"🗑️ Removido CONFIRMED: {signal['symbol']} (ID: {signal['id']})")
+                        confirmed_removed += 1
+                    except Exception as e:
+                        print(f"❌ Erro ao remover sinal confirmado {signal['id']}: {e}")
+            
+            total_removed = pending_removed + confirmed_removed
+            print(f"✅ Limpeza concluída: {total_removed} sinais removidos ({pending_removed} pendentes/rejeitados, {confirmed_removed} confirmados antigos)")
             
             # Estatísticas finais
             remaining_signals = supabase.table('signals').select('id', count='exact').execute()
             total_remaining = remaining_signals.count if remaining_signals.count else 0
             
-            print(f"📊 Sinais restantes no sistema: {total_remaining}")
+            # Contar sinais confirmados restantes
+            confirmed_remaining = supabase.table('signals').select('id', count='exact').eq('status', 'CONFIRMED').execute()
+            confirmed_count = confirmed_remaining.count if confirmed_remaining.count else 0
+            
+            print(f"📊 Sinais restantes no sistema: {total_remaining} (sendo {confirmed_count} confirmados)")
+            print(f"✅ Sinais confirmados preservados até às 21:00 conforme solicitado")
             
         except Exception as e:
             print(f"❌ Erro na limpeza de sinais: {e}")
