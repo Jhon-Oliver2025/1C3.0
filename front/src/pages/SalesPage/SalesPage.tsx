@@ -966,10 +966,12 @@ const SalesPage: React.FC = () => {
         {!showButton && <ButtonPlaceholder />}
       </VideoSection>
 
-      {/* Rodapé com Lazy Loading */}
-      <Suspense fallback={<FooterSkeleton />}>
-        <LazyFooter />
-      </Suspense>
+      {/* Rodapé com Lazy Loading - Oculto em fullscreen mobile */}
+      {!(isFullscreen && isMobile) && (
+        <Suspense fallback={<FooterSkeleton />}>
+          <LazyFooter />
+        </Suspense>
+      )}
     </PageContainer>
   );
 };
