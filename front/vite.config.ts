@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => {
       }
     },
     build: {
-      target: 'es2015',
+      target: 'es2020',
       minify: 'esbuild', // Usar sempre esbuild para evitar problemas com terser no Docker
       sourcemap: false,
       chunkSizeWarningLimit: 1000,

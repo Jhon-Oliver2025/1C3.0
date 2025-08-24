@@ -1136,7 +1136,6 @@ const ProgressBar = styled.div.withConfig({
     bottom: 80px;
     z-index: 10020;
   `}
-`; /* Z-index alto para funcionar em fullscreen */
 `;
 
 const ProgressBarBackground = styled.div.withConfig({
