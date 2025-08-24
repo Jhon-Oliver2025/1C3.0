@@ -23,6 +23,7 @@ const CheckoutContainer = styled.div`
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
+  overflow-x: hidden; /* Adicionado para prevenir rolagem horizontal */
   
   @media (max-width: 768px) {
     padding: 1.5rem;
@@ -36,6 +37,13 @@ const CheckoutContainer = styled.div`
     margin: 0.5rem;
     max-width: calc(100% - 1rem);
     gap: 1rem;
+  }
+
+  /* Estilos para o iframe do Mercado Pago, se houver */
+  iframe {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
   }
 `;
 
@@ -219,42 +227,31 @@ const TransparentCheckoutContainer = styled.div`
   padding: 1.5rem;
   margin: 1rem 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  
+  width: 100%; /* Garante que o container ocupe a largura total */
+  max-width: 100%; /* Garante que o container não ultrapasse a largura do pai */
+
+  /* Estilos para os elementos internos do formulário do Mercado Pago */
   .mp-form {
     background: transparent !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
-  
+
   .mp-form .mp-form-row {
     margin-bottom: 1rem;
+    width: 100% !important;
+    max-width: 100% !important;
   }
-  
+
   .mp-form .mp-form-row label {
     color: rgba(255, 255, 255, 0.9) !important;
     font-weight: 500;
     margin-bottom: 0.5rem;
     display: block;
-  }
-  
-  .mp-form .mp-form-row input {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 8px !important;
-    color: white !important;
-    padding: 0.75rem !important;
     width: 100% !important;
-    font-size: 1rem !important;
   }
-  
-  .mp-form .mp-form-row input:focus {
-    border-color: #2196f3 !important;
-    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2) !important;
-    outline: none !important;
-  }
-  
-  .mp-form .mp-form-row input::placeholder {
-    color: rgba(255, 255, 255, 0.5) !important;
-  }
-  
+
+  .mp-form .mp-form-row input,
   .mp-form .mp-form-row select {
     background: rgba(255, 255, 255, 0.1) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -262,13 +259,60 @@ const TransparentCheckoutContainer = styled.div`
     color: white !important;
     padding: 0.75rem !important;
     width: 100% !important;
+    font-size: 1rem !important;
+    box-sizing: border-box; /* Garante que padding e border sejam incluídos na largura */
   }
-  
+
+  .mp-form .mp-form-row input:focus,
+  .mp-form .mp-form-row select:focus {
+    border-color: #2196f3 !important;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2) !important;
+    outline: none !important;
+  }
+
+  .mp-form .mp-form-row input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
   .mp-form .mp-form-row .mp-error {
     color: #f44336 !important;
     font-size: 0.875rem;
     margin-top: 0.25rem;
   }
+
+  /* Media queries para garantir responsividade em telas menores */
+  @media (max-width: 768px) {
+    padding: 1rem;
+    margin: 0.5rem 0;
+
+    .mp-form .mp-form-row input,
+    .mp-form .mp-form-row select {
+      font-size: 0.9rem !important;
+      padding: 0.6rem !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.8rem;
+    margin: 0.25rem 0;
+
+    .mp-form .mp-form-row input,
+    .mp-form .mp-form-row select {
+      font-size: 0.85rem !important;
+      padding: 0.5rem !important;
+    }
+  }
+
+  @media (max-width: 360px) {
+    padding: 0.5rem;
+
+    .mp-form .mp-form-row input,
+    .mp-form .mp-form-row select {
+      font-size: 0.8rem !important;
+      padding: 0.4rem !important;
+    }
+  }
+
 `;
 
 // Interfaces
@@ -383,12 +427,60 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
    */
   const initializeMercadoPago = async () => {
     try {
-      // Buscar configuração da API
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/payments/config`);
-      const config = await response.json();
+      // Verificar se estamos em desenvolvimento e o backend não está disponível
+      const isDevelopment = import.meta.env.DEV;
+      let config;
       
-      if (config.config && config.config.public_key) {
+      if (isDevelopment) {
+        try {
+          // Tentar buscar configuração da API
+          const apiUrl = import.meta.env.VITE_API_URL || '';
+          const response = await fetch(`${apiUrl}/api/payments/config`);
+          
+          if (!response.ok) {
+            throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
+          }
+          
+          const responseText = await response.text();
+          if (!responseText) {
+            throw new Error('Resposta vazia da API');
+          }
+          
+          config = JSON.parse(responseText);
+        } catch (error) {
+          console.warn('Backend não disponível em desenvolvimento, usando configuração mock:', error.message);
+          // Configuração mock para desenvolvimento
+          config = {
+            config: {
+              public_key: 'TEST-mock-public-key-for-development'
+            }
+          };
+          
+          // Mostrar mensagem informativa em desenvolvimento
+          setStatusMessage({
+            type: 'info',
+            message: 'Modo desenvolvimento: Backend não conectado. Funcionalidade de pagamento limitada.'
+          });
+          return;
+        }
+      } else {
+        // Em produção, sempre tentar buscar da API
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        const response = await fetch(`${apiUrl}/api/payments/config`);
+        
+        if (!response.ok) {
+          throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
+        }
+        
+        const responseText = await response.text();
+        if (!responseText) {
+          throw new Error('Resposta vazia da API');
+        }
+        
+        config = JSON.parse(responseText);
+      }
+      
+      if (config.config && config.config.public_key && config.config.public_key !== 'TEST-mock-public-key-for-development') {
         console.log('Inicializando Mercado Pago com chave pública:', config.config.public_key);
         const mp = new window.MercadoPago(config.config.public_key, {
           locale: 'pt-BR'
@@ -397,6 +489,8 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         
         // Criar preferência automaticamente
         await createPaymentPreference();
+      } else if (config.config.public_key === 'TEST-mock-public-key-for-development') {
+        console.log('Modo desenvolvimento: Mercado Pago não inicializado (usando mock)');
       } else {
         throw new Error('Chave pública não encontrada na resposta da API');
       }
