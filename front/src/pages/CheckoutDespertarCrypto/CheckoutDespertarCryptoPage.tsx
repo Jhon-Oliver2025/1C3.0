@@ -80,6 +80,19 @@ const CheckoutSection = styled.div`
   padding: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
   height: fit-content;
+  width: 100%; /* Adicionado para garantir que ocupe a largura total */
+  max-width: 100%; /* Adicionado para evitar transbordamento */
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+    margin: 0;
+  }
   
   @media (max-width: 768px) {
     padding: 1.5rem;
