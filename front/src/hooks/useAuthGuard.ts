@@ -14,18 +14,15 @@ export const useAuthGuard = () => {
    */
   const canMakeAuthenticatedRequest = useCallback((): boolean => {
     if (authLoading) {
-      console.log('🔄 Auth: Aguardando verificação de autenticação...');
       return false;
     }
     
     if (!isAuthenticated) {
-      console.warn('🔐 Auth: Usuário não autenticado');
       return false;
     }
     
     const token = localStorage.getItem('token');
     if (!token) {
-      console.warn('🔐 Auth: Token não encontrado no localStorage');
       return false;
     }
     

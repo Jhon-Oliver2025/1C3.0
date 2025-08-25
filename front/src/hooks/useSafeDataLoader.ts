@@ -32,7 +32,6 @@ export const useSafeDataLoader = <T>(
     
     // Verificar se precisa de autenticação
     if (options.requireAuth && !canMakeAuthenticatedRequest()) {
-      console.log('🔐 Data: Aguardando autenticação para carregar dados');
       return;
     }
     
@@ -69,18 +68,22 @@ export const useSafeDataLoader = <T>(
     }
   }, [options.url, options.requireAuth, canMakeAuthenticatedRequest, authenticatedFetch]);
   
-  // Carregar dados iniciais
+  // Carregar dados iniciais apenas se não requer auth ou se está autenticado
   useEffect(() => {
-    fetchData();
-  }, [fetchData, ...(options.dependencies || [])]);
+    if (!options.requireAuth || canMakeAuthenticatedRequest()) {
+      fetchData();
+    }
+  }, [fetchData, canMakeAuthenticatedRequest, ...(options.dependencies || [])]);
   
-  // Configurar intervalo se especificado
+  // Configurar intervalo se especificado e se pode fazer requisições
   useEffect(() => {
     if (options.interval && options.interval > 0) {
-      const intervalId = setInterval(fetchData, options.interval);
-      return () => clearInterval(intervalId);
+      if (!options.requireAuth || canMakeAuthenticatedRequest()) {
+        const intervalId = setInterval(fetchData, options.interval);
+        return () => clearInterval(intervalId);
+      }
     }
-  }, [fetchData, options.interval]);
+  }, [fetchData, options.interval, canMakeAuthenticatedRequest, options.requireAuth]);
   
   return {
     data,
