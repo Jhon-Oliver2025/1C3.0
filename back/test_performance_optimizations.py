@@ -137,21 +137,31 @@ def test_memory_usage():
     print()
     
     try:
-        import psutil
+        # Tentar importar psutil, se não estiver disponível, usar alternativa
+        try:
+            import psutil
+            process = psutil.Process()
+            initial_memory = process.memory_info().rss / 1024 / 1024  # MB
+            print(f"📊 Memória inicial: {initial_memory:.1f} MB")
+            psutil_available = True
+        except ImportError:
+            print("⚠️ psutil não disponível, usando medição alternativa")
+            import gc
+            initial_memory = 0  # Fallback
+            psutil_available = False
+        
         import gc
-        
-        # Memória inicial
-        process = psutil.Process()
-        initial_memory = process.memory_info().rss / 1024 / 1024  # MB
-        
-        print(f"📊 Memória inicial: {initial_memory:.1f} MB")
         
         # Inicializar sistema
         db = Database()
         tech_analysis = TechnicalAnalysis(db)
         
-        after_init_memory = process.memory_info().rss / 1024 / 1024
-        print(f"📊 Memória após inicialização: {after_init_memory:.1f} MB (+{after_init_memory-initial_memory:.1f} MB)")
+        if psutil_available:
+            after_init_memory = process.memory_info().rss / 1024 / 1024
+            print(f"📊 Memória após inicialização: {after_init_memory:.1f} MB (+{after_init_memory-initial_memory:.1f} MB)")
+        else:
+            after_init_memory = 0
+            print("📊 Memória após inicialização: (medição não disponível)")
         
         # Executar varredura
         test_pairs = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'BNBUSDT', 'XRPUSDT']
@@ -159,8 +169,12 @@ def test_memory_usage():
         
         signals = tech_analysis.scan_market(verbose=False)
         
-        after_scan_memory = process.memory_info().rss / 1024 / 1024
-        print(f"📊 Memória após varredura: {after_scan_memory:.1f} MB (+{after_scan_memory-after_init_memory:.1f} MB)")
+        if psutil_available:
+            after_scan_memory = process.memory_info().rss / 1024 / 1024
+            print(f"📊 Memória após varredura: {after_scan_memory:.1f} MB (+{after_scan_memory-after_init_memory:.1f} MB)")
+        else:
+            after_scan_memory = 0
+            print("📊 Memória após varredura: (medição não disponível)")
         
         # Estatísticas de cache
         cache_stats = tech_analysis.cache_manager.get_performance_stats()
@@ -171,8 +185,12 @@ def test_memory_usage():
         
         # Limpeza
         gc.collect()
-        final_memory = process.memory_info().rss / 1024 / 1024
-        print(f"📊 Memória final: {final_memory:.1f} MB")
+        if psutil_available:
+            final_memory = process.memory_info().rss / 1024 / 1024
+            print(f"📊 Memória final: {final_memory:.1f} MB")
+        else:
+            final_memory = 0
+            print("📊 Memória final: (medição não disponível)")
         
         return {
             'initial_memory': initial_memory,
@@ -180,10 +198,6 @@ def test_memory_usage():
             'memory_increase': after_scan_memory - initial_memory,
             'cache_entries': sum(stats['total_entries'] for stats in cache_stats['individual_caches'].values())
         }
-        
-    except ImportError:
-        print("⚠️ psutil não disponível, pulando teste de memória")
-        return None
     except Exception as e:
         print(f"❌ Erro no teste de memória: {e}")
         return None

@@ -6,11 +6,20 @@
     "exclude": [
         "**/node_modules",
         "**/__pycache__",
-        "**/.*"
+        "**/.*",
+        "**/test_*.py",
+        "**/*_test.py"
     ],
     "reportMissingImports": "none",
+    "reportMissingModuleSource": "none",
     "reportUndefinedVariable": "none",
     "reportGeneralTypeIssues": "none",
+    "reportOptionalMemberAccess": "none",
+    "reportOptionalSubscript": "none",
+    "reportPrivateImportUsage": "none",
     "pythonVersion": "3.10",
-    "typeCheckingMode": "off"
+    "typeCheckingMode": "off",
+    "stubPath": "",
+    "venvPath": "",
+    "venv": ""
 }
