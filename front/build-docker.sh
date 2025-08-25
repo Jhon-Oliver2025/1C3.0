@@ -5,10 +5,11 @@ set -e
 
 echo "🔧 Preparando ambiente de build..."
 
-# Limpar cache e dependências antigas
-echo "🧹 Limpando cache..."
-rm -rf node_modules package-lock.json .npm || true
+# Limpar cache e dependências antigas (conforme sugerido pelo Rollup)
+echo "🧹 Limpando cache e node_modules completamente..."
+rm -rf node_modules package-lock.json .npm .vite dist build || true
 npm cache clean --force || true
+echo "✅ Limpeza completa realizada"
 
 # Configurar npm
 echo "⚙️ Configurando npm..."
