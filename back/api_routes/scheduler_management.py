@@ -558,3 +558,67 @@ def scheduler_health_check():
             'error': str(e),
             'message': 'Erro ao executar health check'
         }), 500
+
+@scheduler_management_bp.route('/api/scheduler/restart-system-status', methods=['GET'])
+def get_restart_system_status():
+    """
+    Retorna status específico do sistema de restart às 21:00
+    Inclui informações detalhadas sobre o sistema de limpeza automática
+    """
+    try:
+        from core.signal_cleanup import cleanup_system
+        
+        # Obter status detalhado do sistema
+        status = cleanup_system.get_system_status()
+        
+        return jsonify({
+            'status': 'success',
+            'restart_system': status,
+            'message': 'Status do sistema de restart obtido com sucesso'
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao obter status do sistema de restart: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Erro ao obter status do sistema de restart',
+            'error': str(e)
+        }), 500
+
+@scheduler_management_bp.route('/api/scheduler/test-restart', methods=['POST'])
+def test_restart_system():
+    """
+    Executa um teste do sistema de restart (para debug)
+    ATENÇÃO: Isso executará a limpeza completa de sinais!
+    """
+    try:
+        from core.signal_cleanup import cleanup_system
+        
+        # Verificar se é uma requisição autorizada (pode adicionar autenticação aqui)
+        data = request.get_json() or {}
+        confirm = data.get('confirm', False)
+        
+        if not confirm:
+            return jsonify({
+                'status': 'error',
+                'message': 'Confirmação necessária. Envie {"confirm": true} para executar o teste.',
+                'warning': 'ATENÇÃO: Isso executará a limpeza completa de sinais!'
+            }), 400
+        
+        # Executar teste do sistema
+        logger.info("🧪 Executando teste do sistema de restart...")
+        cleanup_system.test_restart_system()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Teste do sistema de restart executado com sucesso',
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro no teste do sistema de restart: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Erro no teste do sistema de restart',
+            'error': str(e)
+        }), 500

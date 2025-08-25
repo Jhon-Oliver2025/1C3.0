@@ -176,13 +176,14 @@ class SignalCleanup:
             print(f"❌ Erro ao atualizar estatísticas: {e}")
     
     def schedule_cleanup(self) -> None:
-        """Agenda restart diário do sistema"""
-        # Agendar restart único às 21:00 (reinício completo do sistema)
-        schedule.every().day.at("21:00").do(self.daily_system_restart)
+        """Agenda restart diário do sistema com timezone correto"""
+        # IMPORTANTE: A biblioteca schedule não suporta timezone nativamente
+        # Vamos usar uma abordagem diferente com verificação manual de horário
         
-        print("📅 Restart do sistema agendado:")
+        print("📅 Sistema de restart configurado:")
         print("   🔄 21:00 - Restart Diário Completo do Sistema")
         print("   🌍 Timezone: America/Sao_Paulo")
+        print("   ⚠️ Usando verificação manual de timezone (schedule não suporta timezone)")
     
     def start_scheduler(self) -> None:
         """Inicia o agendador de limpeza em thread separada"""
@@ -195,12 +196,43 @@ class SignalCleanup:
         
         def run_scheduler():
             print("🚀 Sistema de limpeza automática iniciado")
+            last_restart_date = None  # Controlar para executar apenas uma vez por dia
+            
             while self.is_running:
                 try:
+                    # Obter horário atual de São Paulo
+                    now_sp = datetime.now(self.sao_paulo_tz)
+                    current_date = now_sp.date()
+                    current_hour = now_sp.hour
+                    current_minute = now_sp.minute
+                    
+                    # Debug: mostrar horário atual a cada 30 minutos
+                    if current_minute % 30 == 0:
+                        print(f"🕐 Horário atual SP: {now_sp.strftime('%d/%m/%Y %H:%M:%S')} - Aguardando 21:00")
+                    
+                    # Verificar se é 21:00 e ainda não executou hoje
+                    if (current_hour == 21 and current_minute == 0 and 
+                        last_restart_date != current_date):
+                        
+                        print(f"⏰ HORÁRIO DE RESTART DETECTADO: {now_sp.strftime('%d/%m/%Y %H:%M:%S')}")
+                        print("🚀 Executando restart diário do sistema...")
+                        
+                        # Executar restart
+                        self.daily_system_restart()
+                        
+                        # Marcar que já executou hoje
+                        last_restart_date = current_date
+                        print(f"✅ Restart concluído. Próximo restart: {(current_date + timedelta(days=1)).strftime('%d/%m/%Y')} às 21:00")
+                    
+                    # Executar jobs agendados da biblioteca schedule (se houver outros)
                     schedule.run_pending()
+                    
                     time.sleep(60)  # Verificar a cada minuto
+                    
                 except Exception as e:
                     print(f"❌ Erro no agendador de limpeza: {e}")
+                    import traceback
+                    traceback.print_exc()
                     time.sleep(60)
         
         self.cleanup_thread = threading.Thread(target=run_scheduler, daemon=True)
@@ -222,6 +254,39 @@ class SignalCleanup:
         """Executa limpeza manual (para testes)"""
         print("🔧 Executando limpeza manual...")
         self.cleanup_old_signals()
+    
+    def test_restart_system(self) -> None:
+        """Testa o sistema de restart (para debug)"""
+        print("🧪 TESTE DO SISTEMA DE RESTART")
+        print("="*50)
+        
+        now_sp = datetime.now(self.sao_paulo_tz)
+        print(f"⏰ Horário atual SP: {now_sp.strftime('%d/%m/%Y %H:%M:%S')}")
+        print(f"📅 Próximo restart: {self.get_next_restart_time()}")
+        
+        time_until = self.get_time_until_restart()
+        print(f"⏳ Tempo até restart: {time_until['hours']}h {time_until['minutes']}m {time_until['seconds']}s")
+        
+        print(f"🔄 Sistema ativo: {self.is_running}")
+        print(f"🧵 Thread ativa: {self.cleanup_thread.is_alive() if self.cleanup_thread else False}")
+        
+        print("\n🚀 Executando restart de teste...")
+        self.daily_system_restart()
+        print("✅ Teste concluído!")
+    
+    def get_system_status(self) -> dict:
+        """Retorna status detalhado do sistema"""
+        now_sp = datetime.now(self.sao_paulo_tz)
+        time_until = self.get_time_until_restart()
+        
+        return {
+            'is_running': self.is_running,
+            'thread_active': self.cleanup_thread.is_alive() if self.cleanup_thread else False,
+            'current_time_sp': now_sp.strftime('%d/%m/%Y %H:%M:%S'),
+            'next_restart': self.get_next_restart_time(),
+            'time_until_restart': time_until,
+            'timezone': str(self.sao_paulo_tz)
+        }
     
     def get_next_restart_time(self) -> str:
         """Retorna o horário do próximo restart do sistema"""
