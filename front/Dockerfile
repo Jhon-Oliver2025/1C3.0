@@ -1,8 +1,11 @@
-# Usar Node.js 20 Alpine (para compatibilidade com dependências)
-FROM node:20-alpine
+# Usar Node.js 20 Debian (resolve problemas do Rollup com musl)
+FROM node:20-slim
 
-# Instalar dependências básicas e bash
-RUN apk add --no-cache git bash curl
+# Instalar dependências básicas
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
