@@ -1,19 +1,25 @@
 # Usar Node.js 20 Alpine (para compatibilidade com dependências)
 FROM node:20-alpine
 
-# Instalar dependências básicas
-RUN apk add --no-cache git
+# Instalar dependências básicas e bash
+RUN apk add --no-cache git bash curl
 
 WORKDIR /app
 
-# Copiar package files
+# Configurar variáveis de ambiente para Node.js
+ENV NODE_ENV=production
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV CI=true
+ENV npm_config_optional=false
+ENV npm_config_legacy_peer_deps=true
+
+# Copiar package files e configurações
 COPY package*.json ./
 COPY .npmrc ./
-RUN rm -rf node_modules package-lock.json || true
+COPY build-docker.sh ./
 
-# Instalar dependências
-RUN npm install --production --legacy-peer-deps --no-optional --legacy-peer-deps
-RUN npm install --save-dev vite @vitejs/plugin-react typescript
+# Tornar script executável
+RUN chmod +x build-docker.sh
 
 # Copiar arquivos de configuração
 COPY tsconfig*.json ./
@@ -24,12 +30,8 @@ COPY index.html ./
 COPY src/ ./src/
 COPY public/ ./public/
 
-# Configurar ambiente
-ENV NODE_ENV=production
-ENV CI=true
-
-# Build simples
-RUN npm run build
+# Executar script de build robusto
+RUN ./build-docker.sh
 
 # Estágio 2: Servir com Nginx
 FROM nginx:alpine
