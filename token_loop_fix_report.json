@@ -1,0 +1,216 @@
+{
+  "timestamp": "2025-08-25T12:19:28.475659",
+  "analysis": {
+    "files_analyzed": 78,
+    "token_usages": {
+      "localStorage_get": [
+        {
+          "file": ".\\front\\src\\components\\MainLayout\\MainLayout.tsx",
+          "matches": 1
+        },
+        {
+          "file": ".\\front\\src\\components\\ProtectedLesson\\ProtectedLesson.tsx",
+          "matches": 2
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useAdminCheck.ts",
+          "matches": 1
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useAuthManager.ts",
+          "matches": 3
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useAuthToken.ts",
+          "matches": 4
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useCourseAccess.ts",
+          "matches": 5
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useOptimizedAuth.ts",
+          "matches": 3
+        },
+        {
+          "file": ".\\front\\src\\hooks\\usePWAManager.ts",
+          "matches": 2
+        },
+        {
+          "file": ".\\front\\src\\pages\\BTCAnalysis\\BTCAnalysisPage.tsx",
+          "matches": 4
+        },
+        {
+          "file": ".\\front\\src\\pages\\CRM\\CRMPage.tsx",
+          "matches": 1
+        },
+        {
+          "file": ".\\front\\src\\pages\\Dashboard\\DashboardPage.tsx",
+          "matches": 4
+        },
+        {
+          "file": ".\\front\\src\\pages\\Vitrini\\VitrineAlunosPage.tsx",
+          "matches": 1
+        }
+      ],
+      "fetch_with_token": [
+        {
+          "file": ".\\front\\src\\components\\MercadoPagoCheckout\\MercadoPagoCheckout.tsx",
+          "matches": 3
+        },
+        {
+          "file": ".\\front\\src\\components\\ProtectedLesson\\ProtectedLesson.tsx",
+          "matches": 1
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useAdminCheck.ts",
+          "matches": 1
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useAuthManager.ts",
+          "matches": 3
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useAuthToken.ts",
+          "matches": 2
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useCourseAccess.ts",
+          "matches": 4
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useOptimizedAuth.ts",
+          "matches": 1
+        },
+        {
+          "file": ".\\front\\src\\hooks\\usePWAManager.ts",
+          "matches": 1
+        },
+        {
+          "file": ".\\front\\src\\pages\\BTCAnalysis\\BTCAnalysisPage.tsx",
+          "matches": 4
+        },
+        {
+          "file": ".\\front\\src\\pages\\CRM\\CRMPage.tsx",
+          "matches": 1
+        },
+        {
+          "file": ".\\front\\src\\pages\\Dashboard\\DashboardPage.tsx",
+          "matches": 4
+        }
+      ],
+      "token_validation": [
+        {
+          "file": ".\\front\\src\\components\\PWA\\PWAProvider.tsx",
+          "matches": 2
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useAuthManager.ts",
+          "matches": 2
+        },
+        {
+          "file": ".\\front\\src\\hooks\\useAuthToken.ts",
+          "matches": 10
+        },
+        {
+          "file": ".\\front\\src\\hooks\\usePWAManager.ts",
+          "matches": 4
+        }
+      ],
+      "token_not_found": [
+        {
+          "file": ".\\front\\src\\hooks\\useAuthToken.ts",
+          "matches": 1
+        },
+        {
+          "file": ".\\front\\src\\pages\\BTCAnalysis\\BTCAnalysisPage.tsx",
+          "matches": 1
+        },
+        {
+          "file": ".\\front\\src\\pages\\Dashboard\\DashboardPage.tsx",
+          "matches": 4
+        }
+      ]
+    },
+    "potential_issues": [
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\components\\BtcSentimentCard\\BtcSentimentCard.tsx"
+      },
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\components\\ElementorRenderer\\PageRenderer.tsx"
+      },
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\components\\MercadoPagoCheckout\\MercadoPagoCheckout.tsx"
+      },
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\components\\TradingSimulation\\TradingSimulation.tsx"
+      },
+      {
+        "type": "missing_auth_check",
+        "description": "Requisições sem verificação adequada de autenticação",
+        "file": ".\\front\\src\\hooks\\useAuthToken.ts"
+      },
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\pages\\BtcSentimentPage.tsx"
+      },
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\pages\\ForgotPasswordPage.tsx"
+      },
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\pages\\RegisterPage.tsx"
+      },
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\pages\\ResetPasswordPage.tsx"
+      },
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\pages\\BTCAnalysis\\BTCAnalysisPage.tsx"
+      },
+      {
+        "type": "infinite_loop_risk",
+        "description": "useEffect com array de dependências vazio pode causar loop infinito",
+        "file": ".\\front\\src\\pages\\BTCAnalysis\\BTCAnalysisPage.tsx"
+      },
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\pages\\ChatInterface\\ChatInterface.tsx"
+      },
+      {
+        "type": "missing_token_check",
+        "description": "Muitas requisições fetch sem verificação adequada de token",
+        "file": ".\\front\\src\\pages\\Suporte\\SuportePage.tsx"
+      }
+    ]
+  },
+  "fixes_applied": [
+    "✅ Criado: .\\front\\src\\hooks\\useAuthGuard.ts",
+    "✅ Criado: .\\front\\src\\hooks\\useSafeDataLoader.ts",
+    "✅ Criado exemplo: .\\front\\src\\examples\\DashboardPageFixed.example.tsx"
+  ],
+  "recommendations": [
+    "🔄 Substituir fetch direto por useSafeDataLoader nos componentes",
+    "🔐 Usar useAuthGuard para verificações de autenticação",
+    "⚡ Adicionar debounce em requisições frequentes",
+    "🎯 Verificar dependências de useEffect para evitar loops",
+    "📊 Monitorar console para mensagens \"Token não encontrado\"",
+    "🔍 Implementar logs estruturados para debug"
+  ]
+}

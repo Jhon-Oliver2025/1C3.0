@@ -1,0 +1,73 @@
+{
+  "timestamp": "2025-08-25T12:03:39.801511",
+  "base_url": "https://1crypten.space",
+  "endpoint_status": {
+    "health": {
+      "url": "https://1crypten.space/api/health",
+      "status": "success",
+      "response_time": 1.54,
+      "status_code": 200,
+      "error": null
+    },
+    "status": {
+      "url": "https://1crypten.space/api/status",
+      "status": "timeout",
+      "response_time": null,
+      "status_code": null,
+      "error": "Timeout"
+    },
+    "market_status": {
+      "url": "https://1crypten.space/api/market-status",
+      "status": "timeout",
+      "response_time": null,
+      "status_code": null,
+      "error": "Timeout"
+    },
+    "btc_signals": {
+      "url": "https://1crypten.space/api/btc-signals/confirmed",
+      "status": "timeout",
+      "response_time": null,
+      "status_code": null,
+      "error": "Timeout"
+    },
+    "auth_login": {
+      "url": "https://1crypten.space/api/auth/login",
+      "status": "timeout",
+      "response_time": null,
+      "status_code": null,
+      "error": "Timeout"
+    }
+  },
+  "issues_found": [
+    {
+      "type": "timeout",
+      "endpoint": "status",
+      "description": "Endpoint status com timeout"
+    },
+    {
+      "type": "timeout",
+      "endpoint": "market_status",
+      "description": "Endpoint market_status com timeout"
+    },
+    {
+      "type": "timeout",
+      "endpoint": "btc_signals",
+      "description": "Endpoint btc_signals com timeout"
+    },
+    {
+      "type": "timeout",
+      "endpoint": "auth_login",
+      "description": "Endpoint auth_login com timeout"
+    }
+  ],
+  "recommendations": [
+    "🔄 Verificar se o backend está rodando",
+    "📊 Verificar uso de CPU e memória do servidor",
+    "🐳 Reiniciar containers Docker se aplicável",
+    "🔍 Verificar logs do backend para erros",
+    "📊 Monitorar métricas de performance",
+    "🔍 Verificar logs em tempo real",
+    "⚡ Considerar implementar health checks automáticos"
+  ],
+  "overall_status": "partial"
+}

@@ -4,6 +4,8 @@ import SignalCard from '../../components/SignalCard/SignalCard';
 import TradingSimulation from '../../components/TradingSimulation/TradingSimulation';
 import { useAuthToken } from '../../hooks/useAuthToken';
 import { useAdminCheck } from '../../hooks/useAdminCheck';
+import { useAuthGuard } from '../../hooks/useAuthGuard';
+import { useSafeDataLoader } from '../../hooks/useSafeDataLoader';
 // PWA removido - agora temos página dedicada para o App 1Crypten
 import styles from './DashboardPage.module.css';
 import './DashboardMobile.css';
@@ -144,103 +146,43 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  // Função para buscar status das limpezas da API
-  const fetchCleanupStatus = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.warn('Token não encontrado para buscar status das limpezas');
-        return;
-      }
-      
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/cleanup-status`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          setCleanupStatus(data);
-        } else {
-          console.warn('API retornou HTML em vez de JSON, usando status padrão');
-        }
-      } else {
-        if (response.status === 401 || response.status === 403) {
-          console.warn('Token inválido para cleanup-status, redirecionando para login');
-          logout();
-          navigate('/login');
-          return;
-        }
-        console.warn('API cleanup-status não disponível');
-      }
-    } catch (error) {
-      console.error('Erro ao buscar status das limpezas:', error);
+  // Hook seguro para buscar status das limpezas
+  const { data: cleanupStatusData } = useSafeDataLoader<any>({
+    url: '/api/cleanup-status',
+    requireAuth: true,
+    interval: 60000 // Atualizar a cada 1 minuto
+  });
+  
+  // Atualizar estado quando dados chegarem
+  useEffect(() => {
+    if (cleanupStatusData) {
+      setCleanupStatus(cleanupStatusData);
     }
-  };
+  }, [cleanupStatusData]);
 
-  // Função para buscar dados do BTC
-  const fetchBTCData = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.warn('Token não encontrado para buscar dados do BTC');
-        return;
-      }
+  // Hook seguro para buscar dados do BTC
+  const { data: btcMetricsData } = useSafeDataLoader<any>({
+    url: '/api/btc-signals/metrics',
+    requireAuth: true,
+    interval: 30000 // Atualizar a cada 30 segundos
+  });
+  
+  // Atualizar estado quando dados do BTC chegarem
+  useEffect(() => {
+    if (btcMetricsData?.data) {
+      const btcPriceData = btcMetricsData.data.btc_price_data;
+      const btcAnalysisData = btcMetricsData.data.btc_analysis;
       
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/btc-signals/metrics`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        
-        // Usar dados reais da API metrics que contém btc_price_data e btc_analysis
-        const btcPriceData = data.data?.btc_price_data;
-        const btcAnalysisData = data.data?.btc_analysis;
-        
-        if (btcPriceData && btcAnalysisData) {
-          setBtcData({
-            price: btcPriceData.price || 0,
-            change_24h: btcPriceData.change_24h || 0,
-            strength: btcAnalysisData.strength || 50,
-            loading: false
-          });
-        } else {
-          // Fallback apenas se não houver dados na API
-          setBtcData({
-            price: 50000,
-            change_24h: 0,
-            strength: 50,
-            loading: false
-          });
-        }
-      } else {
-        if (response.status === 401 || response.status === 403) {
-          console.warn('Token inválido para BTC data, redirecionando para login');
-          logout();
-          navigate('/login');
-          return;
-        }
-        // Fallback se a API não estiver disponível
+      if (btcPriceData && btcAnalysisData) {
         setBtcData({
-          price: 50000,
-          change_24h: 0,
-          strength: 50,
+          price: btcPriceData.price || 0,
+          change_24h: btcPriceData.change_24h || 0,
+          strength: btcAnalysisData.strength || 50,
           loading: false
         });
       }
-    } catch (error) {
-      console.error('Erro ao buscar dados do BTC:', error);
-      // Fallback em caso de erro
+    } else {
+      // Fallback se não houver dados
       setBtcData({
         price: 50000,
         change_24h: 0,
@@ -248,7 +190,7 @@ const DashboardPage: React.FC = () => {
         loading: false
       });
     }
-  };
+  }, [btcMetricsData]);
 
 
 
@@ -300,8 +242,6 @@ const DashboardPage: React.FC = () => {
   useEffect(() => {
     fetchSignals();
     fetchMarketStatus();
-    fetchCleanupStatus();
-    fetchBTCData();
     
     // Verificar novos sinais a cada 2 minutos (sem refresh da página)
     const signalsTimer = setInterval(() => {
@@ -313,21 +253,9 @@ const DashboardPage: React.FC = () => {
       fetchMarketStatus();
     }, 30000);
     
-    // Atualizar status das limpezas a cada 60 segundos
-    const cleanupTimer = setInterval(() => {
-      fetchCleanupStatus();
-    }, 60000);
-    
-    // Atualizar dados do BTC a cada 30 segundos
-    const btcTimer = setInterval(() => {
-      fetchBTCData();
-    }, 30000);
-    
     return () => {
       clearInterval(signalsTimer);
       clearInterval(marketTimer);
-      clearInterval(cleanupTimer);
-      clearInterval(btcTimer);
     };
   }, []);
 
