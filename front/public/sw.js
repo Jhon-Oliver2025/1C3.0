@@ -1,12 +1,17 @@
 /**
- * Service Worker Otimizado para Performance
- * Melhora significativamente a velocidade de carregamento do PWA
+ * Service Worker Otimizado para PWA
+ * Resolve problemas de cache, atualização e estado da aplicação
+ * Versão: 3.0 - Melhorias para experiência mobile
  */
 
-const CACHE_NAME = '1crypten-v2.1';
-const STATIC_CACHE = '1crypten-static-v2.1';
-const DYNAMIC_CACHE = '1crypten-dynamic-v2.1';
-const API_CACHE = '1crypten-api-v2.1';
+const CACHE_VERSION = '3.0';
+const CACHE_NAME = `1crypten-v${CACHE_VERSION}`;
+const STATIC_CACHE = `1crypten-static-v${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `1crypten-dynamic-v${CACHE_VERSION}`;
+const API_CACHE = `1crypten-api-v${CACHE_VERSION}`;
+
+// Flag para forçar atualização
+let forceUpdate = false;
 
 // Recursos críticos para cache imediato
 const CRITICAL_RESOURCES = [
@@ -85,17 +90,32 @@ async function cacheBackgroundResources() {
  * Ativação do Service Worker
  */
 self.addEventListener('activate', (event) => {
-  console.log('✅ Service Worker: Ativando versão otimizada...');
+  console.log('✅ Service Worker: Ativando versão otimizada v3.0...');
   
   event.waitUntil(
     Promise.all([
       // Limpar caches antigos
       cleanupOldCaches(),
       // Tomar controle imediatamente
-      self.clients.claim()
+      self.clients.claim(),
+      // Notificar clientes sobre atualização
+      notifyClientsOfUpdate()
     ])
   );
 });
+
+/**
+ * Notifica clientes sobre atualizações
+ */
+async function notifyClientsOfUpdate() {
+  const clients = await self.clients.matchAll();
+  clients.forEach(client => {
+    client.postMessage({
+      type: 'UPDATE_AVAILABLE',
+      version: CACHE_VERSION
+    });
+  });
+}
 
 /**
  * Limpeza de caches antigos

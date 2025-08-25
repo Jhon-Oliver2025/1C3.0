@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import styles from './LoginPage.module.css';
 import logo from '../assets/logo.png';
 import { Link } from 'react-router-dom';
-import { useOptimizedAuth } from '../hooks/useOptimizedAuth';
+import { usePWA } from '../components/PWA/PWAProvider';
 
 function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading, error, isAuthenticated, clearError } = useOptimizedAuth();
+  const { login, authLoading: isLoading, authError: error, isAuthenticated, clearAuthError: clearError } = usePWA();
 
   // Redirecionar se já estiver autenticado
   useEffect(() => {

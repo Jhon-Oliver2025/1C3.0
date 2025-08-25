@@ -3,6 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 // Removido: mobile-essential.css (causava conflitos de header)
 
+// PWA Provider
+import PWAProvider, { usePWA } from './components/PWA/PWAProvider';
+
 // Importar componentes de páginas
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
@@ -36,19 +39,36 @@ import MainLayout from './components/MainLayout/MainLayout';
 import UpdateNotification from './components/UpdateNotification/UpdateNotification';
 
 /**
- * Componente para verificar autenticação
+ * Componente para verificar autenticação usando PWA context
  * Redireciona para login se não autenticado
  */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = !!localStorage.getItem('token');
+  const { isAuthenticated, isAppReady } = usePWA();
+  
+  // Aguardar app estar pronto
+  if (!isAppReady) {
+    return null; // Loading será mostrado pelo PWAProvider
+  }
+  
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
 /**
  * Componente principal da aplicação
- * Gerencia todo o roteamento da aplicação
+ * Gerencia todo o roteamento da aplicação com PWA
  */
 function App() {
+  return (
+    <PWAProvider>
+      <AppRoutes />
+    </PWAProvider>
+  );
+}
+
+/**
+ * Componente de rotas da aplicação
+ */
+function AppRoutes() {
   return (
     <div>
       <Routes>
