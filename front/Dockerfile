@@ -8,9 +8,11 @@ WORKDIR /app
 
 # Copiar package files
 COPY package*.json ./
+COPY .npmrc ./
+RUN rm -rf node_modules package-lock.json || true
 
 # Instalar dependências
-RUN npm ci --only=production --legacy-peer-deps
+RUN npm install --production --legacy-peer-deps --no-optional --legacy-peer-deps
 RUN npm install --save-dev vite @vitejs/plugin-react typescript
 
 # Copiar arquivos de configuração

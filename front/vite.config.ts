@@ -16,6 +16,13 @@ export default defineConfig(({ mode }) => {
   console.log(`🔍 Is Production: ${isProduction}`);
 
   return {
+    optimizeDeps: {
+      include: ['react', 'react-dom'],
+      exclude: ['@rollup/rollup-linux-x64-musl']
+    },
+    esbuild: {
+      target: 'es2020'
+    },
     plugins: [react()],
     resolve: {
       alias: {

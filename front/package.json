@@ -34,5 +34,17 @@
     "terser": "^5.43.1",
     "typescript": "^5.2.2",
     "vite": "^5.2.0"
+  },
+  "resolutions": {
+    "@rollup/rollup-linux-x64-musl": "npm:@rollup/rollup-linux-x64-gnu",
+    "rollup": "^4.0.0"
+  },
+  "overrides": {
+    "@rollup/rollup-linux-x64-musl": "npm:@rollup/rollup-linux-x64-gnu",
+    "rollup": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }
