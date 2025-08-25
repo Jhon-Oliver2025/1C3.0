@@ -1,0 +1,79 @@
+{
+  "timestamp": "2025-08-19T13:42:37.219862",
+  "domain": "1crypten.space",
+  "results": [
+    {
+      "timestamp": "2025-08-19T13:42:11.337544",
+      "test": "Resolução DNS",
+      "status": "PASS",
+      "details": "IP: 91.99.219.101",
+      "response_time": 0.0
+    },
+    {
+      "timestamp": "2025-08-19T13:42:18.382029",
+      "test": "Conectividade Básica",
+      "status": "PASS",
+      "details": "Status 200",
+      "response_time": 7.044484376907349
+    },
+    {
+      "timestamp": "2025-08-19T13:42:19.088728",
+      "test": "Certificado SSL",
+      "status": "PASS",
+      "details": "Expira em 73 dias (2025-10-31)",
+      "response_time": 0
+    },
+    {
+      "timestamp": "2025-08-19T13:42:19.840621",
+      "test": "Headers de Resposta",
+      "status": "INFO",
+      "details": "Server: nginx/1.29.1, Cache: None, Encoding: gzip",
+      "response_time": 0
+    },
+    {
+      "timestamp": "2025-08-19T13:42:19.840621",
+      "test": "Servidor Web",
+      "status": "INFO",
+      "details": "Nginx detectado",
+      "response_time": 0
+    },
+    {
+      "timestamp": "2025-08-19T13:42:20.597369",
+      "test": "Endpoint /api/status",
+      "status": "PASS",
+      "details": "Status 200",
+      "response_time": 0.7567474842071533
+    },
+    {
+      "timestamp": "2025-08-19T13:42:21.377840",
+      "test": "Endpoint /api/btc-signals/confirmed",
+      "status": "PASS",
+      "details": "Status 200",
+      "response_time": 0.7649126052856445
+    },
+    {
+      "timestamp": "2025-08-19T13:42:22.101054",
+      "test": "Endpoint /manifest.json",
+      "status": "PASS",
+      "details": "Status 200",
+      "response_time": 0.7232136726379395
+    },
+    {
+      "timestamp": "2025-08-19T13:42:23.356156",
+      "test": "Endpoint /logo3.png",
+      "status": "PASS",
+      "details": "Status 200",
+      "response_time": 1.2551019191741943
+    },
+    {
+      "timestamp": "2025-08-19T13:42:37.209809",
+      "test": "Tempos de Resposta",
+      "status": "PASS",
+      "details": "Avg: 0.76s, Min: 0.72s, Max: 0.81s, Failures: 0/5",
+      "response_time": 0.758287000656128
+    }
+  ],
+  "recommendations": [
+    "✅ Todos os testes passaram! Sistema funcionando normalmente."
+  ]
+}

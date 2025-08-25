@@ -1,0 +1,58 @@
+.legalPageContainer {
+  min-height: 100vh;
+  background-color: #0A192F; /* Cor de fundo escura, similar ao seu tema */
+  color: #E2E8F0; /* Cor do texto principal */
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Alinha o conteúdo ao topo */
+}
+
+.legalContent {
+  max-width: 800px;
+  width: 100%;
+  background-color: rgba(10, 25, 47, 0.6); /* Fundo levemente transparente */
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+  line-height: 1.6;
+  text-align: justify;
+}
+
+.legalContent h1 {
+  color: #64FFDA; /* Cor de destaque para títulos */
+  font-size: 2.5em;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.legalContent h2 {
+  color: #64FFDA;
+  font-size: 1.8em;
+  margin-top: 30px;
+  margin-bottom: 15px;
+}
+
+.legalContent p {
+  margin-bottom: 15px;
+}
+
+.legalContent ul {
+  list-style-type: disc;
+  margin-left: 25px;
+  margin-bottom: 15px;
+}
+
+.legalContent li {
+  margin-bottom: 8px;
+}
+
+/* Estilos para links dentro do conteúdo legal, se houver */
+.legalContent a {
+  color: #00BCD4; /* Cor de link */
+  text-decoration: none;
+}
+
+.legalContent a:hover {
+  text-decoration: underline;
+}

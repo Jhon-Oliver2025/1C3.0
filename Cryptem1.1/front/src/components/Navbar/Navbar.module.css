@@ -1,0 +1,461 @@
+.navbar {
+  width: 100%; /* Garante que a navbar ocupe toda a largura */
+  display: flex; /* Habilita o flexbox para alinhamento */
+  justify-content: space-between; /* Coloca o logo à esquerda e os links à direita */
+  align-items: center; /* Centraliza verticalmente os itens */
+  padding: 10px 40px; /* Aumentado o padding lateral de 20px para 40px */
+  background-color: #0A192F; /* Exemplo de cor de fundo - Alterado de #333 para um azul escuro */
+  color: white; /* Exemplo de cor do texto */
+  position: fixed; /* Para que ela fique sobreposta, se for o caso */
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Garante que ela fique acima de outros elementos */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+  box-sizing: border-box;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  /* Removido gap: 10px; pois o indicador agora é uma borda */
+  position: relative; /* Mantido para o posicionamento do logoWrapper */
+}
+
+.logoWrapper { /* NEW: Wrapper for the logo with the status border */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px; /* Espaço para a borda e o brilho */
+  border-radius: 8px; /* Borda arredondada para o wrapper */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  z-index: 2; /* Garante que o wrapper esteja acima de outros elementos se houver */
+}
+
+.logoWrapper.online {
+  border: 2px solid #07FF86; /* Borda verde para online */
+  animation: border-glow-green 2s infinite ease-in-out; /* Animação de brilho verde */
+}
+
+.logoWrapper.offline {
+  border: 2px solid #FF0000; /* Borda vermelha para offline */
+  animation: border-glow-red 2s infinite ease-in-out; /* Animação de brilho vermelho */
+}
+
+.crypTenLogo { /* Estilo para a imagem do logo dentro do wrapper */
+  height: 40px; /* Tamanho do logo */
+  width: auto;
+  object-fit: contain;
+  display: block; /* Remove qualquer espaço extra */
+}
+
+.logoLink { /* Adicionado estilo para o link do logo */
+  color: #64FFDA; /* Cor de destaque para o logo */
+  text-decoration: none;
+  font-size: 1.8em; /* Tamanho da fonte para o texto do logo, se for texto */
+  font-weight: bold;
+  transition: color 0.3s ease;
+  display: flex; /* Adicionado para alinhar o conteúdo (logo) dentro do link */
+  align-items: center; /* Adicionado para alinhar o conteúdo (logo) dentro do link */
+}
+
+.logoLink:hover {
+  color: #98FFEC; /* Cor mais clara no hover */
+}
+
+
+
+.desktopNav {
+  display: flex; /* Garante que os links fiquem em linha */
+  gap: 10px; /* Espaçamento entre os links - Reduzido de 15px para 10px */
+}
+
+.navLink {
+  color: #CCD6F6; /* Cor clara para os links */
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: color 0.3s ease, transform 0.2s ease, border-bottom 0.3s ease; /* Adicionado border-bottom para transição */
+  padding-bottom: 3px; /* Espaço para a borda */
+}
+
+.navLink:hover {
+  color: #64FFDA; /* Um tone de azul/verde claro para hover, opcional */
+  transform: translateY(-2px); /* Efeito de leve elevação */
+}
+
+.activeNavLink { /* Estilo para o link ativo em desktop */
+  color: #64FFDA; /* Cor de destaque */
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: bold; /* Deixa o texto mais forte */
+  border-bottom: 2px solid #64FFDA; /* Adiciona uma borda inferior */
+  padding-bottom: 3px; /* Garante espaço para a borda */
+}
+
+/* Estilos específicos para o link "Sair" */
+.logoutLink {
+  color: #FF6B6B; /* Uma cor de destaque para "Sair", como vermelho */
+  border: 2px solid #FF6B6B; /* Borda um pouco mais grossa */
+  padding: 10px 20px; /* Aumenta o padding para um botão maior */
+  border-radius: 8px; /* Borda mais arredondada */
+  font-weight: 600; /* Deixa o texto um pouco mais forte */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.logoutLink:hover {
+  background-color: #FF4C4C; /* Um vermelho um pouco mais vibrante no hover */
+  color: #0A192F; /* Cor do texto no hover */
+  border-color: #FF4C4C; /* Mantém a cor da borda no hover */
+  transform: translateY(-3px); /* Efeito de elevação um pouco mais pronunciado */
+  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4); /* Sombra sutil */
+}
+
+.loginLink {
+  color: #64FFDA;
+  border: 2px solid #64FFDA;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.loginLink:hover {
+  background-color: #64FFDA;
+  color: #0A192F;
+  border-color: #64FFDA;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(100, 255, 218, 0.4);
+}
+
+.hamburger {
+  display: none; /* Escondido por padrão em desktop */
+  cursor: pointer;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bar {
+  width: 25px;
+  height: 3px;
+  background-color: #CCD6F6; /* Cor clara para as barras do hambúrguer */
+  border-radius: 2px;
+}
+
+/* Styles for the mobile menu */
+.mobileMenu {
+  /* Ensure flexbox for centering */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center items horizontally */
+  justify-content: center; /* Center items vertically */
+  padding-top: 20px; /* Adjust as needed */
+  position: absolute;
+  top: 100%; /* Abaixo da navbar */
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 72px); /* Ocupa a altura restante da viewport (assumindo navbar com ~72px de altura) */
+  background-color: #0A192F; /* Mesmo azul escuro profundo */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  padding: 1rem 0;
+  animation: slideDown 0.3s ease-out forwards; /* Animação simples */
+  overflow-y: auto; /* Adiciona scroll se o conteúdo for maior que a tela */
+  z-index: 999; /* Garante que o menu esteja acima de outros elementos */
+  gap: 0.5rem; /* Adiciona um pequeno espaço entre os itens do menu */
+}
+
+.mobileNavLink {
+  color: #CCD6F6;
+  text-decoration: none;
+  padding: 0.8rem 2rem;
+  font-size: 1.2rem;
+  text-align: center;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Adicionado color para transição */
+  border-bottom: 1px solid rgba(204, 214, 246, 0.1); /* Adiciona um separador sutil */
+}
+
+.mobileNavLink:hover {
+  background-color: rgba(100, 255, 218, 0.1); /* Fundo levemente transparente para hover */
+}
+
+.mobileNavLink:last-child { /* Remove a borda do último item para um visual mais limpo */
+  border-bottom: none;
+}
+
+.activeMobileNavLink { /* Estilo para o link ativo em mobile */
+  background-color: rgba(100, 255, 218, 0.2); /* Fundo mais visível */
+  color: #64FFDA; /* Cor de destaque */
+  font-weight: bold; /* Deixa o texto mais forte */
+  text-decoration: none;
+  padding: 0.8rem 2rem;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+/* Animação para o menu mobile */
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Media Queries para responsividade */
+@media (max-width: 768px) {
+  .desktopNav {
+    display: none; /* Esconde os links em desktop em telas menores */
+  }
+
+  .hamburger {
+    display: flex; /* Mostra o ícone de hambúrguer */
+  }
+
+  .navbar {
+    padding: 0.8rem 1rem; /* Ajusta o padding para telas menores */
+  }
+}
+
+
+.logo {
+  display: flex;
+  align-items: center;
+  /* Adicione espaço para o indicador se necessário */
+  position: relative; /* Para posicionar o indicador */
+}
+
+.backendStatusIndicator {
+  position: absolute; /* Essencial para posicionar atrás do logo */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centraliza o elemento */
+  width: 50px; /* Reduzido para ser ligeiramente maior que o logo */
+  height: 50px; /* Reduzido para ser ligeiramente maior que o logo */
+  border-radius: 50%;
+  z-index: 1; /* Garante que fique atrás do logo (que tem z-index: 2) */
+  animation: blink-animation 2s infinite ease-in-out;
+  filter: blur(5px); /* Reduzido o desfoque para um brilho mais definido, mas ainda suave */
+}
+
+.backendStatusIndicator.online {
+  box-shadow: 0 0 10px 5px rgba(7, 255, 134, 0.4), /* Brilho interno mais sutil */
+              0 0 20px 10px rgba(7, 255, 134, 0.2); /* Brilho externo mais sutil */
+}
+
+.backendStatusIndicator.offline {
+  box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.4),
+              0 0 20px 10px rgba(255, 0, 0, 0.2);
+}
+
+/* Animação de piscar */
+@keyframes blink-animation {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0.5; /* Reduzido a opacidade para um efeito mais sutil */
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.8; /* Reduzido a opacidade no pico para um efeito mais sutil */
+  }
+}
+
+/* REMOVIDO: .backendStatusIndicator e seus estilos */
+/* REMOVIDO: @keyframes blink-animation (será substituído por border-glow-...) */
+
+/* NEW: Animações para o brilho da borda */
+@keyframes border-glow-green {
+  0%, 100% {
+    box-shadow: 0 0 0px 0px rgba(7, 255, 134, 0.0); /* Sem brilho */
+  }
+  50% {
+    box-shadow: 0 0 15px 8px rgba(7, 255, 134, 0.7); /* Brilho verde */
+  }
+}
+
+@keyframes border-glow-red {
+  0%, 100% {
+    box-shadow: 0 0 0px 0px rgba(255, 0, 0, 0.0); /* Sem brilho */
+  }
+  50% {
+    box-shadow: 0 0 15px 8px rgba(255, 0, 0, 0.7); /* Brilho vermelho */
+  }
+}
+
+/* NEW: Styles for the Zion mobile button */
+.zionMobileButton {
+  background-color: #007bff; /* Example color, choose your brand color */
+  color: white;
+  border-radius: 50%; /* Makes it round */
+  width: 80px; /* Adjust size as needed */
+  height: 80px; /* Adjust size as needed */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin: 20px auto; /* Centers it and adds vertical spacing */
+  text-decoration: none; /* Remove underline */
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: add a subtle shadow */
+  
+  /* Explicit overrides to ensure it behaves as a button */
+  padding: 0; /* Remove padding from mobileNavLink */
+  border-bottom: none; /* Remove border from mobileNavLink */
+}
+
+.zionMobileButton:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Ensure the desktop link for Zion looks like other nav links */
+.navLink {
+  color: #CCD6F6; /* Cor clara para os links */
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: color 0.3s ease, transform 0.2s ease, border-bottom 0.3s ease; /* Adicionado border-bottom para transição */
+  padding-bottom: 3px; /* Espaço para a borda */
+}
+
+.navLink:hover {
+  color: #64FFDA; /* Um tone de azul/verde claro para hover, opcional */
+  transform: translateY(-2px); /* Efeito de leve elevação */
+}
+
+.activeNavLink { /* Estilo para o link ativo em desktop */
+  color: #64FFDA; /* Cor de destaque */
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: bold; /* Deixa o texto mais forte */
+  border-bottom: 2px solid #64FFDA; /* Adiciona uma borda inferior */
+  padding-bottom: 3px; /* Garante espaço para a borda */
+}
+
+/* Estilos específicos para o link "Sair" */
+.logoutLink {
+  color: #FF6B6B; /* Uma cor de destaque para "Sair", como vermelho */
+  border: 2px solid #FF6B6B; /* Borda um pouco mais grossa */
+  padding: 10px 20px; /* Aumenta o padding para um botão maior */
+  border-radius: 8px; /* Borda mais arredondada */
+  font-weight: 600; /* Deixa o texto um pouco mais forte */
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.logoutLink:hover {
+  background-color: #FF4C4C; /* Um vermelho um pouco mais vibrante no hover */
+  color: #0A192F; /* Cor do texto no hover */
+  border-color: #FF4C4C; /* Mantém a cor da borda no hover */
+  transform: translateY(-3px); /* Efeito de elevação um pouco mais pronunciado */
+  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4); /* Sombra sutil */
+}
+
+.loginLink {
+  color: #64FFDA;
+  border: 2px solid #64FFDA;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.loginLink:hover {
+  background-color: #64FFDA;
+  color: #0A192F;
+  border-color: #64FFDA;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(100, 255, 218, 0.4);
+}
+
+.hamburger {
+  display: none; /* Escondido por padrão em desktop */
+  cursor: pointer;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bar {
+  width: 25px;
+  height: 3px;
+  background-color: #CCD6F6; /* Cor clara para as barras do hambúrguer */
+  border-radius: 2px;
+}
+
+@media (max-width: 768px) {
+  .desktopNav {
+    display: none; /* Esconde os links em desktop em telas menores */
+  }
+
+  .hamburger {
+    display: flex; /* Mostra o ícone de hambúrguer */
+  }
+
+  .navbar {
+    padding: 0.8rem 1rem; /* Ajusta o padding para telas menores */
+  }
+}
+
+
+.logo {
+  display: flex;
+  align-items: center;
+  /* Adicione espaço para o indicador se necessário */
+  position: relative; /* Para posicionar o indicador */
+}
+
+.backendStatusIndicator {
+  position: absolute; /* Essencial para posicionar atrás do logo */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centraliza o elemento */
+  width: 50px; /* Reduzido para ser ligeiramente maior que o logo */
+  height: 50px; /* Reduzido para ser ligeiramente maior que o logo */
+  border-radius: 50%;
+  z-index: 1; /* Garante que fique atrás do logo (que tem z-index: 2) */
+  animation: blink-animation 2s infinite ease-in-out;
+  filter: blur(5px); /* Reduzido o desfoque para um brilho mais definido, mas ainda suave */
+}
+
+.backendStatusIndicator.online {
+  box-shadow: 0 0 10px 5px rgba(7, 255, 134, 0.4), /* Brilho interno mais sutil */
+              0 0 20px 10px rgba(7, 255, 134, 0.2); /* Brilho externo mais sutil */
+}
+
+.backendStatusIndicator.offline {
+  box-shadow: 0 0 10px 5px rgba(255, 0, 0, 0.4),
+              0 0 20px 10px rgba(255, 0, 0, 0.2);
+}
+
+/* Animação de piscar */
+@keyframes blink-animation {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.9);
+    opacity: 0.5; /* Reduzido a opacidade para um efeito mais sutil */
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+    opacity: 0.8; /* Reduzido a opacidade no pico para um efeito mais sutil */
+  }
+}
+
+/* REMOVIDO: .backendStatusIndicator e seus estilos */
+/* REMOVIDO: @keyframes blink-animation (será substituído por border-glow-...) */
+
+/* NEW: Animações para o brilho da borda */
+@keyframes border-glow-green {
+  0%, 100% {
+    box-shadow: 0 0 0px 0px rgba(7, 255, 134, 0.0); /* Sem brilho */
+  }
+  50% {
+    box-shadow: 0 0 15px 8px rgba(7, 255, 134, 0.7); /* Brilho verde */
+  }
+}
+
+@keyframes border-glow-red {
+  0%, 100% {
+    box-shadow: 0 0 0px 0px rgba(255, 0, 0, 0.0); /* Sem brilho */
+  }
+  50% {
+    box-shadow: 0 0 15px 8px rgba(255, 0, 0, 0.7); /* Brilho vermelho */
+  }
+}

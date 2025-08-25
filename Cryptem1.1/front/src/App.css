@@ -1,0 +1,50 @@
+/* Remove or adjust any max-width, margin, or padding that might be limiting the width */
+.App {
+  /* Remova ou comente as linhas abaixo se existirem e estiverem limitando a largura */
+  /* max-width: 1280px; */
+  /* margin: 0 auto; */
+  /* padding: 2rem; */
+  /* text-align: center; */ /* Se existir e não for desejado globalmente */
+
+  /* Garante que o contêiner principal ocupe 100% da largura */
+  width: 100%;
+  min-height: 100vh; /* Garante que ocupe a altura total da viewport */
+  display: flex;
+  flex-direction: column; /* Para empilhar o Navbar e o conteúdo das rotas verticalmente */
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}

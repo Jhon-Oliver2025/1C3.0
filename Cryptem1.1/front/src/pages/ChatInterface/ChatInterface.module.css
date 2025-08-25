@@ -1,0 +1,149 @@
+/* ChatInterface.module.css */
+
+.chatContainer {
+  display: flex;
+  flex-direction: column;
+  width: 90%; /* Ajusta a largura para ser responsiva */
+  max-width: 700px; /* Limita a largura máxima em telas maiores */
+  height: 80vh; /* Altura relativa à viewport */
+  max-height: 700px; /* Limita a altura máxima */
+  margin: 40px auto; /* Centraliza o chat na tela e adiciona margem superior */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  background-color: #0D0D2B; /* Fundo muito escuro, quase preto, inspirado no logo */
+  color: #e0e0e0; /* Cor do texto para contraste */
+}
+
+.messageList {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #1A1A40; /* Fundo um pouco mais claro que o container, com tom roxo/azul */
+  border-bottom: 1px solid #2A2A50; /* Borda com cor que combina com o inputArea */
+}
+
+.message {
+  display: flex;
+  max-width: 80%;
+}
+
+.message.user {
+  align-self: flex-end;
+  justify-content: flex-end;
+}
+
+.message.bot {
+  align-self: flex-start;
+  justify-content: flex-start;
+}
+
+.messageContent {
+  padding: 10px 15px;
+  border-radius: 18px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-size: 0.95em;
+  line-height: 1.4;
+}
+
+.message.user .messageContent {
+  background: linear-gradient(to right, #E0F2F7, #C0E0EB); /* MODIFIED: Gradiente de azul claro para mensagens do usuário */
+  color: #1A1A40; /* MODIFIED: Cor do texto escura para contraste com o fundo claro */
+  border-bottom-right-radius: 2px;
+}
+
+.message.bot .messageContent {
+  background: linear-gradient(to right, #0A1931, #1F3A60); /* MODIFIED: Gradiente de azul escuro para mensagens do bot */
+  color: #ffffff; /* MODIFIED: Texto branco para contraste com o fundo escuro */
+  border-bottom-left-radius: 2px;
+}
+
+.inputArea {
+  display: flex;
+  padding: 15px 20px;
+  background-color: #2A2A50; /* Fundo da área de input, tom roxo/azul */
+  border-top: 1px solid #1A1A40; /* Borda com cor que combina com o messageList background */
+}
+
+.inputArea input {
+  flex-grow: 1;
+  padding: 12px 15px;
+  border: none;
+  border-radius: 25px;
+  margin-right: 10px;
+  background-color: #3A3A60; /* MODIFIED: Cor do input, um pouco mais clara que o inputArea */
+  color: #e0e0e0;
+  font-size: 1em;
+  outline: none;
+}
+
+.inputArea input::placeholder {
+  color: #a0a0a0;
+}
+
+.inputArea button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 25px;
+  background-color: #F0F0F0; /* MODIFIED: Cor muito clara, quase branca, para o botão */
+  color: #1A1A40; /* MODIFIED: Cor do texto escura para contraste com o fundo claro */
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.inputArea button:hover:not(:disabled) {
+  background-color: #D0D0D0; /* MODIFIED: Tom mais escuro do cinza claro para o hover */
+}
+
+.inputArea button:disabled {
+  background-color: #6b7b8e;
+  cursor: not-allowed;
+}
+
+/* Media Queries para dispositivos móveis */
+@media (max-width: 768px) {
+  .chatContainer {
+    width: 100%;
+    height: 100vh; /* Ocupa a altura total da tela em mobile */
+    margin: 0; /* Remove margens para ocupar a tela inteira */
+    border-radius: 0; /* Remove bordas arredondadas em mobile */
+    box-shadow: none; /* Remove sombra em mobile */
+  }
+
+  .messageList {
+    padding: 15px;
+  }
+
+  .inputArea {
+    padding: 10px 15px;
+  }
+
+  .inputArea input {
+    padding: 10px 12px;
+    font-size: 0.9em;
+  }
+
+  .inputArea button {
+    padding: 10px 15px;
+    font-size: 0.9em;
+  }
+}
+
+
+.chatHeader {
+  width: 100%;
+  height: 120px; /* Altura fixa para o cabeçalho */
+  overflow: hidden; /* Esconde partes da imagem que excedam */
+}
+
+.headerImage {
+  width: 100%;
+  height: 100%; /* Ocupa toda altura do cabeçalho */
+  object-fit: cover; /* Mantém proporção cobrindo a área */
+  object-position: center; /* Centraliza a imagem */
+}

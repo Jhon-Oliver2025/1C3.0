@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@chatscope/chat-ui-kit-react": "^2.1.1",
+    "@chatscope/chat-ui-kit-styles": "^1.4.0",
+    "@types/react-chat-widget": "^2.1.0",
+    "axios": "^1.10.0",
+    "react": "^19.1.0",
+    "react-chatbot-kit": "^2.2.2",
+    "react-dom": "^19.1.0"
+  }
+}

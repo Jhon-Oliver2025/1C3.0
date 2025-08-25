@@ -1,0 +1,337 @@
+/* Estilos para o contêiner principal do Dashboard */
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  padding-top: 80px; /* Adiciona padding para compensar a topBar fixa */
+  min-height: 100vh; /* Garante que o contêiner ocupe pelo menos 100% da altura da viewport */
+  background: linear-gradient(135deg, #0A192F 0%, #000000 100%);
+  color: white;
+  font-family: 'Arial', sans-serif;
+  gap: 40px; /* Espaçamento entre as seções */
+  overflow-x: hidden; /* Evita rolagem horizontal indesejada */
+}
+
+.logoAndStatusDashboard {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centraliza o conteúdo horizontalmente */
+  width: 100%; /* Garante que ocupe toda a largura para centralizar */
+  gap: 10px;
+  margin-bottom: 20px;
+  margin-top: 20px; /* Adiciona um espaço do topo */
+}
+
+.dashboardLogo {
+  width: 150px; /* Ajuste o tamanho da logo conforme necessário */
+  height: auto;
+}
+
+.dashboardLogo {
+  width: 150px; /* Ajuste o tamanho da logo conforme necessário */
+  height: auto;
+}
+
+.topBar {
+  position: fixed; /* Fixa a barra no topo */
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between; /* Alinha a logo à esquerda e o status à direita */
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #0A192F; /* Cor de fundo para a barra */
+  z-index: 1000; /* Garante que fique acima de outros elementos */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.dashboardLogo {
+  width: 100px; /* Ajuste o tamanho da logo conforme necessário */
+  height: auto;
+}
+
+.statusIndicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.statusIndicator.online {
+  background-color: #4CAF50; /* Verde para online */
+}
+
+.statusIndicator.offline {
+  background-color: #E53E3E; /* Vermelho para offline */
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Estilos para o cabeçalho (que contém a imagem da Terra e a seção de boas-vindas) */
+.headerSection {
+  width: 100%;
+  max-width: 1200px;
+  min-height: 250px; /* Adjusted min-height */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-image: url('../assets/terra.png'); /* Adiciona a imagem terra.png como background */
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  margin-top: 20px;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+  flex: 1;
+  min-width: 300px;
+  text-align: center;
+}
+
+.motivationalPhrase {
+  font-size: 2.5vw; /* Slightly smaller base font size */
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  max-width: 80%; /* Limit width to prevent stretching */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+@media (max-width: 768px) {
+  .motivationalPhrase {
+    font-size: 4vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .motivationalPhrase {
+    font-size: 6vw;
+  }
+}
+
+
+
+
+
+.terraImage { /* Esta regra não é mais usada diretamente, mas mantida caso precise */
+  max-width: 150px;
+  height: auto;
+  display: block;
+}
+
+/* Media queries para a seção de boas-vindas */
+@media (max-width: 768px) {
+  .headerSection {
+    flex-direction: column;
+    align-items: center;
+  }
+  .headerContent {
+    width: 100%;
+  }
+  .terraImage {
+    max-width: 100px;
+  }
+  .headerContent h1 {
+    font-size: 1.8em;
+  }
+  .headerContent p {
+    font-size: 1em;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerContent {
+    padding: 15px;
+  }
+  .terraImage {
+    max-width: 80px;
+  }
+  .headerContent h1 {
+    font-size: 1.5em;
+  }
+  .headerContent p {
+    font-size: 0.9em;
+  }
+}
+
+/* Estilos para a seção de conteúdo principal (que contém os sinais) */
+.contentSection {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px; /* Espaçamento entre as sub-seções */
+}
+
+/* Estilos para a seção de Sinais de Trading */
+.signalsSection {
+  width: 100%;
+  padding: 20px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* REMOVIDO: .signalsSection h2 {
+  text-align: center;
+  color: #64FFDA;
+  font-size: 2em;
+  margin-bottom: 20px;
+} */
+
+/* Estilos para o cabeçalho de estatísticas dos sinais (NOVO) */
+.signalsHeader {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: rgba(10, 25, 47, 0.7);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  color: white;
+  font-size: 1em;
+  font-weight: normal;
+}
+
+.signalStat {
+  text-align: center;
+}
+
+.signalStat span {
+  font-size: 1.2em;
+  color: #64FFDA; /* Cor padrão para os números */
+}
+
+.signalStat .buyText {
+  color: #4CAF50; /* Verde para compra */
+  font-weight: bold;
+}
+
+.signalStat .sellText {
+  color: #E53E3E; /* Vermelho para venda */
+  font-weight: bold;
+}
+
+/* Estilos para o contêiner dos cards de sinais */
+.signalCardsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  justify-content: center;
+  max-height: 500px; /* Altura máxima para habilitar a rolagem */
+  overflow-y: auto; /* Adiciona a barra de rolagem vertical apenas para os cards */
+  padding-right: 15px; /* Adiciona um padding para evitar que o conteúdo fique colado na barra de rolagem */
+}
+
+/* Estilização da barra de rolagem para navegadores WebKit (Chrome, Safari) */
+.signalCardsContainer::-webkit-scrollbar {
+  width: 8px; /* Largura da barra de rolagem */
+}
+
+.signalCardsContainer::-webkit-scrollbar-track {
+  background: #1A2B40; /* Cor do fundo da trilha da barra de rolagem - Azul escuro */
+  border-radius: 10px;
+}
+
+.signalCardsContainer::-webkit-scrollbar-thumb {
+  background: #3A506B; /* Cor do "polegar" da barra de rolagem - Azul escuro */
+  border-radius: 10px;
+}
+
+.signalCardsContainer::-webkit-scrollbar-thumb:hover {
+  background: #4A6585; /* Cor do "polegar" ao passar o mouse - Azul um pouco mais claro */
+}
+
+/* Estilos para mensagens de carregamento, erro e sem sinais */
+.loadingMessage,
+.errorMessage,
+.noSignalsMessage {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 1.1em;
+  color: #f0f0f0;
+}
+
+.errorMessage {
+  color: #ff4d4d;
+}
+
+/* Estilos para os cards individuais de sinal (se ainda existirem e forem usados) */
+/* Mantidos comentados como estavam, caso você os use em outro lugar */
+/*
+.signalCard {
+  background-color: #1A202C;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: left;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-in-out;
+}
+
+.signalCard:hover {
+  transform: translateY(-5px);
+}
+
+.signalCard h3 {
+  color: #64FFDA;
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.signalCard p {
+  font-size: 1em;
+  color: #A0AEC0;
+  margin-bottom: 5px;
+}
+
+.signalCard .typeBuy {
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+.signalCard .typeSell {
+  color: #E53E3E;
+  font-weight: bold;
+}
+
+.signalCard .premiumBadge {
+  background-color: #FFD700;
+  color: #333;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-top: 10px;
+  display: inline-block;
+}
+*/

@@ -1,0 +1,52 @@
+.tickerContainer {
+  width: 100%;
+  overflow: hidden; /* Esconde o conteúdo que está fora da área visível */
+  background-color: #1A202C; /* Fundo escuro para a barra do ticker */
+  padding: 10px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  white-space: nowrap; /* Garante que os itens fiquem na mesma linha */
+  position: relative;
+}
+
+.tickerContent {
+  display: inline-block; /* Permite que o conteúdo se estenda horizontalmente */
+  animation: scrollTicker 60s linear infinite; /* Animação de rolagem lenta e infinita */
+}
+
+.tickerItem {
+  display: inline-block;
+  padding: 0 20px;
+  font-size: 1.1em;
+  color: #E2E8F0; /* Cor do texto padrão */
+}
+
+.symbol {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.price {
+  margin-right: 8px;
+}
+
+.change {
+  font-weight: bold;
+}
+
+.positive {
+  color: #64FFDA; /* Verde para mudanças positivas */
+}
+
+.negative {
+  color: #FF6B6B; /* Vermelho para mudanças negativas */
+}
+
+/* Keyframes para a animação de rolagem */
+@keyframes scrollTicker {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%); /* Rola 50% do conteúdo (metade duplicada) */
+  }
+}

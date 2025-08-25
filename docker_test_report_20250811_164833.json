@@ -1,0 +1,39 @@
+{
+  "docker_services": {
+    "crypto-redis-dev": "missing",
+    "crypto-postgres-dev": "missing",
+    "crypto-nginx-dev": "missing",
+    "crypto-frontend-dev": "missing",
+    "crypto-backend-dev": "missing"
+  },
+  "database": {
+    "status": "connected_via_api"
+  },
+  "redis": {
+    "operations": "working",
+    "status": "connected",
+    "version": "7.4.5"
+  },
+  "backend_api": {
+    "status": "working",
+    "signals": "error_401",
+    "cleanup_status": "error_404",
+    "register": "error_400",
+    "login": "error_400"
+  },
+  "frontend": {},
+  "pwa": {
+    "manifest": "error_502",
+    "service_worker": "error_502",
+    "icons_working": 0,
+    "icons_total": 2
+  },
+  "integrations": {
+    "telegram": "no_test_endpoint",
+    "binance": "no_test_endpoint"
+  },
+  "performance": {
+    "api_response_time": 0.03741192817687988,
+    "frontend_load_time": 0.02169179916381836
+  }
+}

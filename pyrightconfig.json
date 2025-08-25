@@ -1,0 +1,16 @@
+{
+    "include": [
+        "front/src",
+        "back"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/.*"
+    ],
+    "reportMissingImports": "none",
+    "reportUndefinedVariable": "none",
+    "reportGeneralTypeIssues": "none",
+    "pythonVersion": "3.10",
+    "typeCheckingMode": "off"
+}

@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "email": "jonatasprojetos2013@gmail.com",
+    "password": "$2b$10$bLmhxq4hJIxSEPPuleqzxuthPCufasMhAzBlLh5WFvF3aoIEz1.Oe",
+    "isAdmin": false
+  },
+  {
+    "id": 2,
+    "email": "fabidocesaber@hotmail.com",
+    "password": "$2b$10$Dwz0t/g1OX/JPbXK87NA7uRBZLFRzX8jz0145vKReidRyN4rSjoWC",
+    "isAdmin": false
+  },
+  {
+    "id": 3,
+    "email": "estruturablogs83@gmail.com",
+    "password": "$2b$10$cX2ER9TOV5JVe8/XIDZ1D.XaquHZeoBe5bZ7HA8OzNZQQcylu8WIO",
+    "isAdmin": false
+  }
+]

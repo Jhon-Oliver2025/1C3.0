@@ -1,0 +1,267 @@
+/* Reset e Estilos Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #000033;
+    color: #ffffff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Layout Principal */
+.dashboard-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #000033 0%, #000066 100%);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: linear-gradient(135deg, rgba(0,0,51,0.95), rgba(0,0,25,0.98));
+    border-right: 1px solid rgba(0,127,255,0.3);
+    padding: 20px;
+    z-index: 1000;
+}
+
+/* Menu */
+.menu-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+    background: rgba(0,127,255,0.1);
+}
+
+.menu-item.active {
+    background: rgba(0,127,255,0.2);
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    margin-left: 250px;
+    padding: 20px;
+    max-width: calc(100vw - 250px);
+    overflow-x: hidden;
+}
+
+.content-wrapper {
+    width: 100%;
+    /* --- Início da Edição --- */
+    /* Remover max-width e margin: 0 auto para permitir que ocupe 100% da largura do pai (dbc.Col) */
+    /* margin: 0 auto; */
+    /* max-width: calc(100vw - 290px); */
+    /* --- Fim da Edição --- */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Ticker Styles */
+.ticker-wrap {
+    width: 100%;
+    height: 90px;
+    background: rgba(0,0,51,0.95);
+    padding: 15px 0;  /* Removido padding lateral */
+    border-radius: 15px;
+    border: 1px solid rgba(0,127,255,0.3);
+    overflow: hidden;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.ticker-move {
+    display: flex;
+    animation: ticker 180s linear infinite;  /* Aumentado para 180s (3 minutos) */
+    white-space: nowrap;
+    align-items: center;
+    width: max-content;
+    gap: 15px;  /* Reduzido de 30px para 15px */
+}
+
+.ticker-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 25px;  /* Aumentado padding vertical */
+    background: rgba(0,0,102,0.5);
+    border: 1px solid rgba(0,127,255,0.2);
+    border-radius: 8px;
+    min-width: 200px;
+    height: 60px;  /* Altura fixa para os containers */
+    justify-content: space-between;
+}
+
+.ticker-icon {
+    width: 32px;  /* Ícones um pouco maiores */
+    height: 32px;
+    margin-right: 12px;
+}
+
+.ticker-item {
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+}
+
+.ticker-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+}
+
+.ticker-symbol {
+    color: #fff;
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.ticker-price {
+    color: #fff;
+    margin-right: 10px;
+}
+
+.ticker-change {
+    color: #fff;
+    margin-right: 10px;
+}
+
+@keyframes ticker {
+    0% { 
+        transform: translateX(0); 
+    }
+    100% { 
+        transform: translateX(-100%); 
+    }
+}
+
+/* Signals Container */
+.signals-container {
+    width: 100%;
+    background: rgba(0,0,51,0.95);
+    border-radius: 15px;
+    padding: 20px;
+    border: 1px solid rgba(0,127,255,0.3);
+    max-height: calc(100vh - 340px);
+    overflow-y: auto;
+}
+
+.dashboard-header {
+    width: 100%;
+    height: 180px;
+    border-radius: 15px;
+    border: 1px solid rgba(0,127,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: none;
+}
+
+.header-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 1;
+    background-color: transparent;
+}
+
+.dashboard-header h2 {
+    color: #FFFFFF;
+    font-size: 2.5em;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    position: relative;
+    z-index: 2;
+}
+
+/* Estilo da barra de rolagem */
+::-webkit-scrollbar {
+    width: 10px;
+    background: rgba(0, 0, 51, 0.3);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #007FFF 0%, #0055AA 100%);
+    border-radius: 5px;
+    border: 2px solid rgba(0, 0, 51, 0.95);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #0099FF 0%, #0066CC 100%);
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 51, 0.2);
+    border-radius: 5px;
+}
+
+
+/* Estilos para a classificação do sinal */
+.signal-class {
+    font-size: 0.9em;
+    font-weight: bold;
+    margin-top: 5px;
+    padding: 2px 5px;
+    border-radius: 3px;
+    text-align: center;
+}
+
+/* Estilo para Sinais Premium */
+/* --- Início da Edição --- */
+.signal-class-premium {
+    color: gold; /* Cor dourada */
+    text-shadow:
+        0 0 5px gold,    /* Brilho interno */
+        0 0 10px gold,   /* Brilho médio */
+        0 0 15px gold,   /* Brilho externo */
+        0 0 20px rgba(255, 215, 0, 0.5); /* Sombra neon */
+    /* Opcional: Adicionar um fundo sutil ou borda */
+    /* background-color: rgba(255, 215, 0, 0.1); */
+    /* border: 1px solid rgba(255, 215, 0, 0.3); */
+}
+/* --- Fim da Edição --- */
+
+
+/* Estilos para os detalhes do sinal */
+.signal-details {
+    margin-top: 10px;
+    font-size: 0.85em;
+    line-height: 1.6;
+}
+
+/* --- Início da Edição --- */
+/* Estilo para o botão de reiniciar sinais */
+.restart-button:hover {
+    background-color: #FF6666 !important; /* Cor mais clara no hover */
+}
+/* --- Fim da Edição --- */

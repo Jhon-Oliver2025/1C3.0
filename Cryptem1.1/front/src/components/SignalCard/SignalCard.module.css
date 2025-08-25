@@ -1,0 +1,90 @@
+.signalCard {
+  /* Glassmorphism */
+  background-color: rgba(10, 25, 47, 0.6); /* Azul escuro semi-transparente, mantendo boa transparência */
+  backdrop-filter: blur(25px); /* Efeito de desfoque MUITO aumentado */
+  -webkit-backdrop-filter: blur(25px); /* Para compatibilidade com Safari */
+  border: 1px solid rgba(100, 255, 218, 0.5); /* Borda discreta com cor complementar, opacidade um pouco maior */
+  box-shadow: 0 15px 50px 0 rgba(31, 38, 135, 0.5); /* Sombra mais pronunciada */
+  
+  border-radius: 10px;
+  padding: 20px;
+  color: #E2E8F0; /* Cor padrão do texto do card (para labels, etc.) */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 350px; /* Largura máxima para cada card */
+  width: 100%;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.symbol {
+  font-size: 1.8em;
+  font-weight: bold;
+  color: white; /* Cor do símbolo (nome da moeda) */
+}
+
+.typeButton {
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.buy {
+  background-color: #4CAF50; /* Verde para compra */
+  color: white;
+}
+
+.sell {
+  background-color: #E53E3E; /* Vermelho para venda */
+  color: white;
+}
+
+.premiumText {
+  font-size: 0.9em;
+  font-weight: bold;
+  color: #FFD700; /* Cor dourada para Sinais Premium */
+  margin-bottom: 5px;
+}
+
+.priceDetail {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 1.1em;
+}
+
+.label {
+  color: #A0AEC0; /* Cor para os labels (Entrada, Alvo) */
+}
+
+.entryPriceValue { /* Nova classe para o preço de entrada */
+  font-weight: bold;
+  color: white; /* Cor branca para o preço de entrada */
+}
+
+.value {
+  font-weight: bold;
+  color: #FFD700; /* Cor dourada para o valor (usado no Alvo) */
+}
+
+.changePercentage {
+  font-weight: bold;
+  margin-left: 10px;
+  color: #4CAF50; /* Alterado para o mesmo verde do botão de compra */
+}
+
+.date {
+  font-size: 0.8em;
+  color: #A0AEC0;
+  text-align: right;
+  margin-top: 10px;
+}

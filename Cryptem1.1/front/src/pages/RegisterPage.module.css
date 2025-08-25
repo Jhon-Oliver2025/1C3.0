@@ -1,0 +1,114 @@
+.registerPageContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f2f5; /* Cor de fundo suave */
+  font-family: Arial, sans-serif;
+}
+
+.registerCard {
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.logoSection {
+  margin-bottom: 20px;
+}
+
+.crypTenLogo {
+  width: 100px; /* Ajuste o tamanho conforme necessário */
+  height: auto;
+}
+
+.registerCard h2 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 1.8em;
+}
+
+.registerCard p {
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 0.9em;
+}
+
+.formGroup {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  color: #555;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.formGroup input {
+  width: calc(100% - 20px); /* Padding de 10px em cada lado */
+  padding: 12px 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+  box-sizing: border-box; /* Inclui padding e borda no width */
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #007bff; /* Cor de destaque ao focar */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.registerButton {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff; /* Cor primária */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.registerButton:hover {
+  background-color: #0056b3; /* Cor mais escura ao passar o mouse */
+}
+
+.errorMessage {
+  color: #dc3545; /* Vermelho para erros */
+  margin-top: -10px;
+  margin-bottom: 15px;
+  font-size: 0.85em;
+}
+
+.successMessage {
+  color: #28a745; /* Verde para sucesso */
+  margin-top: -10px;
+  margin-bottom: 15px;
+  font-size: 0.85em;
+}
+
+.loginLink {
+  margin-top: 20px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.loginLink a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.loginLink a:hover {
+  text-decoration: underline;
+}
