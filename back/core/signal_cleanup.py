@@ -181,9 +181,10 @@ class SignalCleanup:
         # Vamos usar uma abordagem diferente com verificação manual de horário
         
         print("📅 Sistema de restart configurado:")
-        print("   🔄 21:00 - Restart Diário Completo do Sistema")
+        print("   🧪 TESTE: 10:15 - Restart Diário Completo do Sistema")
         print("   🌍 Timezone: America/Sao_Paulo")
         print("   ⚠️ Usando verificação manual de timezone (schedule não suporta timezone)")
+        print("   🔄 TODO: Voltar para 21:00 após teste")
     
     def start_scheduler(self) -> None:
         """Inicia o agendador de limpeza em thread separada"""
@@ -208,10 +209,11 @@ class SignalCleanup:
                     
                     # Debug: mostrar horário atual a cada 30 minutos
                     if current_minute % 30 == 0:
-                        print(f"🕐 Horário atual SP: {now_sp.strftime('%d/%m/%Y %H:%M:%S')} - Aguardando 21:00")
+                        print(f"🕐 Horário atual SP: {now_sp.strftime('%d/%m/%Y %H:%M:%S')} - TESTE: Aguardando 10:15")
                     
-                    # Verificar se é 21:00 e ainda não executou hoje
-                    if (current_hour == 21 and current_minute == 0 and 
+                    # TESTE EM PRODUÇÃO: Verificar se é 10:15 e ainda não executou hoje
+                    # TODO: Voltar para 21:00 após teste
+                    if (current_hour == 10 and current_minute == 15 and 
                         last_restart_date != current_date):
                         
                         print(f"⏰ HORÁRIO DE RESTART DETECTADO: {now_sp.strftime('%d/%m/%Y %H:%M:%S')}")
@@ -292,8 +294,9 @@ class SignalCleanup:
         """Retorna o horário do próximo restart do sistema"""
         now_sp = datetime.now(self.sao_paulo_tz)
         
-        # Próximo restart às 21:00
-        next_restart = now_sp.replace(hour=21, minute=0, second=0, microsecond=0)
+        # TESTE: Próximo restart às 10:15
+        # TODO: Voltar para 21:00 após teste
+        next_restart = now_sp.replace(hour=10, minute=15, second=0, microsecond=0)
         if next_restart <= now_sp:
             next_restart += timedelta(days=1)
         
@@ -303,8 +306,9 @@ class SignalCleanup:
         """Retorna tempo restante até o próximo restart"""
         now_sp = datetime.now(self.sao_paulo_tz)
         
-        # Próximo restart às 21:00
-        next_restart = now_sp.replace(hour=21, minute=0, second=0, microsecond=0)
+        # TESTE: Próximo restart às 10:15
+        # TODO: Voltar para 21:00 após teste
+        next_restart = now_sp.replace(hour=10, minute=15, second=0, microsecond=0)
         if next_restart <= now_sp:
             next_restart += timedelta(days=1)
         
