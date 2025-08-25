@@ -22,8 +22,7 @@ npm install --legacy-peer-deps --omit=optional --verbose
 # Verificar se Rollup foi instalado corretamente
 echo "🔍 Verificando Rollup..."
 if ! npm list rollup > /dev/null 2>&1; then
-    echo "⚠️ Rollup não encontrado, instalando manualmente..."
-    npm install rollup@latest --legacy-peer-deps --omit=optional
+    echo "⚠️ Rollup não encontrado como dependência direta, mas deve estar disponível via Vite"
 fi
 
 # Build da aplicação
