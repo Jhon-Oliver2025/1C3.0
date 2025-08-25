@@ -19,6 +19,10 @@ npm config set engine-strict false
 echo "📦 Instalando dependências..."
 npm install --legacy-peer-deps --omit=optional --verbose
 
+# Forçar instalação do binário correto do Rollup
+echo "🔧 Instalando binário correto do Rollup..."
+npm install @rollup/rollup-linux-x64-gnu --legacy-peer-deps --omit=optional --force
+
 # Verificar se Rollup foi instalado corretamente
 echo "🔍 Verificando Rollup..."
 if ! npm list rollup > /dev/null 2>&1; then
