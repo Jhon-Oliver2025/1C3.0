@@ -49,24 +49,16 @@ export default defineConfig(({ mode }) => {
       }
     },
     build: {
-      target: 'es2020',
-      minify: 'esbuild', // Usar sempre esbuild para evitar problemas com terser no Docker
-      sourcemap: false,
-      chunkSizeWarningLimit: 1000,
-      assetsInlineLimit: 0, // Não inlinear assets para evitar problemas com vídeos
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom'],
-            styled: ['styled-components'],
-            router: ['react-router-dom']
-          },
+          entryFileNames: `assets/[name]-cb9db726.[hash].js`,
+          chunkFileNames: `assets/[name]-cb9db726.[hash].js`,
           assetFileNames: (assetInfo) => {
             // Manter nome original para vídeos na pasta public
             if (assetInfo.name && assetInfo.name.endsWith('.mp4')) {
               return '[name][extname]';
             }
-            return 'assets/[name]-[hash][extname]';
+            return 'assets/[name]-cb9db726.[hash].[ext]';
           }
         }
       }
