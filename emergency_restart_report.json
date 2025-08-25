@@ -1,0 +1,42 @@
+{
+  "timestamp": "2025-08-25T13:48:31.564612",
+  "total_endpoints": 4,
+  "working_endpoints": 4,
+  "failed_endpoints": 0,
+  "success_rate": 100.0,
+  "avg_response_time": 0.8919785,
+  "results": [
+    {
+      "name": "health",
+      "url": "https://1crypten.space/api/health",
+      "status_code": 200,
+      "response_time": 0.802985,
+      "success": true,
+      "error": null
+    },
+    {
+      "name": "status",
+      "url": "https://1crypten.space/api/status",
+      "status_code": 200,
+      "response_time": 0.769572,
+      "success": true,
+      "error": null
+    },
+    {
+      "name": "market_status",
+      "url": "https://1crypten.space/api/market-status",
+      "status_code": 200,
+      "response_time": 1.004439,
+      "success": true,
+      "error": null
+    },
+    {
+      "name": "btc_signals",
+      "url": "https://1crypten.space/api/btc-signals/confirmed",
+      "status_code": 200,
+      "response_time": 0.990918,
+      "success": true,
+      "error": null
+    }
+  ]
+}
