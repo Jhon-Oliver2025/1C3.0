@@ -16,9 +16,10 @@ echo "⚙️ Configurando npm..."
 npm config set legacy-peer-deps true
 npm config set engine-strict false
 
-# Instalar dependências
+# Instalar dependências (incluindo devDependencies para build)
 echo "📦 Instalando dependências..."
 npm install --legacy-peer-deps
+echo "✅ Dependências instaladas com sucesso"
 
 # Verificar se Rollup foi instalado corretamente
 echo "🔍 Verificando Rollup..."
