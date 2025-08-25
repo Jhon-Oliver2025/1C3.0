@@ -10,7 +10,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NODE_OPTIONS="--max-old-space-size=4096"
 ENV CI=true
-ENV npm_config_optional=false
 ENV npm_config_legacy_peer_deps=true
 
 # Copiar package files e configurações

@@ -13,18 +13,17 @@ npm cache clean --force || true
 # Configurar npm
 echo "⚙️ Configurando npm..."
 npm config set legacy-peer-deps true
-npm config set optional false
 npm config set engine-strict false
 
 # Instalar dependências
 echo "📦 Instalando dependências..."
-npm install --legacy-peer-deps --no-optional --verbose
+npm install --legacy-peer-deps --omit=optional --verbose
 
 # Verificar se Rollup foi instalado corretamente
 echo "🔍 Verificando Rollup..."
 if ! npm list rollup > /dev/null 2>&1; then
     echo "⚠️ Rollup não encontrado, instalando manualmente..."
-    npm install rollup@latest --legacy-peer-deps --no-optional
+    npm install rollup@latest --legacy-peer-deps --omit=optional
 fi
 
 # Build da aplicação
