@@ -868,7 +868,8 @@ const SalesPage: React.FC = () => {
                 console.log('🎬 Iniciando carregamento do vídeo:', videoConfig.videoUrl);
               }}
               onError={(e) => {
-                console.error('❌ Erro ao carregar vídeo:', e.target.error);
+                const target = e.target as HTMLVideoElement;
+                console.error('❌ Erro ao carregar vídeo:', target.error);
                 console.log('🔍 URL do vídeo:', videoConfig.videoUrl);
               }}
               onAbort={() => {
