@@ -29,6 +29,6 @@ fi
 
 # Build da aplicação
 echo "🔨 Fazendo build..."
-NODE_OPTIONS="--max-old-space-size=4096" npm run build
+NODE_OPTIONS="--max-old-space-size=4096" npx vite build --mode production
 
 echo "✅ Build concluído com sucesso!"
